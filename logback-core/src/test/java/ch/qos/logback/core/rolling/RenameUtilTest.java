@@ -31,6 +31,7 @@ import ch.qos.logback.core.util.CoreTestConstants;
  
 import ch.qos.logback.core.util.StatusPrinter;
  
+
 import org.junit.Before;
  
 import org.junit.Ignore;
@@ -40,14 +41,16 @@ import org.junit.Test;
 
 import java.io.File;
  
-import java.io.FileInputStream; 
 import java.io.FileOutputStream;
  
 import java.io.IOException;
  
-
 import static org.junit.Assert.assertTrue;
  
+import java.io.FileInputStream; 
+import java.io.FileNotFoundException; 
+
+import static org.junit.Assert.assertEquals; 
 
 public
   class
@@ -103,59 +106,67 @@ public
 // END renameToNonExistingDirectory({FormalParametersInternal})//  }
 	
 
-    // START MANUAL_renamingOnDifferentVolumesOnLinux({FormalParametersInternal})//@Test
-  @Ignore
-  public void MANUAL_renamingOnDifferentVolumesOnLinux() throws IOException, RolloverFailure {
-    RenameUtil renameUtil = new RenameUtil();
-    renameUtil.setContext(context);
+    @Test
+    @Ignore
+    public void MANUAL_renamingOnDifferentVolumesOnLinux() throws IOException, RolloverFailure {
+        RenameUtil renameUtil = new RenameUtil();
+        renameUtil.setContext(context);
 
-    String src = "/tmp/ramdisk/foo.txt";
-    FileOutputStream fis = new FileOutputStream(src);
-    fis.write(("hello" + diff).getBytes());
+        String src = "/tmp/ramdisk/foo.txt";
+        makeFile(src);
 
-    renameUtil.rename(src, "/tmp/foo" + diff + ".txt");
-    StatusPrinter.print(context);
-// END MANUAL_renamingOnDifferentVolumesOnLinux({FormalParametersInternal})//  }
+        renameUtil.rename(src, "/tmp/foo" + diff + ".txt");
+        StatusPrinter.print(context);
+    }
 	
 
-    // START MANUAL_renamingOnDifferentVolumesOnWindows({FormalParametersInternal})//@Test
-  @Ignore
-  public void MANUAL_renamingOnDifferentVolumesOnWindows() throws IOException, RolloverFailure {
-    RenameUtil renameUtil = new RenameUtil();
-    renameUtil.setContext(context);
 
-    String src = "c:/tmp/foo.txt";
-    FileOutputStream fis = new FileOutputStream(src);
-    fis.write(("hello" + diff).getBytes());
-    fis.close();
+    @Test
+    @Ignore
+    public void MANUAL_renamingOnDifferentVolumesOnWindows() throws IOException, RolloverFailure {
+        RenameUtil renameUtil = new RenameUtil();
+        renameUtil.setContext(context);
 
-    renameUtil.rename(src, "d:/tmp/foo" + diff + ".txt");
-    StatusPrinter.print(context);
-    assertTrue(statusChecker.isErrorFree(0));
-// END MANUAL_renamingOnDifferentVolumesOnWindows({FormalParametersInternal})//  }
+        String src = "c:/tmp/foo.txt"; 
+        makeFile(src);
+        
+        renameUtil.rename(src, "d:/tmp/foo" + diff + ".txt");
+        StatusPrinter.print(context);
+        assertTrue(statusChecker.isErrorFree(0));
+    }
 	
 
-  @Test
-  public void renameLockedAbstractFile() throws IOException, RolloverFailure {
-    RenameUtil renameUtil = new RenameUtil();
-    renameUtil.setContext(context);
+  
+	
 
-    String src = "abstract_pathname.txt";
-    FileOutputStream fos = new FileOutputStream(src);
-    fos.write(("hello" + diff).getBytes());
-    fos.close();
     
-    FileInputStream fisLock = new FileInputStream(src);
+    @Test //  LOGBACK-1054 
+    public void renameLockedAbstractFile_LOGBACK_1054 () throws IOException, RolloverFailure {
+        RenameUtil renameUtil = new RenameUtil();
+        renameUtil.setContext(context);
 
-    renameUtil.rename(src, src+"."+ diff );
-    StatusPrinter.print(context);
-    assertTrue(statusChecker.isErrorFree(0));
-  }
+        String abstractFileName = "abstract_pathname-"+diff;
+        
+        String src = CoreTestConstants.OUTPUT_DIR_PREFIX+abstractFileName;
+        String target = abstractFileName + ".target";
+        
+        makeFile(src);
+        
+        FileInputStream fisLock = new FileInputStream(src);
+        renameUtil.rename(src,  target);
+        // release the lock
+        fisLock.close();
+        
+        StatusPrinter.print(context);
+        assertEquals(0, statusChecker.matchCount("Parent of target file ."+target+". is null"));
+    }
 	
 
-    // START renameByCopying({FormalParametersInternal})//@Test
-  public void renameByCopying() {
-
-// END renameByCopying({FormalParametersInternal})//  }
+    private void makeFile(String src) throws FileNotFoundException, IOException {
+        
+        FileOutputStream fos = new FileOutputStream(src);
+        fos.write(("hello" + diff).getBytes());
+        fos.close();
+    }
 
 }

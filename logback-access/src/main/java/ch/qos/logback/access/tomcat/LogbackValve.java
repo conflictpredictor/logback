@@ -250,7 +250,7 @@ public
 // END setQuiet(boolean-boolean)//  }
 	
 
-    // START invoke(Request-Request-Response-Response)//@Override
+    @Override
   public void invoke(Request request, Response response) throws IOException,
       ServletException {
 
@@ -273,6 +273,13 @@ public
       TomcatServerAdapter adapter = new TomcatServerAdapter(request, response);
       IAccessEvent accessEvent = new AccessEvent(request, response, adapter);
 
+      try {
+        final String threadName = Thread.currentThread().getName();
+        if (threadName != null) {
+          accessEvent.setThreadName(threadName);
+        }
+      } catch (Exception ignored) { }
+
       if (getFilterChainDecision(accessEvent) == FilterReply.DENY) {
         return;
       }
@@ -282,7 +289,7 @@ public
     } finally {
       request.removeAttribute(AccessConstants.LOGBACK_STATUS_MANAGER_KEY);
     }
-// END invoke(Request-Request-Response-Response)//  }
+  }
 	
 
     // START stopInternal({FormalParametersInternal})//@Override

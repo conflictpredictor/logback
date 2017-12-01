@@ -11,24 +11,39 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.access.spi;
+package ch.qos.logback.access.spi; 
 
 import ch.qos.logback.access.AccessConstants;
+ 
 import ch.qos.logback.access.pattern.AccessConverter;
+ 
 import ch.qos.logback.access.servlet.Util;
+ 
 
 import javax.servlet.http.Cookie;
+ 
 import javax.servlet.http.HttpServletRequest;
+ 
 import javax.servlet.http.HttpServletResponse;
+ 
+import javax.servlet.http.HttpSession; 
 
 import java.io.Serializable;
+ 
 import java.util.ArrayList;
+ 
 import java.util.Enumeration;
+ 
 import java.util.HashMap;
+ 
 import java.util.List;
+ 
 import java.util.Map;
+ 
 import java.util.TreeMap;
+ 
 import java.util.Vector;
+ 
 
 // Contributors:  Joern Huxhorn (see also bug #110)
 
@@ -41,37 +56,94 @@ import java.util.Vector;
  * @author Ceki G&uuml;lc&uuml;
  * @author S&eacute;bastien Pennec
  */
-public class AccessEvent implements Serializable, IAccessEvent {
+public
+  class
+  AccessEvent  implements Serializable, IAccessEvent
+ {
+	
 
     private static final long serialVersionUID = 866718993618836343L;
 
+	
+
     private static final String EMPTY = "";
 
+	
+
     private transient final HttpServletRequest httpRequest;
+
+	
     private transient final HttpServletResponse httpResponse;
 
+	
+
+  String queryString;
+	
+
     String requestURI;
+
+	
     String requestURL;
+
+	
     String remoteHost;
+
+	
     String remoteUser;
+
+	
     String remoteAddr;
+
+	
+  String threadName;
+	
     String protocol;
+
+	
     String method;
+
+	
     String serverName;
+
+	
+  String sessionID;
+	
     String requestContent;
+
+	
     String responseContent;
+
+	
     long elapsedTime;
 
+	
+
     Map<String, String> requestHeaderMap;
+
+	
     Map<String, String[]> requestParameterMap;
+
+	
     Map<String, String> responseHeaderMap;
+
+	
     Map<String, Object> attributeMap;
 
+	
+
     long contentLength = SENTINEL;
+
+	
     int statusCode = SENTINEL;
+
+	
     int localPort = SENTINEL;
 
+	
+
     transient ServerAdapter serverAdapter;
+
+	
 
     /**
      * The number of milliseconds elapsed from 1/1/1970 until logging event was
@@ -79,13 +151,17 @@ public class AccessEvent implements Serializable, IAccessEvent {
      */
     private long timeStamp = 0;
 
-    public AccessEvent(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ServerAdapter adapter) {
-        this.httpRequest = httpRequest;
-        this.httpResponse = httpResponse;
-        this.timeStamp = System.currentTimeMillis();
-        this.serverAdapter = adapter;
-        this.elapsedTime = calculateElapsedTime();
-    }
+	
+
+    // START AccessEvent(HttpServletRequest-HttpServletRequest-HttpServletResponse-HttpServletResponse-ServerAdapter-ServerAdapter)//public AccessEvent(HttpServletRequest httpRequest,
+                     HttpServletResponse httpResponse, ServerAdapter adapter) {
+    this.httpRequest = httpRequest;
+    this.httpResponse = httpResponse;
+    this.timeStamp = System.currentTimeMillis();
+    this.serverAdapter = adapter;
+    this.elapsedTime = calculateElapsedTime();
+// END AccessEvent(HttpServletRequest-HttpServletRequest-HttpServletResponse-HttpServletResponse-ServerAdapter-ServerAdapter)//  }
+	
 
     /**
      * Returns the underlying HttpServletRequest. After serialization the returned
@@ -93,10 +169,11 @@ public class AccessEvent implements Serializable, IAccessEvent {
      *
      * @return
      */
-    @Override
-    public HttpServletRequest getRequest() {
-        return httpRequest;
-    }
+    // START getRequest({FormalParametersInternal})//@Override
+  public HttpServletRequest getRequest() {
+    return httpRequest;
+// END getRequest({FormalParametersInternal})//  }
+	
 
     /**
      * Returns the underlying HttpServletResponse. After serialization the returned
@@ -104,447 +181,535 @@ public class AccessEvent implements Serializable, IAccessEvent {
      *
      * @return
      */
-    @Override
-    public HttpServletResponse getResponse() {
-        return httpResponse;
-    }
+    // START getResponse({FormalParametersInternal})//@Override
+  public HttpServletResponse getResponse() {
+    return httpResponse;
+// END getResponse({FormalParametersInternal})//  }
+	
 
-    @Override
-    public long getTimeStamp() {
-        return timeStamp;
-    }
+    // START getTimeStamp({FormalParametersInternal})//@Override
+  public long getTimeStamp() {
+    return timeStamp;
+// END getTimeStamp({FormalParametersInternal})//  }
+	
 
-    public void setTimeStamp(long timeStamp) {
-        if (this.timeStamp != 0) {
-            throw new IllegalStateException("timeStamp has been already set for this event.");
-        } else {
-            this.timeStamp = timeStamp;
+    // START setTimeStamp(long-long)//public void setTimeStamp(long timeStamp) {
+    if (this.timeStamp != 0) {
+      throw new IllegalStateException(
+          "timeStamp has been already set for this event.");
+    } else {
+      this.timeStamp = timeStamp;
+    }
+// END setTimeStamp(long-long)//  }
+	
+
+  /**
+   * @param threadName The threadName to set.
+   */
+  public void setThreadName(String threadName) {
+    this.threadName = threadName;
+  }
+	
+
+  @Override
+  public String getThreadName() {
+    return threadName == null ? NA : threadName;
+  }
+	
+
+    // START getRequestURI({FormalParametersInternal})//@Override
+  public String getRequestURI() {
+    if (requestURI == null) {
+      if (httpRequest != null) {
+        requestURI = httpRequest.getRequestURI();
+      } else {
+        requestURI = NA;
+      }
+    }
+    return requestURI;
+// END getRequestURI({FormalParametersInternal})//  }
+	
+
+  @Override
+  public String getQueryString() {
+    if (queryString == null) {
+      if (httpRequest != null) {
+        StringBuilder buf = new StringBuilder();
+        final String qStr = httpRequest.getQueryString();
+        if (qStr != null) {
+          buf.append(AccessConverter.QUESTION_CHAR);
+          buf.append(qStr);
         }
+        queryString = buf.toString();
+      } else {
+        queryString = NA;
+      }
     }
-
-    @Override
-    public String getRequestURI() {
-        if (requestURI == null) {
-            if (httpRequest != null) {
-                requestURI = httpRequest.getRequestURI();
-            } else {
-                requestURI = NA;
-            }
-        }
-        return requestURI;
-    }
+    return queryString;
+  }
+	
 
     /**
      * The first line of the request.
      */
     @Override
-    public String getRequestURL() {
-        if (requestURL == null) {
-            if (httpRequest != null) {
-                StringBuilder buf = new StringBuilder();
-                buf.append(httpRequest.getMethod());
-                buf.append(AccessConverter.SPACE_CHAR);
-                buf.append(httpRequest.getRequestURI());
-                final String qStr = httpRequest.getQueryString();
-                if (qStr != null) {
-                    buf.append(AccessConverter.QUESTION_CHAR);
-                    buf.append(qStr);
-                }
-                buf.append(AccessConverter.SPACE_CHAR);
-                buf.append(httpRequest.getProtocol());
-                requestURL = buf.toString();
-            } else {
-                requestURL = NA;
-            }
+  public String getRequestURL() {
+    if (requestURL == null) {
+      if (httpRequest != null) {
+        StringBuilder buf = new StringBuilder();
+        buf.append(httpRequest.getMethod());
+        buf.append(AccessConverter.SPACE_CHAR);
+        buf.append(httpRequest.getRequestURI());
+        buf.append(getQueryString());
+        buf.append(AccessConverter.SPACE_CHAR);
+        buf.append(httpRequest.getProtocol());
+        requestURL = buf.toString();
+      } else {
+        requestURL = NA;
+      }
+    }
+    return requestURL;
+  }
+	
+
+    // START getRemoteHost({FormalParametersInternal})//@Override
+  public String getRemoteHost() {
+    if (remoteHost == null) {
+      if (httpRequest != null) {
+        // the underlying implementation of HttpServletRequest will
+        // determine if remote lookup will be performed
+        remoteHost = httpRequest.getRemoteHost();
+      } else {
+        remoteHost = NA;
+      }
+    }
+    return remoteHost;
+// END getRemoteHost({FormalParametersInternal})//  }
+	
+
+    // START getRemoteUser({FormalParametersInternal})//@Override
+  public String getRemoteUser() {
+    if (remoteUser == null) {
+      if (httpRequest != null) {
+        remoteUser = httpRequest.getRemoteUser();
+      } else {
+        remoteUser = NA;
+      }
+    }
+    return remoteUser;
+// END getRemoteUser({FormalParametersInternal})//  }
+	
+
+    // START getProtocol({FormalParametersInternal})//@Override
+  public String getProtocol() {
+    if (protocol == null) {
+      if (httpRequest != null) {
+        protocol = httpRequest.getProtocol();
+      } else {
+        protocol = NA;
+      }
+    }
+    return protocol;
+// END getProtocol({FormalParametersInternal})//  }
+	
+
+    // START getMethod({FormalParametersInternal})//@Override
+  public String getMethod() {
+    if (method == null) {
+      if (httpRequest != null) {
+        method = httpRequest.getMethod();
+      } else {
+        method = NA;
+      }
+    }
+    return method;
+// END getMethod({FormalParametersInternal})//  }
+	
+
+  @Override
+  public String getSessionID() {
+    if (sessionID == null) {
+      if (httpRequest != null) {
+        final HttpSession session = httpRequest.getSession();
+        if (session != null) {
+          sessionID = session.getId();
         }
-        return requestURL;
+      } else {
+        sessionID = NA;
+      }
+    }
+    return sessionID;
+  }
+	
+
+    // START getServerName({FormalParametersInternal})//@Override
+  public String getServerName() {
+    if (serverName == null) {
+      if (httpRequest != null) {
+        serverName = httpRequest.getServerName();
+      } else {
+        serverName = NA;
+      }
+    }
+    return serverName;
+// END getServerName({FormalParametersInternal})//  }
+	
+
+    // START getRemoteAddr({FormalParametersInternal})//@Override
+  public String getRemoteAddr() {
+    if (remoteAddr == null) {
+      if (httpRequest != null) {
+        remoteAddr = httpRequest.getRemoteAddr();
+      } else {
+        remoteAddr = NA;
+      }
+    }
+    return remoteAddr;
+// END getRemoteAddr({FormalParametersInternal})//  }
+	
+
+    // START getRequestHeader(String-String)//@Override
+  public String getRequestHeader(String key) {
+    String result = null;
+    key = key.toLowerCase();
+    if (requestHeaderMap == null) {
+      if (httpRequest != null) {
+        buildRequestHeaderMap();
+        result = requestHeaderMap.get(key);
+      }
+    } else {
+      result = requestHeaderMap.get(key);
     }
 
-    @Override
-    public String getRemoteHost() {
-        if (remoteHost == null) {
-            if (httpRequest != null) {
-                // the underlying implementation of HttpServletRequest will
-                // determine if remote lookup will be performed
-                remoteHost = httpRequest.getRemoteHost();
-            } else {
-                remoteHost = NA;
-            }
-        }
-        return remoteHost;
+    if (result != null) {
+      return result;
+    } else {
+      return NA;
+    }
+// END getRequestHeader(String-String)//  }
+	
+
+    // START getRequestHeaderNames({FormalParametersInternal})//@Override
+  public Enumeration getRequestHeaderNames() {
+    // post-serialization
+    if (httpRequest == null) {
+      Vector<String> list = new Vector<String>(getRequestHeaderMap().keySet());
+      return list.elements();
+    }
+    return httpRequest.getHeaderNames();
+// END getRequestHeaderNames({FormalParametersInternal})//  }
+	
+
+    // START getRequestHeaderMap({FormalParametersInternal})//@Override
+  public Map<String, String> getRequestHeaderMap() {
+    if (requestHeaderMap == null) {
+      buildRequestHeaderMap();
+    }
+    return requestHeaderMap;
+// END getRequestHeaderMap({FormalParametersInternal})//  }
+	
+
+    // START buildRequestHeaderMap({FormalParametersInternal})//public void buildRequestHeaderMap() {
+    // according to RFC 2616 header names are case insensitive
+    // latest versions of Tomcat return header names in lower-case
+    requestHeaderMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+    Enumeration e = httpRequest.getHeaderNames();
+    if (e == null) {
+      return;
+    }
+    while (e.hasMoreElements()) {
+      String key = (String) e.nextElement();
+      requestHeaderMap.put(key, httpRequest.getHeader(key));
+    }
+// END buildRequestHeaderMap({FormalParametersInternal})//  }
+	
+
+    // START buildRequestParameterMap({FormalParametersInternal})//public void buildRequestParameterMap() {
+    requestParameterMap = new HashMap<String, String[]>();
+    Enumeration e = httpRequest.getParameterNames();
+    if (e == null) {
+      return;
+    }
+    while (e.hasMoreElements()) {
+      String key = (String) e.nextElement();
+      requestParameterMap.put(key, httpRequest.getParameterValues(key));
+    }
+// END buildRequestParameterMap({FormalParametersInternal})//  }
+	
+
+    // START getRequestParameterMap({FormalParametersInternal})//@Override
+  public Map<String, String[]> getRequestParameterMap() {
+    if (requestParameterMap == null) {
+      buildRequestParameterMap();
+    }
+    return requestParameterMap;
+// END getRequestParameterMap({FormalParametersInternal})//  }
+	
+
+    // START getAttribute(String-String)//@Override
+  public String getAttribute(String key) {
+    Object value = null;
+    if (attributeMap != null) {
+      // Event was prepared for deferred processing so we have a copy of attribute map and must use that copy
+      value = attributeMap.get(key);
+    } else if (httpRequest != null) {
+      // We have original request so take attribute from it
+      value = httpRequest.getAttribute(key);
     }
 
-    @Override
-    public String getRemoteUser() {
-        if (remoteUser == null) {
-            if (httpRequest != null) {
-                remoteUser = httpRequest.getRemoteUser();
-            } else {
-                remoteUser = NA;
-            }
-        }
-        return remoteUser;
+    return value != null ? value.toString() : NA;
+// END getAttribute(String-String)//  }
+	
+
+    // START copyAttributeMap({FormalParametersInternal})//private void copyAttributeMap() {
+
+    if (httpRequest == null) {
+      return;
     }
 
-    @Override
-    public String getProtocol() {
-        if (protocol == null) {
-            if (httpRequest != null) {
-                protocol = httpRequest.getProtocol();
-            } else {
-                protocol = NA;
-            }
-        }
-        return protocol;
+    attributeMap = new HashMap<String, Object>();
+
+    Enumeration<String> names = httpRequest.getAttributeNames();
+    while (names.hasMoreElements()) {
+      String name = names.nextElement();
+
+      Object value = httpRequest.getAttribute(name);
+      if (shouldCopyAttribute(name, value)) {
+        attributeMap.put(name, value);
+      }
     }
+// END copyAttributeMap({FormalParametersInternal})//  }
+	
 
-    @Override
-    public String getMethod() {
-        if (method == null) {
-            if (httpRequest != null) {
-                method = httpRequest.getMethod();
-            } else {
-                method = NA;
-            }
-        }
-        return method;
+    // START shouldCopyAttribute(String-String-Object-Object)//private boolean shouldCopyAttribute(String name, Object value) {
+    if (AccessConstants.LB_INPUT_BUFFER.equals(name) || AccessConstants.LB_OUTPUT_BUFFER.equals(name)) {
+      // Do not copy attributes used by logback internally - these are available via other getters anyway
+      return false;
+    } else if (value == null) {
+      // No reasons to copy nulls - Map.get() will return null for missing keys and the list of attribute
+      // names is not available through IAccessEvent
+      return false;
+    } else {
+      // Only copy what is serializable
+      return value instanceof Serializable;
     }
+// END shouldCopyAttribute(String-String-Object-Object)//  }
+	
 
-    @Override
-    public String getServerName() {
-        if (serverName == null) {
-            if (httpRequest != null) {
-                serverName = httpRequest.getServerName();
-            } else {
-                serverName = NA;
-            }
-        }
-        return serverName;
+    // START getRequestParameter(String-String)//@Override
+  public String[] getRequestParameter(String key) {
+    if (httpRequest != null) {
+      String[] value = httpRequest.getParameterValues(key);
+      if (value == null) {
+        return new String[]{ NA };
+      } else {
+        return value;
+      }
+    } else {
+      return new String[]{ NA };
     }
+// END getRequestParameter(String-String)//  }
+	
 
-    @Override
-    public String getRemoteAddr() {
-        if (remoteAddr == null) {
-            if (httpRequest != null) {
-                remoteAddr = httpRequest.getRemoteAddr();
-            } else {
-                remoteAddr = NA;
-            }
-        }
-        return remoteAddr;
-    }
+    // START getCookie(String-String)//@Override
+  public String getCookie(String key) {
 
-    @Override
-    public String getRequestHeader(String key) {
-        String result = null;
-        key = key.toLowerCase();
-        if (requestHeaderMap == null) {
-            if (httpRequest != null) {
-                buildRequestHeaderMap();
-                result = requestHeaderMap.get(key);
-            }
-        } else {
-            result = requestHeaderMap.get(key);
-        }
-
-        if (result != null) {
-            return result;
-        } else {
-            return NA;
-        }
-    }
-
-    @Override
-    public Enumeration getRequestHeaderNames() {
-        // post-serialization
-        if (httpRequest == null) {
-            Vector<String> list = new Vector<String>(getRequestHeaderMap().keySet());
-            return list.elements();
-        }
-        return httpRequest.getHeaderNames();
-    }
-
-    @Override
-    public Map<String, String> getRequestHeaderMap() {
-        if (requestHeaderMap == null) {
-            buildRequestHeaderMap();
-        }
-        return requestHeaderMap;
-    }
-
-    public void buildRequestHeaderMap() {
-        // according to RFC 2616 header names are case insensitive
-        // latest versions of Tomcat return header names in lower-case
-        requestHeaderMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-        Enumeration e = httpRequest.getHeaderNames();
-        if (e == null) {
-            return;
-        }
-        while (e.hasMoreElements()) {
-            String key = (String) e.nextElement();
-            requestHeaderMap.put(key, httpRequest.getHeader(key));
-        }
-    }
-
-    public void buildRequestParameterMap() {
-        requestParameterMap = new HashMap<String, String[]>();
-        Enumeration e = httpRequest.getParameterNames();
-        if (e == null) {
-            return;
-        }
-        while (e.hasMoreElements()) {
-            String key = (String) e.nextElement();
-            requestParameterMap.put(key, httpRequest.getParameterValues(key));
-        }
-    }
-
-    @Override
-    public Map<String, String[]> getRequestParameterMap() {
-        if (requestParameterMap == null) {
-            buildRequestParameterMap();
-        }
-        return requestParameterMap;
-    }
-
-    @Override
-    public String getAttribute(String key) {
-        Object value = null;
-        if (attributeMap != null) {
-            // Event was prepared for deferred processing so we have a copy of attribute map and must use that copy
-            value = attributeMap.get(key);
-        } else if (httpRequest != null) {
-            // We have original request so take attribute from it
-            value = httpRequest.getAttribute(key);
-        }
-
-        return value != null ? value.toString() : NA;
-    }
-
-    private void copyAttributeMap() {
-
-        if (httpRequest == null) {
-            return;
-        }
-
-        attributeMap = new HashMap<String, Object>();
-
-        Enumeration<String> names = httpRequest.getAttributeNames();
-        while (names.hasMoreElements()) {
-            String name = names.nextElement();
-
-            Object value = httpRequest.getAttribute(name);
-            if (shouldCopyAttribute(name, value)) {
-                attributeMap.put(name, value);
-            }
-        }
-    }
-
-    private boolean shouldCopyAttribute(String name, Object value) {
-        if (AccessConstants.LB_INPUT_BUFFER.equals(name) || AccessConstants.LB_OUTPUT_BUFFER.equals(name)) {
-            // Do not copy attributes used by logback internally - these are available via other getters anyway
-            return false;
-        } else if (value == null) {
-            // No reasons to copy nulls - Map.get() will return null for missing keys and the list of attribute
-            // names is not available through IAccessEvent
-            return false;
-        } else {
-            // Only copy what is serializable
-            return value instanceof Serializable;
-        }
-    }
-
-    @Override
-    public String[] getRequestParameter(String key) {
-        if (httpRequest != null) {
-            String[] value = httpRequest.getParameterValues(key);
-            if (value == null) {
-                return new String[] { NA };
-            } else {
-                return value;
-            }
-        } else {
-            return new String[] { NA };
-        }
-    }
-
-    @Override
-    public String getCookie(String key) {
-
-        if (httpRequest != null) {
-            Cookie[] cookieArray = httpRequest.getCookies();
-            if (cookieArray == null) {
-                return NA;
-            }
-
-            for (Cookie cookie : cookieArray) {
-                if (key.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
+    if (httpRequest != null) {
+      Cookie[] cookieArray = httpRequest.getCookies();
+      if (cookieArray == null) {
         return NA;
-    }
+      }
 
-    @Override
-    public long getContentLength() {
-        if (contentLength == SENTINEL) {
-            if (httpResponse != null) {
-                contentLength = serverAdapter.getContentLength();
-                return contentLength;
-            }
+      for (Cookie cookie : cookieArray) {
+        if (key.equals(cookie.getName())) {
+          return cookie.getValue();
         }
+      }
+    }
+    return NA;
+// END getCookie(String-String)//  }
+	
+
+    // START getContentLength({FormalParametersInternal})//@Override
+  public long getContentLength() {
+    if (contentLength == SENTINEL) {
+      if (httpResponse != null) {
+        contentLength = serverAdapter.getContentLength();
         return contentLength;
+      }
+    }
+    return contentLength;
+// END getContentLength({FormalParametersInternal})//  }
+	
+
+    // START getStatusCode({FormalParametersInternal})//public int getStatusCode() {
+    if (statusCode == SENTINEL) {
+      if (httpResponse != null) {
+        statusCode = serverAdapter.getStatusCode();
+      }
+    }
+    return statusCode;
+// END getStatusCode({FormalParametersInternal})//  }
+	
+
+  public long getElapsedSeconds() {
+    return elapsedTime < 0 ? elapsedTime : elapsedTime / 1000;
+  }
+	
+
+    // START getElapsedTime({FormalParametersInternal})//public long getElapsedTime() {
+    return elapsedTime;
+// END getElapsedTime({FormalParametersInternal})//  }
+	
+
+    // START calculateElapsedTime({FormalParametersInternal})//private long calculateElapsedTime() {
+    if (serverAdapter.getRequestTimestamp() < 0) {
+      return -1;
+    }
+    return getTimeStamp() - serverAdapter.getRequestTimestamp();
+// END calculateElapsedTime({FormalParametersInternal})//  }
+	
+
+    // START getRequestContent({FormalParametersInternal})//public String getRequestContent() {
+    if (requestContent != null) {
+      return requestContent;
     }
 
-    public int getStatusCode() {
-        if (statusCode == SENTINEL) {
-            if (httpResponse != null) {
-                statusCode = serverAdapter.getStatusCode();
-            }
+    if (Util.isFormUrlEncoded(httpRequest)) {
+      StringBuilder buf = new StringBuilder();
+
+      Enumeration pramEnumeration = httpRequest.getParameterNames();
+
+      // example: id=1234&user=cgu
+      // number=1233&x=1
+      int count = 0;
+      try {
+        while (pramEnumeration.hasMoreElements()) {
+
+          String key = (String) pramEnumeration.nextElement();
+          if (count++ != 0) {
+            buf.append("&");
+          }
+          buf.append(key);
+          buf.append("=");
+          String val = httpRequest.getParameter(key);
+          if (val != null) {
+            buf.append(val);
+          } else {
+            buf.append("");
+          }
         }
-        return statusCode;
+      } catch (Exception e) {
+        // FIXME Why is try/catch required?
+        e.printStackTrace();
+      }
+      requestContent = buf.toString();
+    } else {
+      // retrieve the byte array placed by TeeFilter
+      byte[] inputBuffer = (byte[]) httpRequest
+          .getAttribute(AccessConstants.LB_INPUT_BUFFER);
+
+      if (inputBuffer != null) {
+        requestContent = new String(inputBuffer);
+      }
+
+      if (requestContent == null || requestContent.length() == 0) {
+        requestContent = EMPTY;
+      }
     }
 
-    public long getElapsedTime() {
-        return elapsedTime;
+    return requestContent;
+// END getRequestContent({FormalParametersInternal})//  }
+	
+
+    // START getResponseContent({FormalParametersInternal})//public String getResponseContent() {
+    if (responseContent != null) {
+      return responseContent;
     }
 
-    private long calculateElapsedTime() {
-        if (serverAdapter.getRequestTimestamp() < 0) {
-            return -1;
-        }
-        return getTimeStamp() - serverAdapter.getRequestTimestamp();
+    if (Util.isImageResponse(httpResponse)) {
+      responseContent = "[IMAGE CONTENTS SUPPRESSED]";
+    } else {
+
+      // retreive the byte array previously placed by TeeFilter
+      byte[] outputBuffer = (byte[]) httpRequest
+          .getAttribute(AccessConstants.LB_OUTPUT_BUFFER);
+
+      if (outputBuffer != null) {
+        responseContent = new String(outputBuffer);
+      }
+      if (responseContent == null || responseContent.length() == 0) {
+        responseContent = EMPTY;
+      }
     }
 
-    public String getRequestContent() {
-        if (requestContent != null) {
-            return requestContent;
-        }
+    return responseContent;
+// END getResponseContent({FormalParametersInternal})//  }
+	
 
-        if (Util.isFormUrlEncoded(httpRequest)) {
-            StringBuilder buf = new StringBuilder();
+    // START getLocalPort({FormalParametersInternal})//public int getLocalPort() {
+    if (localPort == SENTINEL) {
+      if (httpRequest != null) {
+        localPort = httpRequest.getLocalPort();
+      }
 
-            Enumeration pramEnumeration = httpRequest.getParameterNames();
-
-            // example: id=1234&user=cgu
-            // number=1233&x=1
-            int count = 0;
-            try {
-                while (pramEnumeration.hasMoreElements()) {
-
-                    String key = (String) pramEnumeration.nextElement();
-                    if (count++ != 0) {
-                        buf.append("&");
-                    }
-                    buf.append(key);
-                    buf.append("=");
-                    String val = httpRequest.getParameter(key);
-                    if (val != null) {
-                        buf.append(val);
-                    } else {
-                        buf.append("");
-                    }
-                }
-            } catch (Exception e) {
-                // FIXME Why is try/catch required?
-                e.printStackTrace();
-            }
-            requestContent = buf.toString();
-        } else {
-            // retrieve the byte array placed by TeeFilter
-            byte[] inputBuffer = (byte[]) httpRequest.getAttribute(AccessConstants.LB_INPUT_BUFFER);
-
-            if (inputBuffer != null) {
-                requestContent = new String(inputBuffer);
-            }
-
-            if (requestContent == null || requestContent.length() == 0) {
-                requestContent = EMPTY;
-            }
-        }
-
-        return requestContent;
     }
+    return localPort;
+// END getLocalPort({FormalParametersInternal})//  }
+	
 
-    public String getResponseContent() {
-        if (responseContent != null) {
-            return responseContent;
-        }
+    // START getServerAdapter({FormalParametersInternal})//public ServerAdapter getServerAdapter() {
+    return serverAdapter;
+// END getServerAdapter({FormalParametersInternal})//  }
+	
 
-        if (Util.isImageResponse(httpResponse)) {
-            responseContent = "[IMAGE CONTENTS SUPPRESSED]";
-        } else {
+    // START getResponseHeader(String-String)//public String getResponseHeader(String key) {
+    buildResponseHeaderMap();
+    return responseHeaderMap.get(key);
+// END getResponseHeader(String-String)//  }
+	
 
-            // retreive the byte array previously placed by TeeFilter
-            byte[] outputBuffer = (byte[]) httpRequest.getAttribute(AccessConstants.LB_OUTPUT_BUFFER);
-
-            if (outputBuffer != null) {
-                responseContent = new String(outputBuffer);
-            }
-            if (responseContent == null || responseContent.length() == 0) {
-                responseContent = EMPTY;
-            }
-        }
-
-        return responseContent;
+    // START buildResponseHeaderMap({FormalParametersInternal})//void buildResponseHeaderMap() {
+    if (responseHeaderMap == null) {
+      responseHeaderMap = serverAdapter.buildResponseHeaderMap();
     }
+// END buildResponseHeaderMap({FormalParametersInternal})//  }
+	
 
-    public int getLocalPort() {
-        if (localPort == SENTINEL) {
-            if (httpRequest != null) {
-                localPort = httpRequest.getLocalPort();
-            }
+    // START getResponseHeaderMap({FormalParametersInternal})//public Map<String, String> getResponseHeaderMap() {
+    buildResponseHeaderMap();
+    return responseHeaderMap;
+// END getResponseHeaderMap({FormalParametersInternal})//  }
+	
 
-        }
-        return localPort;
-    }
+    // START getResponseHeaderNameList({FormalParametersInternal})//public List<String> getResponseHeaderNameList() {
+    buildResponseHeaderMap();
+    return new ArrayList<String>(responseHeaderMap.keySet());
+// END getResponseHeaderNameList({FormalParametersInternal})//  }
+	
 
-    public ServerAdapter getServerAdapter() {
-        return serverAdapter;
-    }
+    // START prepareForDeferredProcessing({FormalParametersInternal})//public void prepareForDeferredProcessing() {
+    getRequestHeaderMap();
+    getRequestParameterMap();
+    getResponseHeaderMap();
+    getLocalPort();
+    getMethod();
+    getProtocol();
+    getRemoteAddr();
+    getRemoteHost();
+    getRemoteUser();
+    getRequestURI();
+    getRequestURL();
+    getServerName();
+    getTimeStamp();
+    getElapsedTime();
 
-    public String getResponseHeader(String key) {
-        buildResponseHeaderMap();
-        return responseHeaderMap.get(key);
-    }
+    getStatusCode();
+    getContentLength();
+    getRequestContent();
+    getResponseContent();
 
-    void buildResponseHeaderMap() {
-        if (responseHeaderMap == null) {
-            responseHeaderMap = serverAdapter.buildResponseHeaderMap();
-        }
-    }
+    copyAttributeMap();
+// END prepareForDeferredProcessing({FormalParametersInternal})//  }
 
-    public Map<String, String> getResponseHeaderMap() {
-        buildResponseHeaderMap();
-        return responseHeaderMap;
-    }
-
-    public List<String> getResponseHeaderNameList() {
-        buildResponseHeaderMap();
-        return new ArrayList<String>(responseHeaderMap.keySet());
-    }
-
-    public void prepareForDeferredProcessing() {
-        getRequestHeaderMap();
-        getRequestParameterMap();
-        getResponseHeaderMap();
-        getLocalPort();
-        getMethod();
-        getProtocol();
-        getRemoteAddr();
-        getRemoteHost();
-        getRemoteUser();
-        getRequestURI();
-        getRequestURL();
-        getServerName();
-        getTimeStamp();
-        getElapsedTime();
-
-        getStatusCode();
-        getContentLength();
-        getRequestContent();
-        getResponseContent();
-
-        copyAttributeMap();
-    }
 }

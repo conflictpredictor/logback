@@ -14,14 +14,11 @@
 package ch.qos.logback.access.spi;
 
 import ch.qos.logback.core.spi.DeferredProcessingAware;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-
-// Contributors:  Joern Huxhorn (see also bug #110)
 
 /**
  * The Access module's internal representation of logging events. When the
@@ -36,6 +33,7 @@ import java.util.Map;
 public interface IAccessEvent extends DeferredProcessingAware {
 
     String NA = "-";
+
     int SENTINEL = -1;
 
     /**
@@ -61,9 +59,20 @@ public interface IAccessEvent extends DeferredProcessingAware {
     long getTimeStamp();
 
     /**
+   * The number of seconds elapsed between receiving the request and logging it.
+   */
+    long getElapsedSeconds();
+
+    /**
      * The time elapsed between receiving the request and logging it.
      */
     long getElapsedTime();
+
+    void setThreadName(String threadName);
+
+    String getThreadName();
+
+    String getQueryString();
 
     String getRequestURI();
 
@@ -79,6 +88,8 @@ public interface IAccessEvent extends DeferredProcessingAware {
     String getProtocol();
 
     String getMethod();
+
+    String getSessionID();
 
     String getServerName();
 
