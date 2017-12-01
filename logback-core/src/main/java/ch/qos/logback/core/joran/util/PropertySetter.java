@@ -14,14 +14,16 @@
 // Contributors:  Georg Lundesgaard
 package ch.qos.logback.core.joran.util;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import ch.qos.logback.core.joran.spi.DefaultClass;
 import ch.qos.logback.core.joran.spi.DefaultNestedComponentRegistry;
-import ch.qos.logback.core.joran.util.beans.BeanDescription;
-import ch.qos.logback.core.joran.util.beans.BeanDescriptionCache;
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.util.AggregationType;
 import ch.qos.logback.core.util.PropertySetterException;
@@ -31,41 +33,57 @@ import ch.qos.logback.core.util.PropertySetterException;
  * {@link #setProperty setProperty(name,value)} in order to invoke setters on
  * the Object specified in the constructor. This class relies on the JavaBeans
  * {@link Introspector} to analyze the given Object Class using reflection.
- *
+ * 
  * <p>
  * Usage:
- *
+ * 
  * <pre>
  * PropertySetter ps = new PropertySetter(anObject);
  * ps.set(&quot;name&quot;, &quot;Joe&quot;);
  * ps.set(&quot;age&quot;, &quot;32&quot;);
  * ps.set(&quot;isMale&quot;, &quot;true&quot;);
  * </pre>
- *
+ * 
  * will cause the invocations anObject.setName("Joe"), anObject.setAge(32), and
  * setMale(true) if such methods exist with those signatures. Otherwise an
  * {@link IntrospectionException} are thrown.
- *
+ * 
  * @author Anders Kristensen
  * @author Ceki Gulcu
  */
 public class PropertySetter extends ContextAwareBase {
 
-    protected final Object obj;
-    protected final Class<?> objClass;
-    protected final BeanDescription beanDescription;
+    protected Object obj;
+    protected Class<?> objClass;
+    protected PropertyDescriptor[] propertyDescriptors;
+    protected MethodDescriptor[] methodDescriptors;
 
     /**
      * Create a new PropertySetter for the specified Object. This is done in
      * preparation for invoking {@link #setProperty} one or more times.
-     *
+     * 
      * @param obj
      *          the object for which to set properties
      */
-    public PropertySetter(BeanDescriptionCache beanDescriptionCache, Object obj) {
+    public PropertySetter(Object obj) {
         this.obj = obj;
         this.objClass = obj.getClass();
-        this.beanDescription = beanDescriptionCache.getBeanDescription(objClass);
+    }
+
+    /**
+     * Uses JavaBeans {@link Introspector} to computer setters of object to be
+     * configured.
+     */
+    protected void introspect() {
+        try {
+            BeanInfo bi = Introspector.getBeanInfo(obj.getClass());
+            propertyDescriptors = bi.getPropertyDescriptors();
+            methodDescriptors = bi.getMethodDescriptors();
+        } catch (IntrospectionException ex) {
+            addError("Failed to introspect " + obj + ": " + ex.getMessage());
+            propertyDescriptors = new PropertyDescriptor[0];
+            methodDescriptors = new MethodDescriptor[0];
+        }
     }
 
     /**
@@ -74,13 +92,13 @@ public class PropertySetter extends ContextAwareBase {
      * for the specified property name and the value is determined partly from the
      * setter argument type and partly from the value specified in the call to
      * this method.
-     *
+     * 
      * <p>
      * If the setter expects a String no conversion is necessary. If it expects an
      * int, then an attempt is made to convert 'value' to an int using new
      * Integer(value). If the setter expects a boolean, the conversion is by new
      * Boolean(value).
-     *
+     * 
      * @param name
      *          name of the property
      * @param value
@@ -90,12 +108,16 @@ public class PropertySetter extends ContextAwareBase {
         if (value == null) {
             return;
         }
-        Method setter = findSetterMethod(name);
-        if (setter == null) {
-            addWarn("No setter for property [" + name + "] in " + objClass.getName() + ".");
+
+        name = Introspector.decapitalize(name);
+
+        PropertyDescriptor prop = getPropertyDescriptor(name);
+
+        if (prop == null) {
+            addWarn("No such property [" + name + "] in " + objClass.getName() + ".");
         } else {
             try {
-                setProperty(setter, name, value);
+                setProperty(prop, name, value);
             } catch (PropertySetterException ex) {
                 addWarn("Failed to set property [" + name + "] to value \"" + value + "\". ", ex);
             }
@@ -104,7 +126,7 @@ public class PropertySetter extends ContextAwareBase {
 
     /**
      * Set the named property given a {@link PropertyDescriptor}.
-     *
+     * 
      * @param prop
      *          A PropertyDescriptor describing the characteristics of the
      *          property to set.
@@ -113,8 +135,18 @@ public class PropertySetter extends ContextAwareBase {
      * @param value
      *          The value of the property.
      */
-    private void setProperty(Method setter, String name, String value) throws PropertySetterException {
+    public void setProperty(PropertyDescriptor prop, String name, String value) throws PropertySetterException {
+        Method setter = prop.getWriteMethod();
+
+        if (setter == null) {
+            throw new PropertySetterException("No setter for property [" + name + "].");
+        }
+
         Class<?>[] paramTypes = setter.getParameterTypes();
+
+        if (paramTypes.length != 1) {
+            throw new PropertySetterException("#params for setter != 1");
+        }
 
         Object arg;
 
@@ -139,6 +171,7 @@ public class PropertySetter extends ContextAwareBase {
 
         Method addMethod = findAdderMethod(cName);
 
+        // if the
         if (addMethod != null) {
             AggregationType type = computeRawAggregationType(addMethod);
             switch (type) {
@@ -146,18 +179,14 @@ public class PropertySetter extends ContextAwareBase {
                 return AggregationType.NOT_FOUND;
             case AS_BASIC_PROPERTY:
                 return AggregationType.AS_BASIC_PROPERTY_COLLECTION;
-
             case AS_COMPLEX_PROPERTY:
                 return AggregationType.AS_COMPLEX_PROPERTY_COLLECTION;
-            case AS_BASIC_PROPERTY_COLLECTION:
-            case AS_COMPLEX_PROPERTY_COLLECTION:
-                addError("Unexpected AggregationType " + type);
             }
         }
 
-        Method setter = findSetterMethod(name);
-        if (setter != null) {
-            return computeRawAggregationType(setter);
+        Method setterMethod = findSetterMethod(name);
+        if (setterMethod != null) {
+            return computeRawAggregationType(setterMethod);
         } else {
             // we have failed
             return AggregationType.NOT_FOUND;
@@ -165,13 +194,18 @@ public class PropertySetter extends ContextAwareBase {
     }
 
     private Method findAdderMethod(String name) {
-        String propertyName = BeanUtil.toLowerCamelCase(name);
-        return beanDescription.getAdder(propertyName);
+        name = capitalizeFirstLetter(name);
+        return getMethod("add" + name);
     }
 
     private Method findSetterMethod(String name) {
-        String propertyName = BeanUtil.toLowerCamelCase(name);
-        return beanDescription.getSetter(propertyName);
+        String dName = Introspector.decapitalize(name);
+        PropertyDescriptor propertyDescriptor = getPropertyDescriptor(dName);
+        if (propertyDescriptor != null) {
+            return propertyDescriptor.getWriteMethod();
+        } else {
+            return null;
+        }
     }
 
     private Class<?> getParameterClassForMethod(Method method) {
@@ -200,7 +234,7 @@ public class PropertySetter extends ContextAwareBase {
 
     /**
      * Can the given clazz instantiable with certainty?
-     *
+     * 
      * @param clazz
      *          The class to test for instantiability
      * @return true if clazz can be instantiated, and false otherwise.
@@ -284,7 +318,16 @@ public class PropertySetter extends ContextAwareBase {
     }
 
     public void setComplexProperty(String name, Object complexProperty) {
-        Method setter = findSetterMethod(name);
+        String dName = Introspector.decapitalize(name);
+        PropertyDescriptor propertyDescriptor = getPropertyDescriptor(dName);
+
+        if (propertyDescriptor == null) {
+            addWarn("Could not find PropertyDescriptor for [" + name + "] in " + objClass.getName());
+
+            return;
+        }
+
+        Method setter = propertyDescriptor.getWriteMethod();
 
         if (setter == null) {
             addWarn("Not setter method for property [" + name + "] in " + obj.getClass().getName());
@@ -328,16 +371,48 @@ public class PropertySetter extends ContextAwareBase {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
+    protected Method getMethod(String methodName) {
+        if (methodDescriptors == null) {
+            introspect();
+        }
+
+        for (int i = 0; i < methodDescriptors.length; i++) {
+            if (methodName.equals(methodDescriptors[i].getName())) {
+                return methodDescriptors[i].getMethod();
+            }
+        }
+
+        return null;
+    }
+
+    protected PropertyDescriptor getPropertyDescriptor(String name) {
+        if (propertyDescriptors == null) {
+            introspect();
+        }
+
+        for (int i = 0; i < propertyDescriptors.length; i++) {
+            // System.out.println("Comparing " + name + " against "
+            // + propertyDescriptors[i].getName());
+            if (name.equals(propertyDescriptors[i].getName())) {
+                // System.out.println("matched");
+                return propertyDescriptors[i];
+            }
+        }
+
+        return null;
+    }
+
     public Object getObj() {
         return obj;
     }
 
     Method getRelevantMethod(String name, AggregationType aggregationType) {
+        String cName = capitalizeFirstLetter(name);
         Method relevantMethod;
         if (aggregationType == AggregationType.AS_COMPLEX_PROPERTY_COLLECTION) {
-            relevantMethod = findAdderMethod(name);
+            relevantMethod = findAdderMethod(cName);
         } else if (aggregationType == AggregationType.AS_COMPLEX_PROPERTY) {
-            relevantMethod = findSetterMethod(name);
+            relevantMethod = findSetterMethod(cName);
         } else {
             throw new IllegalStateException(aggregationType + " not allowed here");
         }

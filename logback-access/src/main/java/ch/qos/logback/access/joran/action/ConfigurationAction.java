@@ -11,19 +11,35 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.access.joran.action;
+package ch.qos.logback.access.joran.action; 
+
+import ch.qos.logback.core.status.OnConsoleStatusListener;
+ 
+import ch.qos.logback.core.util.OptionHelper;
+ 
 
 import org.xml.sax.Attributes;
+ 
 
 import ch.qos.logback.core.joran.action.Action;
+ 
 import ch.qos.logback.core.joran.spi.InterpretationContext;
-import ch.qos.logback.core.status.OnConsoleStatusListener;
-import ch.qos.logback.core.util.OptionHelper;
-import ch.qos.logback.core.util.StatusListenerConfigHelper;
+ 
+import ch.qos.logback.core.util.ContextUtil;
+ 
+import ch.qos.logback.core.util.StatusListenerConfigHelper; 
 
-public class ConfigurationAction extends Action {
+public
+  class
+  ConfigurationAction  extends Action
+ {
+	
     static final String INTERNAL_DEBUG_ATTR = "debug";
+
+	
     static final String DEBUG_SYSTEM_PROPERTY_KEY = "logback-access.debug";
+
+	
 
     @Override
     public void begin(InterpretationContext ec, String name, Attributes attributes) {
@@ -42,13 +58,17 @@ public class ConfigurationAction extends Action {
             StatusListenerConfigHelper.addOnConsoleListenerInstance(context, new OnConsoleStatusListener());
         }
 
+        new ContextUtil(context).addHostNameAsProperty();
+
         // the context is appender attachable, so it is pushed on top of the stack
         ec.pushObject(getContext());
     }
+	
 
-    @Override
-    public void end(InterpretationContext ec, String name) {
-        addInfo("End of configuration.");
-        ec.popObject();
-    }
+    // START end(InterpretationContext-InterpretationContext-String-String)//@Override
+  public void end(InterpretationContext ec, String name) {
+    addInfo("End of configuration.");
+    ec.popObject();
+// END end(InterpretationContext-InterpretationContext-String-String)//  }
+
 }

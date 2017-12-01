@@ -57,11 +57,16 @@ public interface RollingPolicy extends LifeCycle {
     CompressionMode getCompressionMode();
 
     /**
+   * This method allows RollingPolicy implementations to be aware of their
+   * containing appender.
+   * 
+   * @param appender
+   */
+    /**
      * This method allows RollingPolicy implementations to be aware of their
      * containing appender.
      * 
      * @param appender
      */
-
     void setParent(FileAppender<?> appender);
 }

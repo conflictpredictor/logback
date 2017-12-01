@@ -11,28 +11,50 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling.helper;
+package ch.qos.logback.core.rolling.helper; 
 
 import java.io.File;
+ 
 import java.util.Date;
+ 
 
-public class SizeAndTimeBasedArchiveRemover extends TimeBasedArchiveRemover {
+public
+  class
+  SizeAndTimeBasedArchiveRemover  extends DefaultArchiveRemover
+ {
+	
 
-    public SizeAndTimeBasedArchiveRemover(FileNamePattern fileNamePattern, RollingCalendar rc) {
-        super(fileNamePattern, rc);
-    }
+    // START SizeAndTimeBasedArchiveRemover(FileNamePattern-FileNamePattern-RollingCalendar-RollingCalendar)//public SizeAndTimeBasedArchiveRemover(FileNamePattern fileNamePattern,
+      RollingCalendar rc) {
+    super(fileNamePattern, rc);
+// END SizeAndTimeBasedArchiveRemover(FileNamePattern-FileNamePattern-RollingCalendar-RollingCalendar)//  }
+	
 
-    protected File[] getFilesInPeriod(Date dateOfPeriodToClean) {
-        File archive0 = new File(fileNamePattern.convertMultipleArguments(dateOfPeriodToClean, 0));
-        File parentDir = getParentDir(archive0);
-        String stemRegex = createStemRegex(dateOfPeriodToClean);
-        File[] matchingFileArray = FileFilterUtil.filesInFolderMatchingStemRegex(parentDir, stemRegex);
-        return matchingFileArray;
-    }
+    public void cleanByPeriodOffset(Date now, int periodOffset) {
+        Date dateOfPeriodToClean = rc.getEndOfNextNthPeriod(now, periodOffset);
 
-    private String createStemRegex(final Date dateOfPeriodToClean) {
         String regex = fileNamePattern.toRegexForFixedDate(dateOfPeriodToClean);
-        return FileFilterUtil.afterLastSlash(regex);
+        String stemRegex = FileFilterUtil.afterLastSlash(regex);
+        File archive0 = new File(fileNamePattern.convertMultipleArguments(dateOfPeriodToClean, 0));
+        // in case the file has no directory part, i.e. if it's written into the
+        // user's current directory.
+        archive0 = archive0.getAbsoluteFile();
+
+        File parentDir = archive0.getAbsoluteFile().getParentFile();
+        File[] matchingFileArray = FileFilterUtil.filesInFolderMatchingStemRegex(parentDir, stemRegex);
+
+        for (File f : matchingFileArray) {
+            Date fileLastModified = rc.getEndOfNextNthPeriod(new Date(f.lastModified()), -1);
+
+            if (fileLastModified.compareTo(dateOfPeriodToClean) <= 0) {
+                addInfo("deleting " + f);
+                f.delete();
+            }
+        }
+
+        if (parentClean) {
+            removeFolderIfEmpty(parentDir);
+        }
     }
 
 }

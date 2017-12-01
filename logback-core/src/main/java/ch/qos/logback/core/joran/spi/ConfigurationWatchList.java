@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class ConfigurationWatchList extends ContextAwareBase {
 
@@ -30,14 +30,6 @@ public class ConfigurationWatchList extends ContextAwareBase {
     List<File> fileWatchList = new ArrayList<File>();
     List<Long> lastModifiedList = new ArrayList<Long>();
 
-    public ConfigurationWatchList buildClone() {
-        ConfigurationWatchList out = new ConfigurationWatchList();
-        out.mainURL = this.mainURL;
-        out.fileWatchList = new ArrayList<File>(this.fileWatchList);
-        out.lastModifiedList = new ArrayList<Long>(this.lastModifiedList);
-        return out;
-    }
-    
     public void clear() {
         this.mainURL = null;
         lastModifiedList.clear();

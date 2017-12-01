@@ -11,40 +11,67 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling;
-
-import static ch.qos.logback.core.CoreConstants.CODES_URL;
+package ch.qos.logback.core.rolling; 
 
 import java.io.File;
+ 
 import java.util.Date;
+ 
 import java.util.Locale;
-
-import ch.qos.logback.core.CoreConstants;
+ 
 import ch.qos.logback.core.rolling.helper.ArchiveRemover;
+ 
 import ch.qos.logback.core.rolling.helper.DateTokenConverter;
+ 
 import ch.qos.logback.core.rolling.helper.RollingCalendar;
+ 
 import ch.qos.logback.core.spi.ContextAwareBase;
+ 
 
-abstract public class TimeBasedFileNamingAndTriggeringPolicyBase<E> extends ContextAwareBase implements TimeBasedFileNamingAndTriggeringPolicy<E> {
+import static ch.qos.logback.core.CoreConstants.CODES_URL; 
 
-    static private String COLLIDING_DATE_FORMAT_URL = CODES_URL + "#rfa_collision_in_dateFormat";
+import ch.qos.logback.core.CoreConstants; 
+
+abstract public
+  class
+  TimeBasedFileNamingAndTriggeringPolicyBase <E>
+  extends ContextAwareBase
+  implements TimeBasedFileNamingAndTriggeringPolicy<E>
+ {
+	
 
     protected TimeBasedRollingPolicy<E> tbrp;
 
+	
+
     protected ArchiveRemover archiveRemover = null;
+
+	
     protected String elapsedPeriodsFileName;
+
+	
     protected RollingCalendar rc;
 
+	
+
     protected long artificialCurrentTime = -1;
+
+	
     protected Date dateInCurrentPeriod = null;
 
-    protected long nextCheck;
-    protected boolean started = false;
-    protected boolean errorFree = true;
+	
 
-    public boolean isStarted() {
-        return started;
-    }
+    protected long nextCheck;
+
+	
+    protected boolean started = false;
+
+	
+
+    // START isStarted({FormalParametersInternal})//public boolean isStarted() {
+    return started;
+// END isStarted({FormalParametersInternal})//  }
+	
 
     public void start() {
         DateTokenConverter<Object> dtc = tbrp.fileNamePattern.getPrimaryDateTokenConverter();
@@ -63,7 +90,7 @@ abstract public class TimeBasedFileNamingAndTriggeringPolicyBase<E> extends Cont
         if (!rc.isCollisionFree()) {
             addError("The date format in FileNamePattern will result in collisions in the names of archived log files.");
             addError(CoreConstants.MORE_INFO_PREFIX + COLLIDING_DATE_FORMAT_URL);
-            withErrors();
+            errorFree = false;
             return;
         }
 
@@ -77,59 +104,71 @@ abstract public class TimeBasedFileNamingAndTriggeringPolicyBase<E> extends Cont
         addInfo("Setting initial period to " + dateInCurrentPeriod);
         computeNextCheck();
     }
+	
 
-    public void stop() {
-        started = false;
-    }
+    // START stop({FormalParametersInternal})//public void stop() {
+    started = false;
+// END stop({FormalParametersInternal})//  }
+	
 
     protected void computeNextCheck() {
         nextCheck = rc.getNextTriggeringDate(dateInCurrentPeriod).getTime();
     }
+	
 
-    protected void setDateInCurrentPeriod(long now) {
-        dateInCurrentPeriod.setTime(now);
-    }
+    // START setDateInCurrentPeriod(long-long)//protected void setDateInCurrentPeriod(long now) {
+    dateInCurrentPeriod.setTime(now);
+// END setDateInCurrentPeriod(long-long)//  }
+	
 
     // allow Test classes to act on the dateInCurrentPeriod field to simulate old
     // log files needing rollover
-    public void setDateInCurrentPeriod(Date _dateInCurrentPeriod) {
-        this.dateInCurrentPeriod = _dateInCurrentPeriod;
-    }
+    // START setDateInCurrentPeriod(Date-Date)//public void setDateInCurrentPeriod(Date _dateInCurrentPeriod) {
+    this.dateInCurrentPeriod = _dateInCurrentPeriod;
+// END setDateInCurrentPeriod(Date-Date)//  }
+	
 
-    public String getElapsedPeriodsFileName() {
-        return elapsedPeriodsFileName;
-    }
+    // START getElapsedPeriodsFileName({FormalParametersInternal})//public String getElapsedPeriodsFileName() {
+    return elapsedPeriodsFileName;
+// END getElapsedPeriodsFileName({FormalParametersInternal})//  }
+	
 
-    public String getCurrentPeriodsFileNameWithoutCompressionSuffix() {
-        return tbrp.fileNamePatternWithoutCompSuffix.convert(dateInCurrentPeriod);
-    }
+    // START getCurrentPeriodsFileNameWithoutCompressionSuffix({FormalParametersInternal})//public String getCurrentPeriodsFileNameWithoutCompressionSuffix() {
+    return tbrp.fileNamePatternWCS.convert(dateInCurrentPeriod);
+// END getCurrentPeriodsFileNameWithoutCompressionSuffix({FormalParametersInternal})//  }
+	
 
-    public void setCurrentTime(long timeInMillis) {
-        artificialCurrentTime = timeInMillis;
-    }
+    // START setCurrentTime(long-long)//public void setCurrentTime(long timeInMillis) {
+    artificialCurrentTime = timeInMillis;
+// END setCurrentTime(long-long)//  }
+	
 
-    public long getCurrentTime() {
-        // if time is forced return the time set by user
-        if (artificialCurrentTime >= 0) {
-            return artificialCurrentTime;
-        } else {
-            return System.currentTimeMillis();
-        }
+    // START getCurrentTime({FormalParametersInternal})//public long getCurrentTime() {
+    // if time is forced return the time set by user
+    if (artificialCurrentTime >= 0) {
+      return artificialCurrentTime;
+    } else {
+      return System.currentTimeMillis();
     }
+// END getCurrentTime({FormalParametersInternal})//  }
+	
 
-    public void setTimeBasedRollingPolicy(TimeBasedRollingPolicy<E> _tbrp) {
-        this.tbrp = _tbrp;
+    // START setTimeBasedRollingPolicy(TimeBasedRollingPolicy<E>-TimeBasedRollingPolicy<E>)//public void setTimeBasedRollingPolicy(TimeBasedRollingPolicy<E> _tbrp) {
+    this.tbrp = _tbrp;
 
-    }
+// END setTimeBasedRollingPolicy(TimeBasedRollingPolicy<E>-TimeBasedRollingPolicy<E>)//  }
+	
 
-    public ArchiveRemover getArchiveRemover() {
-        return archiveRemover;
-    }
+    // START getArchiveRemover({FormalParametersInternal})//public ArchiveRemover getArchiveRemover() {
+    return archiveRemover;
+// END getArchiveRemover({FormalParametersInternal})//  }
+	
 
-    protected void withErrors() {
-        errorFree = false;
-    }
-    
+    static private String COLLIDING_DATE_FORMAT_URL = CODES_URL + "#rfa_collision_in_dateFormat";
+	
+    protected boolean errorFree = true;
+	
+
     protected boolean isErrorFree() {
         return errorFree;
     }

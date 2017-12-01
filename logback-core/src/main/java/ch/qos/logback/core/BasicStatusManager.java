@@ -11,35 +11,65 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core;
+package ch.qos.logback.core; 
 
 import java.util.ArrayList;
+ 
 import java.util.List;
+ 
 
 import ch.qos.logback.core.helpers.CyclicBuffer;
+ 
 import ch.qos.logback.core.spi.LogbackLock;
+ 
 import ch.qos.logback.core.status.OnConsoleStatusListener;
+ 
 import ch.qos.logback.core.status.Status;
+ 
 import ch.qos.logback.core.status.StatusListener;
+ 
 import ch.qos.logback.core.status.StatusManager;
+ 
 
-public class BasicStatusManager implements StatusManager {
+public
+  class
+  BasicStatusManager  implements StatusManager
+ {
+	
 
     public static final int MAX_HEADER_COUNT = 150;
+
+	
     public static final int TAIL_SIZE = 150;
+
+	
 
     int count = 0;
 
+	
+
     // protected access was requested in http://jira.qos.ch/browse/LBCORE-36
     final protected List<Status> statusList = new ArrayList<Status>();
+
+	
     final protected CyclicBuffer<Status> tailBuffer = new CyclicBuffer<Status>(TAIL_SIZE);
+
+	
     final protected LogbackLock statusListLock = new LogbackLock();
+
+	
 
     int level = Status.INFO;
 
+	
+
     // protected access was requested in http://jira.qos.ch/browse/LBCORE-36
     final protected List<StatusListener> statusListenerList = new ArrayList<StatusListener>();
+
+	
     final protected LogbackLock statusListenerListLock = new LogbackLock();
+
+	
 
     // Note on synchronization
     // This class contains two separate locks statusListLock and
@@ -54,56 +84,62 @@ public class BasicStatusManager implements StatusManager {
      * @param newStatus
      *                the status message to add
      */
-    public void add(Status newStatus) {
-        // LBCORE-72: fire event before the count check
-        fireStatusAddEvent(newStatus);
+    // START add(Status-Status)//public void add(Status newStatus) {
+    // LBCORE-72: fire event before the count check
+    fireStatusAddEvent(newStatus);
 
-        count++;
-        if (newStatus.getLevel() > level) {
-            level = newStatus.getLevel();
-        }
-
-        synchronized (statusListLock) {
-            if (statusList.size() < MAX_HEADER_COUNT) {
-                statusList.add(newStatus);
-            } else {
-                tailBuffer.add(newStatus);
-            }
-        }
-
+    count++;
+    if (newStatus.getLevel() > level) {
+      level = newStatus.getLevel();
     }
 
-    public List<Status> getCopyOfStatusList() {
-        synchronized (statusListLock) {
-            List<Status> tList = new ArrayList<Status>(statusList);
-            tList.addAll(tailBuffer.asList());
-            return tList;
-        }
+    synchronized (statusListLock) {
+      if (statusList.size() < MAX_HEADER_COUNT) {
+        statusList.add(newStatus);
+      } else {
+        tailBuffer.add(newStatus);
+      }
     }
 
-    private void fireStatusAddEvent(Status status) {
-        synchronized (statusListenerListLock) {
-            for (StatusListener sl : statusListenerList) {
-                sl.addStatusEvent(status);
-            }
-        }
-    }
+// END add(Status-Status)//  }
+	
 
-    public void clear() {
-        synchronized (statusListLock) {
-            count = 0;
-            statusList.clear();
-            tailBuffer.clear();
-        }
+    // START getCopyOfStatusList({FormalParametersInternal})//public List<Status> getCopyOfStatusList() {
+    synchronized (statusListLock) {
+      List<Status> tList = new ArrayList<Status>(statusList);
+      tList.addAll(tailBuffer.asList());
+      return tList;
     }
+// END getCopyOfStatusList({FormalParametersInternal})//  }
+	
 
-    public int getLevel() {
-        return level;
+    // START fireStatusAddEvent(Status-Status)//private void fireStatusAddEvent(Status status) {
+    synchronized (statusListenerListLock) {
+      for (StatusListener sl : statusListenerList) {
+        sl.addStatusEvent(status);
+      }
     }
+// END fireStatusAddEvent(Status-Status)//  }
+	
 
-    public int getCount() {
-        return count;
+    // START clear({FormalParametersInternal})//public void clear() {
+    synchronized (statusListLock) {
+      count = 0;
+      statusList.clear();
+      tailBuffer.clear();
     }
+// END clear({FormalParametersInternal})//  }
+	
+
+    // START getLevel({FormalParametersInternal})//public int getLevel() {
+    return level;
+// END getLevel({FormalParametersInternal})//  }
+	
+
+    // START getCount({FormalParametersInternal})//public int getCount() {
+    return count;
+// END getCount({FormalParametersInternal})//  }
+	
 
     /**
      * This implementation does not allow duplicate installations of OnConsoleStatusListener
@@ -120,25 +156,28 @@ public class BasicStatusManager implements StatusManager {
         }
         return true;
     }
+	
 
-    private boolean checkForPresence(List<StatusListener> statusListenerList, Class<?> aClass) {
-        for (StatusListener e : statusListenerList) {
-            if (e.getClass() == aClass)
-                return true;
-        }
-        return false;
+    // START checkForPresence(List<StatusListener>-List<StatusListener>-Class<?>-Class<?>)//private boolean checkForPresence(List<StatusListener> statusListenerList, Class<?> aClass) {
+    for(StatusListener e: statusListenerList) {
+      if(e.getClass() == aClass)
+        return true;
     }
+    return false;
+// END checkForPresence(List<StatusListener>-List<StatusListener>-Class<?>-Class<?>)//  }
+	
 
-    public void remove(StatusListener listener) {
-        synchronized (statusListenerListLock) {
-            statusListenerList.remove(listener);
-        }
+    // START remove(StatusListener-StatusListener)//public void remove(StatusListener listener) {
+    synchronized (statusListenerListLock) {
+      statusListenerList.remove(listener);
     }
+// END remove(StatusListener-StatusListener)//  }
+	
 
-    public List<StatusListener> getCopyOfStatusListenerList() {
-        synchronized (statusListenerListLock) {
-            return new ArrayList<StatusListener>(statusListenerList);
-        }
+    // START getCopyOfStatusListenerList({FormalParametersInternal})//public List<StatusListener> getCopyOfStatusListenerList() {
+    synchronized (statusListenerListLock) {
+      return new ArrayList<StatusListener>(statusListenerList);
     }
+// END getCopyOfStatusListenerList({FormalParametersInternal})//  }
 
 }

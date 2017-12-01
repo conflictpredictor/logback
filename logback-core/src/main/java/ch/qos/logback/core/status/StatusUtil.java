@@ -103,10 +103,6 @@ public class StatusUtil {
         return Status.ERROR > getHighestLevel(threshold);
     }
 
-    public boolean isWarningOrErrorFree(long threshold) {
-        return Status.WARN > getHighestLevel(threshold);
-    }
-    
     public boolean containsMatch(long threshold, int level, String regex) {
         List<Status> filteredList = filterStatusListByTimeThreshold(sm.getCopyOfStatusList(), threshold);
         Pattern p = Pattern.compile(regex);
@@ -158,11 +154,8 @@ public class StatusUtil {
         while (stati.hasNext()) {
             Status status = stati.next();
             Throwable t = status.getThrowable();
-            while (t != null) {
-                if (t.getClass().getName().equals(exceptionType.getName())) {
-                    return true;
-                }
-                t = t.getCause();
+            if (t != null && t.getClass().getName().equals(exceptionType.getName())) {
+                return true;
             }
         }
         return false;

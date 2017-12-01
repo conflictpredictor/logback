@@ -11,12 +11,15 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.spi;
+package ch.qos.logback.core.spi; 
 
 import java.util.Iterator;
+ 
+import java.util.concurrent.CopyOnWriteArrayList;
+ 
 
 import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.util.COWArrayList;
+ 
 
 /**
  * A ReentrantReadWriteLock based implementation of the
@@ -24,35 +27,41 @@ import ch.qos.logback.core.util.COWArrayList;
  *
  * @author Ceki G&uuml;lc&uuml;
  */
-public class AppenderAttachableImpl<E> implements AppenderAttachable<E> {
+public
+  class
+  AppenderAttachableImpl <E>
+  implements AppenderAttachable<E>
+ {
+	
 
-    @SuppressWarnings("unchecked")
-    final private COWArrayList<Appender<E>> appenderList = new COWArrayList<Appender<E>>(new Appender[0]);
+    final private CopyOnWriteArrayList<Appender<E>> appenderList = new CopyOnWriteArrayList<Appender<E>>();
+
+	
 
     /**
      * Attach an appender. If the appender is already in the list in won't be
      * added again.
      */
-    public void addAppender(Appender<E> newAppender) {
-        if (newAppender == null) {
-            throw new IllegalArgumentException("Null argument disallowed");
-        }
-        appenderList.addIfAbsent(newAppender);
+    // START addAppender(Appender<E>-Appender<E>)//public void addAppender(Appender<E> newAppender) {
+    if (newAppender == null) {
+      throw new IllegalArgumentException("Null argument disallowed");
     }
+     appenderList.addIfAbsent(newAppender);
+// END addAppender(Appender<E>-Appender<E>)//  }
+	
 
     /**
      * Call the <code>doAppend</code> method on all attached appenders.
      */
-    public int appendLoopOnAppenders(E e) {
-        int size = 0;
-        final Appender<E>[] appenderArray = appenderList.asTypedArray();
-        final int len = appenderArray.length;
-        for (int i = 0; i < len; i++) {
-            appenderArray[i].doAppend(e);
-            size++;
-        }
-        return size;
-    }
+    // START appendLoopOnAppenders(E-E)//public int appendLoopOnAppenders(E e) {
+    int size = 0;
+      for (Appender<E> appender : appenderList) {
+        appender.doAppend(e);
+        size++;
+      }
+    return size;
+// END appendLoopOnAppenders(E-E)//  }
+	
 
     /**
      * Get all attached appenders as an Enumeration. If there are no attached
@@ -60,9 +69,10 @@ public class AppenderAttachableImpl<E> implements AppenderAttachable<E> {
      *
      * @return Iterator An iterator of attached appenders.
      */
-    public Iterator<Appender<E>> iteratorForAppenders() {
-        return appenderList.iterator();
-    }
+    // START iteratorForAppenders({FormalParametersInternal})//public Iterator<Appender<E>> iteratorForAppenders() {
+    return appenderList.iterator();
+// END iteratorForAppenders({FormalParametersInternal})//  }
+	
 
     /**
      * Look for an attached appender named as <code>name</code>.
@@ -81,6 +91,7 @@ public class AppenderAttachableImpl<E> implements AppenderAttachable<E> {
         }
         return null;
     }
+	
 
     /**
      * Returns <code>true</code> if the specified appender is in the list of
@@ -88,57 +99,62 @@ public class AppenderAttachableImpl<E> implements AppenderAttachable<E> {
      *
      * @since 1.2
      */
-    public boolean isAttached(Appender<E> appender) {
-        if (appender == null) {
-            return false;
-        }
-        for (Appender<E> a : appenderList) {
-            if (a == appender)
-                return true;
-        }
-        return false;
+    // START isAttached(Appender<E>-Appender<E>)//public boolean isAttached(Appender<E> appender) {
+    if (appender == null) {
+      return false;
     }
+    for (Appender<E> a : appenderList) {
+      if (a == appender) return true;
+    }
+    return false;
+// END isAttached(Appender<E>-Appender<E>)//  }
+	
 
     /**
      * Remove and processPriorToRemoval all previously attached appenders.
      */
-    public void detachAndStopAllAppenders() {
-        for (Appender<E> a : appenderList) {
-            a.stop();
-        }
-        appenderList.clear();
+    // START detachAndStopAllAppenders({FormalParametersInternal})//public void detachAndStopAllAppenders() {
+    for (Appender<E> a : appenderList) {
+      a.stop();
     }
+    appenderList.clear();
+// END detachAndStopAllAppenders({FormalParametersInternal})//  }
+	
 
     static final long START = System.currentTimeMillis();
+
+	
 
     /**
      * Remove the appender passed as parameter form the list of attached
      * appenders.
      */
-    public boolean detachAppender(Appender<E> appender) {
-        if (appender == null) {
-            return false;
-        }
-        boolean result;
-        result = appenderList.remove(appender);
-        return result;
+    // START detachAppender(Appender<E>-Appender<E>)//public boolean detachAppender(Appender<E> appender) {
+    if (appender == null) {
+      return false;
     }
+    boolean result;
+    result = appenderList.remove(appender);
+    return result;
+// END detachAppender(Appender<E>-Appender<E>)//  }
+	
 
     /**
      * Remove the appender with the name passed as parameter form the list of
      * appenders.
      */
-    public boolean detachAppender(String name) {
-        if (name == null) {
-            return false;
-        }
-        boolean removed = false;
-        for (Appender<E> a : appenderList) {
-            if (name.equals((a).getName())) {
-                removed = appenderList.remove(a);
-                break;
-            }
-        }
-        return removed;
+    // START detachAppender(String-String)//public boolean detachAppender(String name) {
+    if (name == null) {
+      return false;
     }
+    boolean removed = false;
+      for (Appender<E> a : appenderList) {
+        if (name.equals((a).getName())) {
+          removed = appenderList.remove(a);
+          break;
+        }
+      }
+    return removed;
+// END detachAppender(String-String)//  }
+
 }

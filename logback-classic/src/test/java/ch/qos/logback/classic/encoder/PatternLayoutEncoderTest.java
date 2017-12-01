@@ -52,17 +52,15 @@ public class PatternLayoutEncoderTest {
         init(baos);
         String msg = "hello";
         ILoggingEvent event = makeLoggingEvent(msg);
-        byte[] eventBytes = ple.encode(event);
-        baos.write(eventBytes);
-        ple.footerBytes();
+        ple.doEncode(event);
+        ple.close();
         assertEquals(msg, baos.toString());
     }
 
     void init(ByteArrayOutputStream baos) throws IOException {
         ple.start();
         ((PatternLayout) ple.getLayout()).setOutputPatternAsHeader(false);
-        byte[] header = ple.headerBytes();
-        baos.write(header);
+        ple.init(baos);
     }
 
     @Test
@@ -71,10 +69,9 @@ public class PatternLayoutEncoderTest {
         init(baos);
         String msg = "\u03b1";
         ILoggingEvent event = makeLoggingEvent(msg);
-        byte[] eventBytes = ple.encode(event);
-        baos.write(eventBytes);
-        ple.footerBytes();
-        assertEquals(msg, new String(baos.toByteArray(), utf8Charset));
+        ple.doEncode(event);
+        ple.close();
+        assertEquals(msg, new String(baos.toByteArray(), utf8Charset.name()));
     }
 
 }

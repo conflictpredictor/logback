@@ -13,8 +13,9 @@
  */
 package ch.qos.logback.core.util;
 
-import static ch.qos.logback.core.CoreConstants.FA_FILENAME_COLLISION_MAP;
-import static ch.qos.logback.core.CoreConstants.RFA_FILENAME_PATTERN_COLLISION_MAP;
+import ch.qos.logback.core.Context;
+import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.core.spi.ContextAwareBase;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -23,13 +24,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-
-import ch.qos.logback.core.Context;
-import ch.qos.logback.core.CoreConstants;
-import ch.qos.logback.core.rolling.helper.FileNamePattern;
-import ch.qos.logback.core.spi.ContextAwareBase;
 
 public class ContextUtil extends ContextAwareBase {
 
@@ -67,10 +62,10 @@ public class ContextUtil extends ContextAwareBase {
     /**
      * Add the local host's name as a property
      */
-    public String safelyGetLocalHostName() {
+    public void addHostNameAsProperty() {
         try {
             String localhostName = getLocalHostName();
-            return localhostName;
+            context.putProperty(CoreConstants.HOSTNAME_KEY, localhostName);
         } catch (UnknownHostException e) {
             addError("Failed to get local hostname", e);
         } catch (SocketException e) {
@@ -78,14 +73,12 @@ public class ContextUtil extends ContextAwareBase {
         } catch (SecurityException e) {
             addError("Failed to get local hostname", e);
         }
-        return CoreConstants.UNKNOWN_LOCALHOST;
     }
 
     public void addProperties(Properties props) {
         if (props == null) {
             return;
         }
-        @SuppressWarnings("rawtypes")
         Iterator i = props.keySet().iterator();
         while (i.hasNext()) {
             String key = (String) i.next();
@@ -93,22 +86,6 @@ public class ContextUtil extends ContextAwareBase {
         }
     }
 
-    public static Map<String, String> getFilenameCollisionMap(Context context) {
-        if (context == null)
-            return null;
-        @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) context.getObject(FA_FILENAME_COLLISION_MAP);
-        return map;
-    }
-
-    public static Map<String, FileNamePattern> getFilenamePatternCollisionMap(Context context) {
-        if (context == null)
-            return null;
-        @SuppressWarnings("unchecked")
-        Map<String, FileNamePattern> map = (Map<String, FileNamePattern>) context.getObject(RFA_FILENAME_PATTERN_COLLISION_MAP);
-        return map;
-    }
-    
     public void addGroovyPackages(List<String> frameworkPackages) {
         // addFrameworkPackage(frameworkPackages, "groovy.lang");
         addFrameworkPackage(frameworkPackages, "org.codehaus.groovy.runtime");

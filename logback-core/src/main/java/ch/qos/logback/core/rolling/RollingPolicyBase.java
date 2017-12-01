@@ -11,12 +11,16 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling;
+package ch.qos.logback.core.rolling; 
 
 import ch.qos.logback.core.FileAppender;
+ 
 import ch.qos.logback.core.rolling.helper.CompressionMode;
+ 
 import ch.qos.logback.core.rolling.helper.FileNamePattern;
+ 
 import ch.qos.logback.core.spi.ContextAwareBase;
+ 
 
 /**
  * Implements methods common to most, it not all, rolling policies. Currently
@@ -24,18 +28,35 @@ import ch.qos.logback.core.spi.ContextAwareBase;
  * 
  * @author Ceki G&uuml;lc&uuml;
  */
-public abstract class RollingPolicyBase extends ContextAwareBase implements RollingPolicy {
+public abstract
+  class
+  RollingPolicyBase  extends ContextAwareBase
+  implements RollingPolicy
+ {
+	
     protected CompressionMode compressionMode = CompressionMode.NONE;
 
+	
+
     FileNamePattern fileNamePattern;
+
+	
     // fileNamePatternStr is always slashified, see setter
     protected String fileNamePatternStr;
 
+	
+
     private FileAppender<?> parent;
+
+	
 
     // use to name files within zip file, i.e. the zipEntry
     FileNamePattern zipEntryFileNamePattern;
+
+	
     private boolean started;
+
+	
 
     /**
      * Given the FileNamePattern string, this method determines the compression
@@ -44,52 +65,65 @@ public abstract class RollingPolicyBase extends ContextAwareBase implements Roll
      * Otherwise and by default, there is no compression.
      * 
      */
-    protected void determineCompressionMode() {
-        if (fileNamePatternStr.endsWith(".gz")) {
-            addInfo("Will use gz compression");
-            compressionMode = CompressionMode.GZ;
-        } else if (fileNamePatternStr.endsWith(".zip")) {
-            addInfo("Will use zip compression");
-            compressionMode = CompressionMode.ZIP;
-        } else {
-            addInfo("No compression will be used");
-            compressionMode = CompressionMode.NONE;
-        }
+    // START determineCompressionMode({FormalParametersInternal})//protected void determineCompressionMode() {
+    if (fileNamePatternStr.endsWith(".gz")) {
+      addInfo("Will use gz compression");
+      compressionMode = CompressionMode.GZ;
+    } else if (fileNamePatternStr.endsWith(".zip")) {
+      addInfo("Will use zip compression");
+      compressionMode = CompressionMode.ZIP;
+    } else {
+      addInfo("No compression will be used");
+      compressionMode = CompressionMode.NONE;
     }
+// END determineCompressionMode({FormalParametersInternal})//  }
+	
 
-    public void setFileNamePattern(String fnp) {
-        fileNamePatternStr = fnp;
-    }
+    // START setFileNamePattern(String-String)//public void setFileNamePattern(String fnp) {
+    fileNamePatternStr = fnp;
+// END setFileNamePattern(String-String)//  }
+	
 
-    public String getFileNamePattern() {
-        return fileNamePatternStr;
-    }
+    // START getFileNamePattern({FormalParametersInternal})//public String getFileNamePattern() {
+    return fileNamePatternStr;
+// END getFileNamePattern({FormalParametersInternal})//  }
+	
 
-    public CompressionMode getCompressionMode() {
-        return compressionMode;
-    }
+    // START getCompressionMode({FormalParametersInternal})//public CompressionMode getCompressionMode() {
+    return compressionMode;
+// END getCompressionMode({FormalParametersInternal})//  }
+	
 
-    public boolean isStarted() {
-        return started;
-    }
+    // START isStarted({FormalParametersInternal})//public boolean isStarted() {
+    return started;
+// END isStarted({FormalParametersInternal})//  }
+	
 
-    public void start() {
-        started = true;
-    }
+    // START start({FormalParametersInternal})//public void start() {
+    started = true;
+// END start({FormalParametersInternal})//  }
+	
 
-    public void stop() {
-        started = false;
-    }
+    // START stop({FormalParametersInternal})//public void stop() {
+    started = false;
+// END stop({FormalParametersInternal})//  }
+	
+
+  
+	
+
+    // START isParentPrudent({FormalParametersInternal})//public boolean isParentPrudent() {
+    return parent.isPrudent();
+// END isParentPrudent({FormalParametersInternal})//  }
+	
+
+    // START getParentsRawFileProperty({FormalParametersInternal})//public String getParentsRawFileProperty() {
+    return parent.rawFileProperty();
+// END getParentsRawFileProperty({FormalParametersInternal})//  }
+	
 
     public void setParent(FileAppender<?> appender) {
         this.parent = appender;
     }
 
-    public boolean isParentPrudent() {
-        return parent.isPrudent();
-    }
-
-    public String getParentsRawFileProperty() {
-        return parent.rawFileProperty();
-    }
 }

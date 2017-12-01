@@ -11,22 +11,35 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.rolling;
+package ch.qos.logback.classic.rolling; 
 
-import org.junit.After;
-import org.junit.Before;
+ 
+import ch.qos.logback.core.util.CachingDateFormatter;
+ 
+ 
 import org.junit.Test;
+ 
 
 import ch.qos.logback.classic.ClassicTestConstants;
+ 
 import ch.qos.logback.classic.Logger;
+ 
 import ch.qos.logback.classic.LoggerContext;
+ 
 import ch.qos.logback.classic.joran.JoranConfigurator;
+ 
 import ch.qos.logback.core.joran.spi.JoranException;
+ 
 import ch.qos.logback.core.rolling.ScaffoldingForRollingTests;
+ 
 import ch.qos.logback.core.status.StatusChecker;
-import ch.qos.logback.core.testUtil.RandomUtil;
-import ch.qos.logback.core.util.CachingDateFormatter;
+ 
 import ch.qos.logback.core.util.CoreTestConstants;
+ 
+
+import org.junit.After; 
+import org.junit.Before; 
+import ch.qos.logback.core.testUtil.RandomUtil; 
 
 /**
  * Test that we can create time-stamped log files with the help of
@@ -35,30 +48,27 @@ import ch.qos.logback.core.util.CoreTestConstants;
  * @author Ceki G&uuml;lc&uuml;
  *
  */
-public class UniqueFileTest {
-    static String UNIK_DIFF = "UNIK_DIFF";
+public
+  class
+  UniqueFileTest {
+	
 
     LoggerContext lc = new LoggerContext();
+
+	
     StatusChecker sc = new StatusChecker(lc);
+
+	
     Logger logger = lc.getLogger(this.getClass());
-    int diff = RandomUtil.getPositiveInt() % 1000;
-    String diffAsStr = Integer.toString(diff);
 
-    @Before
-    public void setUp() {
-        System.setProperty(UNIK_DIFF, diffAsStr);
-    }
+	
 
-    @After
-    public void tearDown() {
-        System.clearProperty(UNIK_DIFF);
-    }
-
-    void loadConfig(String confifFile) throws JoranException {
-        JoranConfigurator jc = new JoranConfigurator();
-        jc.setContext(lc);
-        jc.doConfigure(confifFile);
-    }
+    // START loadConfig(String-String)//void loadConfig(String confifFile) throws JoranException {
+    JoranConfigurator jc = new JoranConfigurator();
+    jc.setContext(lc);
+    jc.doConfigure(confifFile);
+// END loadConfig(String-String)//  }
+	
 
     @Test
     public void basic() throws Exception {
@@ -73,4 +83,23 @@ public class UniqueFileTest {
 
         ScaffoldingForRollingTests.existenceCheck(CoreTestConstants.OUTPUT_DIR_PREFIX + "UNIK_" + timestamp + diffAsStr + "log.txt");
     }
+	
+    static String UNIK_DIFF = "UNIK_DIFF";
+	
+    int diff = RandomUtil.getPositiveInt() % 1000;
+	
+    String diffAsStr = Integer.toString(diff);
+	
+
+    @Before
+    public void setUp() {
+        System.setProperty(UNIK_DIFF, diffAsStr);
+    }
+	
+
+    @After
+    public void tearDown() {
+        System.clearProperty(UNIK_DIFF);
+    }
+
 }

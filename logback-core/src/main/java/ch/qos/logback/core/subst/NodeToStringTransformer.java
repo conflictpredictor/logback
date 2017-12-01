@@ -24,7 +24,7 @@ import java.util.Stack;
 /**
  * Compiles a previously parsed Node chain into a String.
  *
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class NodeToStringTransformer {
 

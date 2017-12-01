@@ -13,16 +13,14 @@
  */
 package ch.qos.logback.core.rolling;
 
-import java.io.IOException;
-import java.util.List;
-
+import ch.qos.logback.core.encoder.EchoEncoder;
+import ch.qos.logback.core.util.CoreTestConstants;
 import org.junit.Before;
 import org.junit.Test;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
-import ch.qos.logback.core.util.CoreTestConstants;
-import ch.qos.logback.core.util.FileSize;
-import ch.qos.logback.core.util.StatusPrinter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SizeBasedRollingTest extends ScaffoldingForRollingTests {
 
@@ -53,7 +51,7 @@ public class SizeBasedRollingTest extends ScaffoldingForRollingTests {
      */
     @Test(expected = IllegalStateException.class)
     public void activeFileNameNotSet() {
-        sizeBasedTriggeringPolicy.setMaxFileSize(new FileSize(100));
+        sizeBasedTriggeringPolicy.setMaxFileSize("100");
         sizeBasedTriggeringPolicy.start();
 
         fwrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "sizeBased-test1.%i");
@@ -65,7 +63,7 @@ public class SizeBasedRollingTest extends ScaffoldingForRollingTests {
         rfa.setName("ROLLING");
         initRFA(randomOutputDir + fileName);
 
-        sizeBasedTriggeringPolicy.setMaxFileSize(new FileSize(100));
+        sizeBasedTriggeringPolicy.setMaxFileSize("100");
         fwrp.setMinIndex(0);
         fwrp.setFileNamePattern(randomOutputDir + filenamePattern);
 
@@ -84,7 +82,6 @@ public class SizeBasedRollingTest extends ScaffoldingForRollingTests {
         }
         rfa.stop();
 
-        StatusPrinter.print(context);
         existenceCheck(expectedFilenameList);
         reverseSortedContentCheck(randomOutputDir, runLength, prefix);
     }

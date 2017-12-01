@@ -20,7 +20,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class CyclicBufferTrackerTest {
 

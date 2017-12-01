@@ -11,50 +11,58 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.recovery;
+package ch.qos.logback.core.recovery; 
 
-public class RecoveryCoordinator {
+public
+  class
+  RecoveryCoordinator {
+	
 
     public final static long BACKOFF_COEFFICIENT_MIN = 20;
-    public final static long BACKOFF_MULTIPLIER = 4;
-    static long BACKOFF_COEFFICIENT_MAX = 327680; // BACKOFF_COEFFICIENT_MIN * 4^7
+
+	
+    static long BACKOFF_COEFFICIENT_MAX = 327680;
+
+	 // BACKOFF_COEFFICIENT_MIN * 4^7
 
     private long backOffCoefficient = BACKOFF_COEFFICIENT_MIN;
 
+	
+
     private static long UNSET = -1;
+
+	
     // tests can set the time directly independently of system clock
     private long currentTime = UNSET;
+
+	
     private long next;
 
-    public RecoveryCoordinator() {
-        next = getCurrentTime() + getBackoffCoefficient();
-    }
+	
 
-    public RecoveryCoordinator(long currentTime) {
-        this.currentTime = currentTime;
-        next = getCurrentTime() + getBackoffCoefficient();
+    // START isTooSoon({FormalParametersInternal})//public boolean isTooSoon() {
+    long now = getCurrentTime();
+    if(now > next) {
+      next = now + getBackoffCoefficient();
+      return false;
+    } else {
+      return true;
     }
+// END isTooSoon({FormalParametersInternal})//  }
+	
 
-    public boolean isTooSoon() {
-        long now = getCurrentTime();
-        if (now > next) {
-            next = now + getBackoffCoefficient();
-            return false;
-        } else {
-            return true;
-        }
-    }
+    // START setCurrentTime(long-long)//void setCurrentTime(long forcedTime) {
+    currentTime = forcedTime;
+// END setCurrentTime(long-long)//  }
+	
 
-    void setCurrentTime(long forcedTime) {
-        currentTime = forcedTime;
+    // START getCurrentTime({FormalParametersInternal})//private long getCurrentTime() {
+    if(currentTime != UNSET) {
+      return currentTime;
     }
-
-    private long getCurrentTime() {
-        if (currentTime != UNSET) {
-            return currentTime;
-        }
-        return System.currentTimeMillis();
-    }
+    return System.currentTimeMillis();
+// END getCurrentTime({FormalParametersInternal})//  }
+	
 
     private long getBackoffCoefficient() {
         long currentCoeff = backOffCoefficient;
@@ -63,4 +71,18 @@ public class RecoveryCoordinator {
         }
         return currentCoeff;
     }
+	
+    public final static long BACKOFF_MULTIPLIER = 4;
+	
+
+    public RecoveryCoordinator() {
+        next = getCurrentTime() + getBackoffCoefficient();
+    }
+	
+
+    public RecoveryCoordinator(long currentTime) {
+        this.currentTime = currentTime;
+        next = getCurrentTime() + getBackoffCoefficient();
+    }
+
 }

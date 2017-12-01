@@ -11,122 +11,163 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+package ch.qos.logback.core.rolling; 
 
 import ch.qos.logback.core.Appender;
+ 
 import ch.qos.logback.core.Context;
+ 
 import ch.qos.logback.core.ContextBase;
+ 
 import ch.qos.logback.core.appender.AbstractAppenderTest;
+ 
 import ch.qos.logback.core.encoder.DummyEncoder;
+ 
 import ch.qos.logback.core.status.Status;
+ 
 import ch.qos.logback.core.status.StatusChecker;
+ 
 import ch.qos.logback.core.testUtil.RandomUtil;
+ 
 import ch.qos.logback.core.util.CoreTestConstants;
+ 
 import ch.qos.logback.core.util.StatusPrinter;
+ 
 
-public class RollingFileAppenderTest extends AbstractAppenderTest<Object> {
+import org.junit.After;
+ 
+import org.junit.Before;
+ 
+import org.junit.Test;
+ 
+
+ 
+
+import static org.junit.Assert.assertEquals; 
+import static org.junit.Assert.assertFalse; 
+import static org.junit.Assert.assertNull; 
+import static org.junit.Assert.assertTrue; 
+
+public
+  class
+  RollingFileAppenderTest  extends AbstractAppenderTest<Object>
+ {
+	
 
     RollingFileAppender<Object> rfa = new RollingFileAppender<Object>();
+
+	
     Context context = new ContextBase();
 
+	
+
     TimeBasedRollingPolicy<Object> tbrp = new TimeBasedRollingPolicy<Object>();
+
+	
     int diff = RandomUtil.getPositiveInt();
+
+	
     String randomOutputDir = CoreTestConstants.OUTPUT_DIR_PREFIX + diff + "/";
 
-    @Before
-    public void setUp() throws Exception {
-        // noStartTest fails if the context is set in setUp
-        // rfa.setContext(context);
+	
 
-        rfa.setEncoder(new DummyEncoder<Object>());
-        rfa.setName("test");
-        tbrp.setContext(context);
-        tbrp.setParent(rfa);
-    }
+    // START setUp({FormalParametersInternal})//@Before
+  public void setUp() throws Exception {
+    // noStartTest fails if the context is set in setUp
+    // rfa.setContext(context);
 
-    @After
-    public void tearDown() throws Exception {
-    }
+    rfa.setEncoder(new DummyEncoder<Object>());
+    rfa.setName("test");
+    tbrp.setContext(context);
+    tbrp.setParent(rfa);
+// END setUp({FormalParametersInternal})//  }
+	
 
-    @Override
-    protected Appender<Object> getAppender() {
-        return rfa;
-    }
+    // START tearDown({FormalParametersInternal})//@After
+  public void tearDown() throws Exception {
+// END tearDown({FormalParametersInternal})//  }
+	
 
-    @Override
-    protected Appender<Object> getConfiguredAppender() {
-        rfa.setContext(context);
-        tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log");
-        tbrp.start();
-        rfa.setRollingPolicy(tbrp);
+    // START getAppender({FormalParametersInternal})//@Override
+  protected Appender<Object> getAppender() {
+    return rfa;
+// END getAppender({FormalParametersInternal})//  }
+	
 
-        rfa.start();
-        return rfa;
-    }
+    // START getConfiguredAppender({FormalParametersInternal})//@Override
+  protected Appender<Object> getConfiguredAppender() {
+    rfa.setContext(context);
+    tbrp
+            .setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log");
+    tbrp.start();
+    rfa.setRollingPolicy(tbrp);
 
-    @Test
-    public void testPrudentModeLogicalImplications() {
-        rfa.setContext(context);
-        // prudent mode will force "file" property to be null
-        rfa.setFile("some non null value");
-        rfa.setAppend(false);
-        rfa.setPrudent(true);
+    rfa.start();
+    return rfa;
+// END getConfiguredAppender({FormalParametersInternal})//  }
+	
 
-        tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log");
-        tbrp.start();
-        rfa.setRollingPolicy(tbrp);
+    // START testPrudentModeLogicalImplications({FormalParametersInternal})//@Test
+  public void testPrudentModeLogicalImplications() {
+    rfa.setContext(context);
+    // prudent mode will force "file" property to be null
+    rfa.setFile("some non null value");
+    rfa.setAppend(false);
+    rfa.setPrudent(true);
 
-        rfa.start();
+    tbrp
+            .setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log");
+    tbrp.start();
+    rfa.setRollingPolicy(tbrp);
 
-        assertTrue(rfa.isAppend());
-        assertNull(rfa.rawFileProperty());
-        assertTrue(rfa.isStarted());
-    }
+    rfa.start();
 
-    @Test
-    public void testPrudentModeLogicalImplicationsOnCompression() {
-        rfa.setContext(context);
-        rfa.setAppend(false);
-        rfa.setPrudent(true);
+    assertTrue(rfa.isAppend());
+    assertNull(rfa.rawFileProperty());
+    assertTrue(rfa.isStarted());
+// END testPrudentModeLogicalImplications({FormalParametersInternal})//  }
+	
 
-        tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log.zip");
-        tbrp.start();
-        rfa.setRollingPolicy(tbrp);
+    // START testPrudentModeLogicalImplicationsOnCompression({FormalParametersInternal})//@Test
+  public void testPrudentModeLogicalImplicationsOnCompression() {
+    rfa.setContext(context);
+    rfa.setAppend(false);
+    rfa.setPrudent(true);
 
-        rfa.start();
+    tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log.zip");
+    tbrp.start();
+    rfa.setRollingPolicy(tbrp);
 
-        StatusChecker checker = new StatusChecker(context);
-        assertFalse(rfa.isStarted());
-        assertEquals(Status.ERROR, checker.getHighestLevel(0));
-    }
+    rfa.start();
 
-    @Test
-    public void testFilePropertyAfterRollingPolicy() {
-        rfa.setContext(context);
-        rfa.setRollingPolicy(tbrp);
-        rfa.setFile("x");
-        StatusPrinter.print(context);
-        StatusChecker statusChecker = new StatusChecker(context.getStatusManager());
-        statusChecker.assertContainsMatch(Status.ERROR, "File property must be set before any triggeringPolicy ");
-    }
+    StatusChecker checker = new StatusChecker(context);
+    assertFalse(rfa.isStarted());
+    assertEquals(Status.ERROR, checker.getHighestLevel(0));
+// END testPrudentModeLogicalImplicationsOnCompression({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void testFilePropertyAfterTriggeringPolicy() {
-        rfa.setContext(context);
-        rfa.setTriggeringPolicy(new SizeBasedTriggeringPolicy<Object>());
-        rfa.setFile("x");
-        StatusChecker statusChecker = new StatusChecker(context.getStatusManager());
-        statusChecker.assertContainsMatch(Status.ERROR, "File property must be set before any triggeringPolicy ");
-    }
+    // START testFilePropertyAfterRollingPolicy({FormalParametersInternal})//@Test
+  public void testFilePropertyAfterRollingPolicy() {
+    rfa.setContext(context);
+    rfa.setRollingPolicy(tbrp);
+    rfa.setFile("x");
+    StatusPrinter.print(context);
+    StatusChecker statusChecker = new StatusChecker(context.getStatusManager());
+    statusChecker.assertContainsMatch(Status.ERROR,
+            "File property must be set before any triggeringPolicy ");
+// END testFilePropertyAfterRollingPolicy({FormalParametersInternal})//  }
+	
+
+    // START testFilePropertyAfterTriggeringPolicy({FormalParametersInternal})//@Test
+  public void testFilePropertyAfterTriggeringPolicy() {
+    rfa.setContext(context);
+    rfa.setTriggeringPolicy(new SizeBasedTriggeringPolicy<Object>());
+    rfa.setFile("x");
+    StatusChecker statusChecker = new StatusChecker(context.getStatusManager());
+    statusChecker.assertContainsMatch(Status.ERROR,
+            "File property must be set before any triggeringPolicy ");
+// END testFilePropertyAfterTriggeringPolicy({FormalParametersInternal})//  }
+	
 
     @Test
     public void testFileNameWithParenthesis() {
@@ -140,24 +181,26 @@ public class RollingFileAppenderTest extends AbstractAppenderTest<Object> {
         rfa.start();
         rfa.doAppend("hello");
     }
+	
 
-    @Test
-    public void stopTimeBasedRollingPolicy() {
-        rfa.setContext(context);
+    // START stopTimeBasedRollingPolicy({FormalParametersInternal})//@Test
+  public void stopTimeBasedRollingPolicy() {
+    rfa.setContext(context);
 
-        tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log.zip");
-        tbrp.start();
-        rfa.setRollingPolicy(tbrp);
-        rfa.start();
+    tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "toto-%d.log.zip");
+    tbrp.start();
+    rfa.setRollingPolicy(tbrp);
+    rfa.start();
 
-        StatusPrinter.print(context);
-        assertTrue(tbrp.isStarted());
-        assertTrue(rfa.isStarted());
-        rfa.stop();
-        assertFalse(rfa.isStarted());
-        assertFalse(tbrp.isStarted());
+    StatusPrinter.print(context);
+    assertTrue(tbrp.isStarted());
+    assertTrue(rfa.isStarted());
+    rfa.stop();
+    assertFalse(rfa.isStarted());
+    assertFalse(tbrp.isStarted());
 
-    }
+// END stopTimeBasedRollingPolicy({FormalParametersInternal})//  }
+	
 
     @Test
     public void stopFixedWindowRollingPolicy() {
@@ -188,24 +231,26 @@ public class RollingFileAppenderTest extends AbstractAppenderTest<Object> {
         assertFalse(sbTriggeringPolicy.isStarted());
 
     }
+	
 
     /**
      * Test for http://jira.qos.ch/browse/LOGBACK-796
      */
-    @Test
-    public void testFileShouldNotMatchFileNamePattern() {
-        rfa.setContext(context);
-        rfa.setFile(CoreTestConstants.OUTPUT_DIR_PREFIX + "x-2013-04.log");
-        tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "x-%d{yyyy-MM}.log");
-        tbrp.start();
+    // START testFileShouldNotMatchFileNamePattern({FormalParametersInternal})//@Test
+  public void testFileShouldNotMatchFileNamePattern() {
+    rfa.setContext(context);
+    rfa.setFile(CoreTestConstants.OUTPUT_DIR_PREFIX + "x-2013-04.log");
+    tbrp.setFileNamePattern(CoreTestConstants.OUTPUT_DIR_PREFIX + "x-%d{yyyy-MM}.log");
+    tbrp.start();
 
-        rfa.setRollingPolicy(tbrp);
-        rfa.start();
-        StatusChecker statusChecker = new StatusChecker(context);
-        final String msg = "File property collides with fileNamePattern. Aborting.";
-        boolean containsMatch = statusChecker.containsMatch(Status.ERROR, msg);
-        assertTrue("Missing error: " + msg, containsMatch);
-    }
+    rfa.setRollingPolicy(tbrp);
+    rfa.start();
+    StatusChecker statusChecker = new StatusChecker(context);
+    final String msg = "File property collides with fileNamePattern. Aborting.";
+    boolean containsMatch = statusChecker.containsMatch(Status.ERROR, msg);
+    assertTrue("Missing error: " + msg, containsMatch);
+// END testFileShouldNotMatchFileNamePattern({FormalParametersInternal})//  }
+	
 
     @Test
     public void collidingTimeformat() {
@@ -225,6 +270,7 @@ public class RollingFileAppenderTest extends AbstractAppenderTest<Object> {
         StatusPrinter.print(context);
         checker.assertContainsMatch("The date format in FileNamePattern will result");
     }
+	
 
     @Test
     public void collidingFileNamePattern() {
@@ -262,5 +308,5 @@ public class RollingFileAppenderTest extends AbstractAppenderTest<Object> {
         StatusChecker checker = new StatusChecker(context);
         checker.assertContainsMatch(Status.ERROR, "'FileNamePattern' option has the same value");
     }
-    
+
 }

@@ -11,21 +11,26 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling;
-
-import static ch.qos.logback.core.CoreConstants.CODES_URL;
-import static ch.qos.logback.core.CoreConstants.MORE_INFO_PREFIX;
+package ch.qos.logback.core.rolling; 
+import ch.qos.logback.core.FileAppender;
+ 
+import ch.qos.logback.core.rolling.helper.CompressionMode;
+ 
+import ch.qos.logback.core.rolling.helper.FileNamePattern;
+ 
 
 import java.io.File;
+ 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
+ 
 
-import ch.qos.logback.core.CoreConstants;
-import ch.qos.logback.core.FileAppender;
-import ch.qos.logback.core.rolling.helper.CompressionMode;
-import ch.qos.logback.core.rolling.helper.FileNamePattern;
-import ch.qos.logback.core.util.ContextUtil;
+import static ch.qos.logback.core.CoreConstants.CODES_URL;
+ 
+import static ch.qos.logback.core.CoreConstants.MORE_INFO_PREFIX; 
+import java.util.Map; 
+import java.util.Map.Entry; 
+
+import ch.qos.logback.core.CoreConstants; 
 
 /**
  * <code>RollingFileAppender</code> extends {@link FileAppender} to backup the
@@ -38,15 +43,31 @@ import ch.qos.logback.core.util.ContextUtil;
  * @author Heinz Richter
  * @author Ceki G&uuml;lc&uuml;
  */
-public class RollingFileAppender<E> extends FileAppender<E> {
+public
+  class
+  RollingFileAppender <E>
+  extends FileAppender<E>
+ {
+	
     File currentlyActiveFile;
+
+	
     TriggeringPolicy<E> triggeringPolicy;
+
+	
     RollingPolicy rollingPolicy;
 
+	
+
     static private String RFA_NO_TP_URL = CODES_URL + "#rfa_no_tp";
+
+	
     static private String RFA_NO_RP_URL = CODES_URL + "#rfa_no_rp";
+
+	
     static private String COLLISION_URL = CODES_URL + "#rfa_collision";
-    static private String RFA_LATE_FILE_URL = CODES_URL + "#rfa_file_after";
+
+	
 
     public void start() {
         if (triggeringPolicy == null) {
@@ -99,6 +120,137 @@ public class RollingFileAppender<E> extends FileAppender<E> {
         addInfo("Active log file name: " + getFile());
         super.start();
     }
+	
+
+  
+	
+
+    // START stop({FormalParametersInternal})//@Override
+  public void stop() {
+    if (rollingPolicy != null) rollingPolicy.stop();
+    if (triggeringPolicy != null) triggeringPolicy.stop();
+    super.stop();
+// END stop({FormalParametersInternal})//  }
+	
+
+    @Override
+    public void setFile(String file) {
+        // http://jira.qos.ch/browse/LBCORE-94
+        // allow setting the file name to null if mandated by prudent mode
+        if (file != null && ((triggeringPolicy != null) || (rollingPolicy != null))) {
+            addError("File property must be set before any triggeringPolicy or rollingPolicy properties");
+            addError(MORE_INFO_PREFIX + RFA_LATE_FILE_URL);
+        }
+        super.setFile(file);
+    }
+	
+
+    // START getFile({FormalParametersInternal})//@Override
+  public String getFile() {
+    return rollingPolicy.getActiveFileName();
+// END getFile({FormalParametersInternal})//  }
+	
+
+    /**
+     * Implemented by delegating most of the rollover work to a rolling policy.
+     */
+    // START rollover({FormalParametersInternal})//public void rollover() {
+    lock.lock();
+    try {
+      // Note: This method needs to be synchronized because it needs exclusive
+      // access while it closes and then re-opens the target file.
+      //
+      // make sure to close the hereto active log file! Renaming under windows
+      // does not work for open files.
+      this.closeOutputStream();
+      attemptRollover();
+      attemptOpenFile();
+    } finally {
+      lock.unlock();
+    }
+// END rollover({FormalParametersInternal})//  }
+	
+
+    // START attemptOpenFile({FormalParametersInternal})//private void attemptOpenFile() {
+      try {
+        // update the currentlyActiveFile LOGBACK-64
+        currentlyActiveFile = new File(rollingPolicy.getActiveFileName());
+
+        // This will also close the file. This is OK since multiple close operations are safe.
+        this.openFile(rollingPolicy.getActiveFileName());
+      } catch (IOException e) {
+        addError("setFile(" + fileName + ", false) call failed.", e);
+      }
+// END attemptOpenFile({FormalParametersInternal})//    }
+	
+
+    // START attemptRollover({FormalParametersInternal})//private void attemptRollover() {
+      try {
+        rollingPolicy.rollover();
+      } catch (RolloverFailure rf) {
+        addWarn("RolloverFailure occurred. Deferring roll-over.");
+        // we failed to roll-over, let us not truncate and risk data loss
+        this.append = true;
+      }
+// END attemptRollover({FormalParametersInternal})//    }
+	
+
+    /**
+    * This method differentiates RollingFileAppender from its super class.
+    */
+    // START subAppend(E-E)//@Override
+  protected void subAppend(E event) {
+    // The roll-over check must precede actual writing. This is the
+    // only correct behavior for time driven triggers.
+
+    // We need to synchronize on triggeringPolicy so that only one rollover
+    // occurs at a time
+    synchronized (triggeringPolicy) {
+      if (triggeringPolicy.isTriggeringEvent(currentlyActiveFile, event)) {
+        rollover();
+      }
+    }
+
+    super.subAppend(event);
+// END subAppend(E-E)//  }
+	
+
+    // START getRollingPolicy({FormalParametersInternal})//public RollingPolicy getRollingPolicy() {
+    return rollingPolicy;
+// END getRollingPolicy({FormalParametersInternal})//  }
+	
+
+    // START getTriggeringPolicy({FormalParametersInternal})//public TriggeringPolicy<E> getTriggeringPolicy() {
+    return triggeringPolicy;
+// END getTriggeringPolicy({FormalParametersInternal})//  }
+	
+
+    /**
+     * Sets the rolling policy. In case the 'policy' argument also implements
+     * {@link TriggeringPolicy}, then the triggering policy for this appender is
+     * automatically set to be the policy argument.
+     *
+     * @param policy
+     */
+    // START setRollingPolicy(RollingPolicy-RollingPolicy)//@SuppressWarnings("unchecked")
+  public void setRollingPolicy(RollingPolicy policy) {
+    rollingPolicy = policy;
+    if (rollingPolicy instanceof TriggeringPolicy) {
+      triggeringPolicy = (TriggeringPolicy<E>) policy;
+    }
+
+// END setRollingPolicy(RollingPolicy-RollingPolicy)//  }
+	
+
+    // START setTriggeringPolicy(TriggeringPolicy<E>-TriggeringPolicy<E>)//public void setTriggeringPolicy(TriggeringPolicy<E> policy) {
+    triggeringPolicy = policy;
+    if (policy instanceof RollingPolicy) {
+      rollingPolicy = (RollingPolicy) policy;
+    }
+// END setTriggeringPolicy(TriggeringPolicy<E>-TriggeringPolicy<E>)//  }
+	
+    static private String RFA_LATE_FILE_URL = CODES_URL + "#rfa_file_after";
+	
 
     private boolean checkForFileAndPatternCollisions() {
         if (triggeringPolicy instanceof RollingPolicyBase) {
@@ -112,29 +264,31 @@ public class RollingFileAppender<E> extends FileAppender<E> {
         }
         return false;
     }
+	
 
     private boolean checkForCollisionsInPreviousRollingFileAppenders() {
         boolean collisionResult = false;
         if (triggeringPolicy instanceof RollingPolicyBase) {
             final RollingPolicyBase base = (RollingPolicyBase) triggeringPolicy;
             final FileNamePattern fileNamePattern = base.fileNamePattern;
-            boolean collisionsDetected = innerCheckForFileNamePatternCollisionInPreviousRFA(fileNamePattern);
+            boolean collisionsDetected = innerCheckForFileNamePatternCollisionInPreviousRFA(fileNamePattern.toString());
             if (collisionsDetected)
                 collisionResult = true;
         }
         return collisionResult;
     }
+	
 
-    private boolean innerCheckForFileNamePatternCollisionInPreviousRFA(FileNamePattern fileNamePattern) {
+    private boolean innerCheckForFileNamePatternCollisionInPreviousRFA(String fileNamePattern) {
         boolean collisionsDetected = false;
         @SuppressWarnings("unchecked")
-        Map<String, FileNamePattern> map = (Map<String, FileNamePattern>) context.getObject(CoreConstants.RFA_FILENAME_PATTERN_COLLISION_MAP);
+        Map<String, String> map = (Map<String, String>) context.getObject(CoreConstants.FA_FILENAME_COLLISION_MAP);
         if (map == null) {
             return collisionsDetected;
         }
-        for (Entry<String, FileNamePattern> entry : map.entrySet()) {
+        for (Entry<String, String> entry : map.entrySet()) {
             if (fileNamePattern.equals(entry.getValue())) {
-                addErrorForCollision("FileNamePattern", entry.getValue().toString(), entry.getKey());
+                addErrorForCollision("FileNamePattern", entry.getValue(), entry.getKey());
                 collisionsDetected = true;
             }
         }
@@ -144,125 +298,4 @@ public class RollingFileAppender<E> extends FileAppender<E> {
         return collisionsDetected;
     }
 
-    @Override
-    public void stop() {
-        super.stop();
-        
-        if (rollingPolicy != null)
-            rollingPolicy.stop();
-        if (triggeringPolicy != null)
-            triggeringPolicy.stop();
-
-        Map<String, FileNamePattern> map = ContextUtil.getFilenamePatternCollisionMap(context);
-        if (map != null && getName() != null)
-            map.remove(getName());
-
-    }
-
-    @Override
-    public void setFile(String file) {
-        // http://jira.qos.ch/browse/LBCORE-94
-        // allow setting the file name to null if mandated by prudent mode
-        if (file != null && ((triggeringPolicy != null) || (rollingPolicy != null))) {
-            addError("File property must be set before any triggeringPolicy or rollingPolicy properties");
-            addError(MORE_INFO_PREFIX + RFA_LATE_FILE_URL);
-        }
-        super.setFile(file);
-    }
-
-    @Override
-    public String getFile() {
-        return rollingPolicy.getActiveFileName();
-    }
-
-    /**
-     * Implemented by delegating most of the rollover work to a rolling policy.
-     */
-    public void rollover() {
-        lock.lock();
-        try {
-            // Note: This method needs to be synchronized because it needs exclusive
-            // access while it closes and then re-opens the target file.
-            //
-            // make sure to close the hereto active log file! Renaming under windows
-            // does not work for open files.
-            this.closeOutputStream();
-            attemptRollover();
-            attemptOpenFile();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void attemptOpenFile() {
-        try {
-            // update the currentlyActiveFile LOGBACK-64
-            currentlyActiveFile = new File(rollingPolicy.getActiveFileName());
-
-            // This will also close the file. This is OK since multiple close operations are safe.
-            this.openFile(rollingPolicy.getActiveFileName());
-        } catch (IOException e) {
-            addError("setFile(" + fileName + ", false) call failed.", e);
-        }
-    }
-
-    private void attemptRollover() {
-        try {
-            rollingPolicy.rollover();
-        } catch (RolloverFailure rf) {
-            addWarn("RolloverFailure occurred. Deferring roll-over.");
-            // we failed to roll-over, let us not truncate and risk data loss
-            this.append = true;
-        }
-    }
-
-    /**
-    * This method differentiates RollingFileAppender from its super class.
-    */
-    @Override
-    protected void subAppend(E event) {
-        // The roll-over check must precede actual writing. This is the
-        // only correct behavior for time driven triggers.
-
-        // We need to synchronize on triggeringPolicy so that only one rollover
-        // occurs at a time
-        synchronized (triggeringPolicy) {
-            if (triggeringPolicy.isTriggeringEvent(currentlyActiveFile, event)) {
-                rollover();
-            }
-        }
-
-        super.subAppend(event);
-    }
-
-    public RollingPolicy getRollingPolicy() {
-        return rollingPolicy;
-    }
-
-    public TriggeringPolicy<E> getTriggeringPolicy() {
-        return triggeringPolicy;
-    }
-
-    /**
-     * Sets the rolling policy. In case the 'policy' argument also implements
-     * {@link TriggeringPolicy}, then the triggering policy for this appender is
-     * automatically set to be the policy argument.
-     *
-     * @param policy
-     */
-    @SuppressWarnings("unchecked")
-    public void setRollingPolicy(RollingPolicy policy) {
-        rollingPolicy = policy;
-        if (rollingPolicy instanceof TriggeringPolicy) {
-            triggeringPolicy = (TriggeringPolicy<E>) policy;
-        }
-
-    }
-
-    public void setTriggeringPolicy(TriggeringPolicy<E> policy) {
-        triggeringPolicy = policy;
-        if (policy instanceof RollingPolicy) {
-            rollingPolicy = (RollingPolicy) policy;
-        }
-    }
 }

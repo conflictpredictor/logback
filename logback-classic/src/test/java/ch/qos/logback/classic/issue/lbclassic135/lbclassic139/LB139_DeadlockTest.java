@@ -26,9 +26,7 @@ public class LB139_DeadlockTest {
     @Before
     public void setUp() {
         loggerContext.setName("LB139");
-        BasicConfigurator bc = new BasicConfigurator();
-        bc.setContext(loggerContext);
-        bc.configure(loggerContext);
+        BasicConfigurator.configure(loggerContext);
     }
 
     @Test

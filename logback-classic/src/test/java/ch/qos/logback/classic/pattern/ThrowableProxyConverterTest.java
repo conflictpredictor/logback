@@ -11,53 +11,91 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.pattern;
+package ch.qos.logback.classic.pattern; 
 
 import java.io.BufferedReader;
+ 
 import java.io.PrintWriter;
+ 
 import java.io.StringReader;
+ 
 import java.io.StringWriter;
+ 
 import java.lang.reflect.InvocationTargetException;
+ 
 import java.util.Arrays;
+ 
 import java.util.List;
+ 
 
 import ch.qos.logback.core.CoreConstants;
+ 
 import org.junit.After;
+ 
 import org.junit.Before;
+ 
 import org.junit.Test;
+ 
 
 import ch.qos.logback.classic.Level;
+ 
 import ch.qos.logback.classic.Logger;
+ 
 import ch.qos.logback.classic.LoggerContext;
+ 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.classic.util.TestHelper;
+ 
+ 
 
-import static ch.qos.logback.classic.util.TestHelper.addSuppressed;
-import static org.assertj.core.api.Assertions.assertThat;
+ 
+import static org.fest.assertions.Assertions.assertThat;
+ 
 import static org.junit.Assert.*;
+ 
 import static org.junit.Assume.assumeTrue;
+ 
+import ch.qos.logback.classic.util.TestHelper; 
 
-public class ThrowableProxyConverterTest {
+import static ch.qos.logback.classic.util.TestHelper.addSuppressed; 
+
+public
+  class
+  ThrowableProxyConverterTest {
+	
 
     LoggerContext lc = new LoggerContext();
+
+	
     ThrowableProxyConverter tpc = new ThrowableProxyConverter();
+
+	
     StringWriter sw = new StringWriter();
+
+	
     PrintWriter pw = new PrintWriter(sw);
 
-    @Before
-    public void setUp() throws Exception {
-        tpc.setContext(lc);
-        tpc.start();
-    }
+	
 
-    @After
-    public void tearDown() throws Exception {
-    }
+    // START setUp({FormalParametersInternal})//@Before
+  public void setUp() throws Exception {
+    tpc.setContext(lc);
+    tpc.start();
+// END setUp({FormalParametersInternal})//  }
+	
 
-    private ILoggingEvent createLoggingEvent(Throwable t) {
-        return new LoggingEvent(this.getClass().getName(), lc.getLogger(Logger.ROOT_LOGGER_NAME), Level.DEBUG, "test message", t, null);
-    }
+    // START tearDown({FormalParametersInternal})//@After
+  public void tearDown() throws Exception {
+// END tearDown({FormalParametersInternal})//  }
+	
+
+    // START createLoggingEvent(Throwable-Throwable)//private ILoggingEvent createLoggingEvent(Throwable t) {
+    return new LoggingEvent(this.getClass().getName(), lc
+        .getLogger(Logger.ROOT_LOGGER_NAME), Level.DEBUG, "test message", t,
+        null);
+// END createLoggingEvent(Throwable-Throwable)//  }
+	
 
     @Test
     public void suppressed() throws InvocationTargetException, IllegalAccessException {
@@ -75,6 +113,7 @@ public class ThrowableProxyConverterTest {
         }
         verify(ex);
     }
+	
 
     @Test
     public void suppressedWithCause() throws InvocationTargetException, IllegalAccessException {
@@ -92,6 +131,7 @@ public class ThrowableProxyConverterTest {
         }
         verify(ex);
     }
+	
 
     @Test
     public void suppressedWithSuppressed() throws Exception {
@@ -109,18 +149,21 @@ public class ThrowableProxyConverterTest {
         }
         verify(ex);
     }
+	
 
-    @Test
-    public void smoke() {
-        Exception t = new Exception("smoke");
-        verify(t);
-    }
+    // START smoke({FormalParametersInternal})//@Test
+  public void smoke() {
+    Exception t = new Exception("smoke");
+    verify(t);
+// END smoke({FormalParametersInternal})//  }
+	
 
     @Test
     public void nested() {
         Throwable t = TestHelper.makeNestedException(1);
         verify(t);
     }
+	
 
     @Test
     public void withArgumentOfOne() throws Exception {
@@ -139,6 +182,7 @@ public class ThrowableProxyConverterTest {
         assertNotNull(reader.readLine());
         assertNull("Unexpected line in stack trace", reader.readLine());
     }
+	
 
     @Test
     public void withShortArgument() throws Exception {
@@ -157,41 +201,41 @@ public class ThrowableProxyConverterTest {
         assertNotNull(reader.readLine());
         assertNull("Unexpected line in stack trace", reader.readLine());
     }
+	
 
     @Test
     public void skipSelectedLine() throws Exception {
-        String nameOfContainingMethod = "skipSelectedLine";
         // given
         final Throwable t = TestHelper.makeNestedException(0);
         t.printStackTrace(pw);
         final ILoggingEvent le = createLoggingEvent(t);
-        tpc.setOptionList(Arrays.asList("full", nameOfContainingMethod));
+        tpc.setOptionList(Arrays.asList("full", "skipSelectedLines"));
         tpc.start();
 
         // when
         final String result = tpc.convert(le);
 
         // then
-        assertThat(result).doesNotContain(nameOfContainingMethod);
-        
+        assertThat(result).excludes("skipSelectedLines");
     }
+	
 
     @Test
     public void skipMultipleLines() throws Exception {
-        String nameOfContainingMethod = "skipMultipleLines";
         // given
         final Throwable t = TestHelper.makeNestedException(0);
         t.printStackTrace(pw);
         final ILoggingEvent le = createLoggingEvent(t);
-        tpc.setOptionList(Arrays.asList("full", nameOfContainingMethod, "junit"));
+        tpc.setOptionList(Arrays.asList("full", "skipMultipleLines", "junit"));
         tpc.start();
 
         // when
         final String result = tpc.convert(le);
 
         // then
-        assertThat(result).doesNotContain(nameOfContainingMethod).doesNotContain("junit");
+        assertThat(result).excludes("skipSelectedLines").excludes("junit");
     }
+	
 
     @Test
     public void shouldLimitTotalLinesExcludingSkipped() throws Exception {
@@ -209,18 +253,21 @@ public class ThrowableProxyConverterTest {
         String[] lines = result.split(CoreConstants.LINE_SEPARATOR);
         assertThat(lines).hasSize(3 + 1);
     }
+	
 
-    void someMethod() throws Exception {
-        throw new Exception("someMethod");
-    }
+    // START someMethod({FormalParametersInternal})//void someMethod() throws Exception {
+    throw new Exception("someMethod");
+// END someMethod({FormalParametersInternal})//  }
+	
 
-    void verify(Throwable t) {
-        t.printStackTrace(pw);
+    // START verify(Throwable-Throwable)//void verify(Throwable t) {
+    t.printStackTrace(pw);
 
-        ILoggingEvent le = createLoggingEvent(t);
-        String result = tpc.convert(le);
-        System.out.println(result);
-        result = result.replace("common frames omitted", "more");
-        assertEquals(sw.toString(), result);
-    }
+    ILoggingEvent le = createLoggingEvent(t);
+    String result = tpc.convert(le);
+    System.out.println(result);
+    result = result.replace("common frames omitted", "more");
+    assertEquals(sw.toString(), result);
+// END verify(Throwable-Throwable)//  }
+
 }

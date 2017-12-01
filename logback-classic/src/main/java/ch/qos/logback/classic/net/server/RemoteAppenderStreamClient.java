@@ -16,12 +16,12 @@ package ch.qos.logback.classic.net.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.net.HardenedObjectInputStream;
 import ch.qos.logback.core.util.CloseUtil;
 
 /**
@@ -87,7 +87,7 @@ class RemoteAppenderStreamClient implements RemoteAppenderClient {
      */
     public void run() {
         logger.info(this + ": connected");
-        HardenedObjectInputStream ois = null;
+        ObjectInputStream ois = null;
         try {
             ois = createObjectInputStream();
             while (true) {
@@ -120,11 +120,11 @@ class RemoteAppenderStreamClient implements RemoteAppenderClient {
         }
     }
 
-    private HardenedObjectInputStream createObjectInputStream() throws IOException {
+    private ObjectInputStream createObjectInputStream() throws IOException {
         if (inputStream != null) {
-            return new HardenedLoggingEventInputStream(inputStream);
+            return new ObjectInputStream(inputStream);
         }
-        return new HardenedLoggingEventInputStream(socket.getInputStream());
+        return new ObjectInputStream(socket.getInputStream());
     }
 
     /**

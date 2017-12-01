@@ -13,12 +13,13 @@
  */
 package ch.qos.logback.core.encoder;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.Layout;
-import ch.qos.logback.core.OutputStreamAppender;
 
 public class LayoutWrappingEncoder<E> extends EncoderBase<E> {
 
@@ -33,8 +34,22 @@ public class LayoutWrappingEncoder<E> extends EncoderBase<E> {
      */
     private Charset charset;
 
-    Appender<?> parent;
-    Boolean immediateFlush = null;
+    private boolean immediateFlush = true;
+
+    /**
+     * Sets the immediateFlush option. The default value for immediateFlush is 'true'. If set to true,
+     * the doEncode() method will immediately flush the underlying OutputStream. Although immediate flushing
+     * is safer, it also significantly degrades logging throughput.
+     *
+     * @since 1.0.3
+     */
+    public void setImmediateFlush(boolean immediateFlush) {
+        this.immediateFlush = immediateFlush;
+    }
+
+    public boolean isImmediateFlush() {
+        return immediateFlush;
+    }
 
     public Layout<E> getLayout() {
         return layout;
@@ -62,58 +77,60 @@ public class LayoutWrappingEncoder<E> extends EncoderBase<E> {
         this.charset = charset;
     }
 
-    /**
-     * Sets the immediateFlush option. The default value for immediateFlush is 'true'. If set to true,
-     * the doEncode() method will immediately flush the underlying OutputStream. Although immediate flushing
-     * is safer, it also significantly degrades logging throughput.
-     *
-     * @since 1.0.3
-     */
-    public void setImmediateFlush(boolean immediateFlush) {
-        addWarn("As of version 1.2.0 \"immediateFlush\" property should be set within the enclosing Appender.");
-        addWarn("Please move \"immediateFlush\" property into the enclosing appender.");
-        this.immediateFlush = immediateFlush;
+    public void init(OutputStream os) throws IOException {
+        super.init(os);
+        writeHeader();
     }
 
-    @Override
-    public byte[] headerBytes() {
-        if (layout == null)
-            return null;
-
-        StringBuilder sb = new StringBuilder();
-        appendIfNotNull(sb, layout.getFileHeader());
-        appendIfNotNull(sb, layout.getPresentationHeader());
-        if (sb.length() > 0) {
-            // If at least one of file header or presentation header were not
-            // null, then append a line separator.
-            // This should be useful in most cases and should not hurt.
-            sb.append(CoreConstants.LINE_SEPARATOR);
+    void writeHeader() throws IOException {
+        if (layout != null && (outputStream != null)) {
+            StringBuilder sb = new StringBuilder();
+            appendIfNotNull(sb, layout.getFileHeader());
+            appendIfNotNull(sb, layout.getPresentationHeader());
+            if (sb.length() > 0) {
+                sb.append(CoreConstants.LINE_SEPARATOR);
+                // If at least one of file header or presentation header were not
+                // null, then append a line separator.
+                // This should be useful in most cases and should not hurt.
+                outputStream.write(convertToBytes(sb.toString()));
+                outputStream.flush();
+            }
         }
-        return convertToBytes(sb.toString());
     }
 
-    @Override
-    public byte[] footerBytes() {
-        if (layout == null)
-            return null;
+    public void close() throws IOException {
+        writeFooter();
+    }
 
-        StringBuilder sb = new StringBuilder();
-        appendIfNotNull(sb, layout.getPresentationFooter());
-        appendIfNotNull(sb, layout.getFileFooter());
-        return convertToBytes(sb.toString());
+    void writeFooter() throws IOException {
+        if (layout != null && outputStream != null) {
+            StringBuilder sb = new StringBuilder();
+            appendIfNotNull(sb, layout.getPresentationFooter());
+            appendIfNotNull(sb, layout.getFileFooter());
+            if (sb.length() > 0) {
+                outputStream.write(convertToBytes(sb.toString()));
+                outputStream.flush();
+            }
+        }
     }
 
     private byte[] convertToBytes(String s) {
         if (charset == null) {
             return s.getBytes();
         } else {
-            return s.getBytes(charset);
+            try {
+                return s.getBytes(charset.name());
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalStateException("An existing charset cannot possibly be unsupported.");
+            }
         }
     }
 
-    public byte[] encode(E event) {
+    public void doEncode(E event) throws IOException {
         String txt = layout.doLayout(event);
-        return convertToBytes(txt);
+        outputStream.write(convertToBytes(txt));
+        if (immediateFlush)
+            outputStream.flush();
     }
 
     public boolean isStarted() {
@@ -121,21 +138,17 @@ public class LayoutWrappingEncoder<E> extends EncoderBase<E> {
     }
 
     public void start() {
-        if (immediateFlush != null) {
-            if (parent instanceof OutputStreamAppender) {
-                addWarn("Setting the \"immediateFlush\" property of the enclosing appender to " + immediateFlush);
-                @SuppressWarnings("unchecked")
-                OutputStreamAppender<E> parentOutputStreamAppender = (OutputStreamAppender<E>) parent;
-                parentOutputStreamAppender.setImmediateFlush(immediateFlush);
-            } else {
-                addError("Could not set the \"immediateFlush\" property of the enclosing appender.");
-            }
-        }
         started = true;
     }
 
     public void stop() {
         started = false;
+        if (outputStream != null) {
+            try {
+                outputStream.flush();
+            } catch (IOException e) {
+            }
+        }
     }
 
     private void appendIfNotNull(StringBuilder sb, String s) {
@@ -144,13 +157,4 @@ public class LayoutWrappingEncoder<E> extends EncoderBase<E> {
         }
     }
 
-    /**
-     * This method allows RollingPolicy implementations to be aware of their
-     * containing appender.
-     * 
-     * @param appender
-     */
-    public void setParent(Appender<?> parent) {
-        this.parent = parent;
-    }
 }

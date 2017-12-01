@@ -20,7 +20,7 @@ import java.io.File;
 import static junit.framework.Assert.assertTrue;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class FileTestUtil {
 

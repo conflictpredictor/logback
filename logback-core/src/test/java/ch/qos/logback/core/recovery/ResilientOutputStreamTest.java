@@ -11,55 +11,72 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.recovery;
-
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
+package ch.qos.logback.core.recovery; 
 
 import ch.qos.logback.core.Context;
+ 
 import ch.qos.logback.core.ContextBase;
-import ch.qos.logback.core.FileAppender;
+ 
 import ch.qos.logback.core.testUtil.RandomUtil;
+ 
 import ch.qos.logback.core.util.CoreTestConstants;
+ 
+ 
+
+import org.junit.BeforeClass;
+ 
+import org.junit.Test;
+ 
+
+import java.io.File;
+ 
+
+import static org.mockito.Mockito.spy;
+ 
+import static org.mockito.Mockito.verify;
+ 
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
-public class ResilientOutputStreamTest {
+public
+  class
+  ResilientOutputStreamTest {
+	
 
     int diff = RandomUtil.getPositiveInt();
+
+	
     Context context = new ContextBase();
 
-    @BeforeClass
-    public static void setUp() {
-        File file = new File(CoreTestConstants.OUTPUT_DIR_PREFIX);
-        file.mkdirs();
-    }
+	
 
-    @Test
-    public void verifyRecuperationAfterFailure() throws Exception {
-        File file = new File(CoreTestConstants.OUTPUT_DIR_PREFIX + "resilient" + diff + ".log");
-        ResilientFileOutputStream rfos = new ResilientFileOutputStream(file, true, FileAppender.DEFAULT_BUFFER_SIZE);
-        rfos.setContext(context);
+    // START setUp({FormalParametersInternal})//@BeforeClass
+   public static void setUp() {
+     File file = new File(CoreTestConstants.OUTPUT_DIR_PREFIX);
+     file.mkdirs();
+// END setUp({FormalParametersInternal})//   }
+	
 
-        ResilientFileOutputStream spy = spy(rfos);
+    // START verifyRecuperationAfterFailure({FormalParametersInternal})//@Test
+   public void verifyRecuperationAfterFailure() throws Exception {
+     File file = new File(CoreTestConstants.OUTPUT_DIR_PREFIX+"resilient"+diff+".log");
+     ResilientFileOutputStream rfos = new ResilientFileOutputStream(file, true);
+     rfos.setContext(context);
 
-        spy.write("a".getBytes());
-        spy.flush();
+     ResilientFileOutputStream spy = spy(rfos);
 
-        spy.getChannel().close();
-        spy.write("b".getBytes());
-        spy.flush();
-        Thread.sleep(RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN + 10);
-        spy.write("c".getBytes());
-        spy.flush();
-        verify(spy).openNewOutputStream();
+     spy.write("a".getBytes());
+     spy.flush();
 
-    }
+     spy.getChannel().close();
+     spy.write("b".getBytes());
+     spy.flush();
+     Thread.sleep(RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN+10);
+     spy.write("c".getBytes());
+     spy.flush();
+     verify(spy).openNewOutputStream();
+
+// END verifyRecuperationAfterFailure({FormalParametersInternal})//   }
 
 }

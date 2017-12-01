@@ -11,68 +11,96 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.status;
+package ch.qos.logback.core.status; 
 
 import java.util.ArrayList;
+ 
 import java.util.Iterator;
+ 
 import java.util.List;
+ 
 
-abstract public class StatusBase implements Status {
+abstract public
+  class
+  StatusBase  implements Status
+ {
+	
 
     static private final List<Status> EMPTY_LIST = new ArrayList<Status>(0);
 
+	
+
     int level;
+
+	
     final String message;
+
+	
     final Object origin;
+
+	
     List<Status> childrenList;
+
+	
     Throwable throwable;
+
+	
     long date;
 
-    StatusBase(int level, String msg, Object origin) {
-        this(level, msg, origin, null);
-    }
+	
 
-    StatusBase(int level, String msg, Object origin, Throwable t) {
-        this.level = level;
-        this.message = msg;
-        this.origin = origin;
-        this.throwable = t;
-        this.date = System.currentTimeMillis();
-    }
+    // START StatusBase(int-int-String-String-Object-Object)//StatusBase(int level, String msg, Object origin) {
+    this(level, msg, origin, null);
+// END StatusBase(int-int-String-String-Object-Object)//  }
+	
 
-    public synchronized void add(Status child) {
-        if (child == null) {
-            throw new NullPointerException("Null values are not valid Status.");
-        }
-        if (childrenList == null) {
-            childrenList = new ArrayList<Status>();
-        }
-        childrenList.add(child);
-    }
+    // START StatusBase(int-int-String-String-Object-Object-Throwable-Throwable)//StatusBase(int level, String msg, Object origin, Throwable t) {
+    this.level = level;
+    this.message = msg;
+    this.origin = origin;
+    this.throwable = t;
+    this.date = System.currentTimeMillis();
+// END StatusBase(int-int-String-String-Object-Object-Throwable-Throwable)//  }
+	
 
-    public synchronized boolean hasChildren() {
-        return ((childrenList != null) && (childrenList.size() > 0));
+    // START add(Status-Status)//public synchronized void add(Status child) {
+    if (child == null) {
+      throw new NullPointerException("Null values are not valid Status.");
     }
+    if (childrenList == null) {
+      childrenList = new ArrayList<Status>();
+    }
+    childrenList.add(child);
+// END add(Status-Status)//  }
+	
 
-    public synchronized Iterator<Status> iterator() {
-        if (childrenList != null) {
-            return childrenList.iterator();
-        } else {
-            return EMPTY_LIST.iterator();
-        }
-    }
+    // START hasChildren({FormalParametersInternal})//public synchronized boolean hasChildren() {
+    return ((childrenList != null) && (childrenList.size() > 0));
+// END hasChildren({FormalParametersInternal})//  }
+	
 
-    public synchronized boolean remove(Status statusToRemove) {
-        if (childrenList == null) {
-            return false;
-        }
-        // TODO also search in childrens' children
-        return childrenList.remove(statusToRemove);
+    // START iterator({FormalParametersInternal})//public synchronized Iterator<Status> iterator() {
+    if (childrenList != null) {
+      return childrenList.iterator();
+    } else {
+      return EMPTY_LIST.iterator();
     }
+// END iterator({FormalParametersInternal})//  }
+	
 
-    public int getLevel() {
-        return level;
+    // START remove(Status-Status)//public synchronized boolean remove(Status statusToRemove) {
+    if (childrenList == null) {
+      return false;
     }
+    // TODO also search in childrens' children
+    return childrenList.remove(statusToRemove);
+// END remove(Status-Status)//  }
+	
+
+    // START getLevel({FormalParametersInternal})//public int getLevel() {
+    return level;
+// END getLevel({FormalParametersInternal})//  }
+	
 
     // status messages are not supposed to contains cycles.
     // cyclic status arrangements are like to cause deadlocks
@@ -93,82 +121,89 @@ abstract public class StatusBase implements Status {
         }
         return result;
     }
+	
 
-    public String getMessage() {
-        return message;
-    }
+    // START getMessage({FormalParametersInternal})//public String getMessage() {
+    return message;
+// END getMessage({FormalParametersInternal})//  }
+	
 
-    public Object getOrigin() {
-        return origin;
-    }
+    // START getOrigin({FormalParametersInternal})//public Object getOrigin() {
+    return origin;
+// END getOrigin({FormalParametersInternal})//  }
+	
 
-    public Throwable getThrowable() {
-        return throwable;
-    }
+    // START getThrowable({FormalParametersInternal})//public Throwable getThrowable() {
+    return throwable;
+// END getThrowable({FormalParametersInternal})//  }
+	
 
-    public Long getDate() {
-        return date;
-    }
+    // START getDate({FormalParametersInternal})//public Long getDate() {
+    return date;
+// END getDate({FormalParametersInternal})//  }
+	
 
     /**
      * @Override
      */
-    public String toString() {
-        StringBuilder buf = new StringBuilder();
-        switch (getEffectiveLevel()) {
-        case INFO:
-            buf.append("INFO");
-            break;
-        case WARN:
-            buf.append("WARN");
-            break;
-        case ERROR:
-            buf.append("ERROR");
-            break;
-        }
-        if (origin != null) {
-            buf.append(" in ");
-            buf.append(origin);
-            buf.append(" -");
-        }
-
-        buf.append(" ");
-        buf.append(message);
-
-        if (throwable != null) {
-            buf.append(" ");
-            buf.append(throwable);
-        }
-
-        return buf.toString();
+    // START toString({FormalParametersInternal})//public String toString() {
+    StringBuilder buf = new StringBuilder();
+    switch (getEffectiveLevel()) {
+    case INFO:
+      buf.append("INFO");
+      break;
+    case WARN:
+      buf.append("WARN");
+      break;
+    case ERROR:
+      buf.append("ERROR");
+      break;
+    }
+    if (origin != null) {
+      buf.append(" in ");
+      buf.append(origin);
+      buf.append(" -");
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + level;
-        result = prime * result + ((message == null) ? 0 : message.hashCode());
-        return result;
+    buf.append(" ");
+    buf.append(message);
+
+    if (throwable != null) {
+      buf.append(" ");
+      buf.append(throwable);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final StatusBase other = (StatusBase) obj;
-        if (level != other.level)
-            return false;
-        if (message == null) {
-            if (other.message != null)
-                return false;
-        } else if (!message.equals(other.message))
-            return false;
-        return true;
-    }
+    return buf.toString();
+// END toString({FormalParametersInternal})//  }
+	
+
+    // START hashCode({FormalParametersInternal})//@Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + level;
+    result = prime * result + ((message == null) ? 0 : message.hashCode());
+    return result;
+// END hashCode({FormalParametersInternal})//  }
+	
+
+    // START equals(Object-Object)//@Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    final StatusBase other = (StatusBase) obj;
+    if (level != other.level)
+      return false;
+    if (message == null) {
+      if (other.message != null)
+        return false;
+    } else if (!message.equals(other.message))
+      return false;
+    return true;
+// END equals(Object-Object)//  }
 
 }

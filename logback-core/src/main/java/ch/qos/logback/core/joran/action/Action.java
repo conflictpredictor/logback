@@ -11,15 +11,21 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.joran.action;
+package ch.qos.logback.core.joran.action; 
 
 import org.xml.sax.Attributes;
+ 
 import org.xml.sax.Locator;
+ 
 
 import ch.qos.logback.core.joran.spi.ActionException;
+ 
 import ch.qos.logback.core.joran.spi.InterpretationContext;
+ 
 import ch.qos.logback.core.joran.spi.Interpreter;
+ 
 import ch.qos.logback.core.spi.ContextAwareBase;
+ 
 
 /**
  *
@@ -35,23 +41,45 @@ import ch.qos.logback.core.spi.ContextAwareBase;
  * @author Ceki G&uuml;lc&uuml;
  *
  */
-public abstract class Action extends ContextAwareBase {
+public abstract
+  class
+  Action  extends ContextAwareBase
+ {
+	
 
     public static final String NAME_ATTRIBUTE = "name";
+
+	
     public static final String KEY_ATTRIBUTE = "key";
+
+	
     public static final String VALUE_ATTRIBUTE = "value";
+
+	
     public static final String FILE_ATTRIBUTE = "file";
+
+	
     public static final String CLASS_ATTRIBUTE = "class";
+
+	
     public static final String PATTERN_ATTRIBUTE = "pattern";
+
+	
     public static final String SCOPE_ATTRIBUTE = "scope";
 
+	
+
     public static final String ACTION_CLASS_ATTRIBUTE = "actionClass";
+
+	
 
     /**
      * Called when the parser encounters an element matching a
      * {@link ch.qos.logback.core.joran.spi.ElementSelector Pattern}.
      */
-    public abstract void begin(InterpretationContext ic, String name, Attributes attributes) throws ActionException;
+    // START begin(InterpretationContext-InterpretationContext-String-String-Attributes-Attributes)//public abstract void begin(InterpretationContext ic, String name,
+// END begin(InterpretationContext-InterpretationContext-String-String-Attributes-Attributes)//      Attributes attributes) throws ActionException;
+	
 
     /**
      * Called to pass the body (as text) contained within an element.
@@ -59,39 +87,48 @@ public abstract class Action extends ContextAwareBase {
      * @param body
      * @throws ActionException
      */
-    public void body(InterpretationContext ic, String body) throws ActionException {
-        // NOP
-    }
+    // START body(InterpretationContext-InterpretationContext-String-String)//public void body(InterpretationContext ic, String body)
+      throws ActionException {
+    // NOP
+// END body(InterpretationContext-InterpretationContext-String-String)//  }
+	
 
     /*
      * Called when the parser encounters an endElement event matching a {@link ch.qos.logback.core.joran.spi.Pattern
      * Pattern}.
      */
-    public abstract void end(InterpretationContext ic, String name) throws ActionException;
+    // START end(InterpretationContext-InterpretationContext-String-String)//public abstract void end(InterpretationContext ic, String name)
+// END end(InterpretationContext-InterpretationContext-String-String)//      throws ActionException;
+	
 
-    public String toString() {
-        return this.getClass().getName();
-    }
+    // START toString({FormalParametersInternal})//public String toString() {
+    return this.getClass().getName();
+// END toString({FormalParametersInternal})//  }
+	
 
-    protected int getColumnNumber(InterpretationContext ic) {
-        Interpreter ji = ic.getJoranInterpreter();
-        Locator locator = ji.getLocator();
-        if (locator != null) {
-            return locator.getColumnNumber();
-        }
-        return -1;
+    // START getColumnNumber(InterpretationContext-InterpretationContext)//protected int getColumnNumber(InterpretationContext ic) {
+    Interpreter ji = ic.getJoranInterpreter();
+    Locator locator = ji.getLocator();
+    if (locator != null) {
+      return locator.getColumnNumber();
     }
+    return -1;
+// END getColumnNumber(InterpretationContext-InterpretationContext)//  }
+	
 
-    protected int getLineNumber(InterpretationContext ic) {
-        Interpreter ji = ic.getJoranInterpreter();
-        Locator locator = ji.getLocator();
-        if (locator != null) {
-            return locator.getLineNumber();
-        }
-        return -1;
+    // START getLineNumber(InterpretationContext-InterpretationContext)//protected int getLineNumber(InterpretationContext ic) {
+    Interpreter ji = ic.getJoranInterpreter();
+    Locator locator = ji.getLocator();
+    if (locator != null) {
+      return locator.getLineNumber();
     }
+    return -1;
+// END getLineNumber(InterpretationContext-InterpretationContext)//  }
+	
 
-    protected String getLineColStr(InterpretationContext ic) {
-        return "line: " + getLineNumber(ic) + ", column: " + getColumnNumber(ic);
-    }
+    // START getLineColStr(InterpretationContext-InterpretationContext)//protected String getLineColStr(InterpretationContext ic) {
+    return "line: " + getLineNumber(ic) + ", column: "
+        + getColumnNumber(ic);
+// END getLineColStr(InterpretationContext-InterpretationContext)//  }
+
 }

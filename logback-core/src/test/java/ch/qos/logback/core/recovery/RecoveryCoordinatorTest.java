@@ -11,46 +11,53 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.recovery;
+package ch.qos.logback.core.recovery; 
 
 import static org.junit.Assert.*;
+ 
 
 import org.junit.Test;
+ 
 
-public class RecoveryCoordinatorTest {
+public
+  class
+  RecoveryCoordinatorTest {
+	
 
-    long now = System.currentTimeMillis();
-    RecoveryCoordinator rc = new RecoveryCoordinator(now);
-
-    @Test
-    public void recoveryNotNeededAfterInit() {
-        RecoveryCoordinator rc = new RecoveryCoordinator();
-        assertTrue(rc.isTooSoon());
-    }
+    // START recoveryNotNeededAfterInit({FormalParametersInternal})//@Test
+  public void recoveryNotNeededAfterInit() {
+    RecoveryCoordinator rc = new RecoveryCoordinator();
+    assertTrue(rc.isTooSoon());
+// END recoveryNotNeededAfterInit({FormalParametersInternal})//  }
+	
 
     @Test
     public void recoveryNotNeededIfAsleepForLessThanBackOffTime() throws InterruptedException {
         rc.setCurrentTime(now + RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN / 2);
         assertTrue(rc.isTooSoon());
     }
+	
 
     @Test
     public void recoveryNeededIfAsleepForMoreThanBackOffTime() throws InterruptedException {
         rc.setCurrentTime(now + RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN + 20);
         assertFalse(rc.isTooSoon());
     }
+	
 
     @Test
     public void recoveryNotNeededIfCurrentTimeSetToBackOffTime() throws InterruptedException {
         rc.setCurrentTime(now + RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN);
         assertTrue(rc.isTooSoon());
     }
+	
 
     @Test
     public void recoveryNeededIfCurrentTimeSetToExceedBackOffTime() {
         rc.setCurrentTime(now + RecoveryCoordinator.BACKOFF_COEFFICIENT_MIN + 1);
         assertFalse(rc.isTooSoon());
     }
+	
 
     @Test
     public void recoveryConditionDetectedEvenAfterReallyLongTimesBetweenRecovery() {
@@ -71,4 +78,10 @@ public class RecoveryCoordinatorTest {
             offset *= 2;
         }
     }
+	
+
+    long now = System.currentTimeMillis();
+	
+    RecoveryCoordinator rc = new RecoveryCoordinator(now);
+
 }

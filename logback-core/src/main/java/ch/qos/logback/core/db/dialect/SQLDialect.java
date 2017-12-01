@@ -14,7 +14,7 @@
 package ch.qos.logback.core.db.dialect;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  *
  */
 public interface SQLDialect {

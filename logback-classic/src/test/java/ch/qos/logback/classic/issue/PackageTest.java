@@ -16,7 +16,6 @@ package ch.qos.logback.classic.issue;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
 import ch.qos.logback.classic.issue.lbclassic135.lbclassic139.LB139_DeadlockTest;
 
 @RunWith(Suite.class)

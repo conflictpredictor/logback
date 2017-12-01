@@ -18,7 +18,7 @@ import ch.qos.logback.core.helpers.CyclicBuffer;
 import java.util.*;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class CyclicBufferTrackerSimulator {
 

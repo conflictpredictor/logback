@@ -20,7 +20,6 @@ import ch.qos.logback.access.servlet.Util;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,8 +43,6 @@ import java.util.Vector;
  */
 public class AccessEvent implements Serializable, IAccessEvent {
 
-    private static final String[] NA_STRING_ARRAY = new String[] { NA };
-
     private static final long serialVersionUID = 866718993618836343L;
 
     private static final String EMPTY = "";
@@ -53,19 +50,16 @@ public class AccessEvent implements Serializable, IAccessEvent {
     private transient final HttpServletRequest httpRequest;
     private transient final HttpServletResponse httpResponse;
 
-    String queryString;
     String requestURI;
     String requestURL;
     String remoteHost;
     String remoteUser;
     String remoteAddr;
-    String threadName;
     String protocol;
     String method;
     String serverName;
     String requestContent;
     String responseContent;
-    String sessionID;
     long elapsedTime;
 
     Map<String, String> requestHeaderMap;
@@ -128,18 +122,6 @@ public class AccessEvent implements Serializable, IAccessEvent {
         }
     }
 
-    /**
-     * @param threadName The threadName to set.
-     */
-    public void setThreadName(String threadName) {
-        this.threadName = threadName;
-    }
-
-    @Override
-    public String getThreadName() {
-        return threadName == null ? NA : threadName;
-    }
-
     @Override
     public String getRequestURI() {
         if (requestURI == null) {
@@ -150,24 +132,6 @@ public class AccessEvent implements Serializable, IAccessEvent {
             }
         }
         return requestURI;
-    }
-
-    @Override
-    public String getQueryString() {
-        if (queryString == null) {
-            if (httpRequest != null) {
-                StringBuilder buf = new StringBuilder();
-                final String qStr = httpRequest.getQueryString();
-                if (qStr != null) {
-                    buf.append(AccessConverter.QUESTION_CHAR);
-                    buf.append(qStr);
-                }
-                queryString = buf.toString();
-            } else {
-                queryString = NA;
-            }
-        }
-        return queryString;
     }
 
     /**
@@ -181,7 +145,11 @@ public class AccessEvent implements Serializable, IAccessEvent {
                 buf.append(httpRequest.getMethod());
                 buf.append(AccessConverter.SPACE_CHAR);
                 buf.append(httpRequest.getRequestURI());
-                buf.append(getQueryString());
+                final String qStr = httpRequest.getQueryString();
+                if (qStr != null) {
+                    buf.append(AccessConverter.QUESTION_CHAR);
+                    buf.append(qStr);
+                }
                 buf.append(AccessConverter.SPACE_CHAR);
                 buf.append(httpRequest.getProtocol());
                 requestURL = buf.toString();
@@ -243,21 +211,6 @@ public class AccessEvent implements Serializable, IAccessEvent {
     }
 
     @Override
-    public String getSessionID() {
-        if (sessionID == null) {
-            if (httpRequest != null) {
-                final HttpSession session = httpRequest.getSession();
-                if (session != null) {
-                    sessionID = session.getId();
-                }
-            } else {
-                sessionID = NA;
-            }
-        }
-        return sessionID;
-    }
-
-    @Override
     public String getServerName() {
         if (serverName == null) {
             if (httpRequest != null) {
@@ -302,7 +255,7 @@ public class AccessEvent implements Serializable, IAccessEvent {
     }
 
     @Override
-    public Enumeration<String> getRequestHeaderNames() {
+    public Enumeration getRequestHeaderNames() {
         // post-serialization
         if (httpRequest == null) {
             Vector<String> list = new Vector<String>(getRequestHeaderMap().keySet());
@@ -323,24 +276,24 @@ public class AccessEvent implements Serializable, IAccessEvent {
         // according to RFC 2616 header names are case insensitive
         // latest versions of Tomcat return header names in lower-case
         requestHeaderMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-        Enumeration<String> e = httpRequest.getHeaderNames();
+        Enumeration e = httpRequest.getHeaderNames();
         if (e == null) {
             return;
         }
         while (e.hasMoreElements()) {
-            String key = e.nextElement();
+            String key = (String) e.nextElement();
             requestHeaderMap.put(key, httpRequest.getHeader(key));
         }
     }
 
     public void buildRequestParameterMap() {
         requestParameterMap = new HashMap<String, String[]>();
-        Enumeration<String> e = httpRequest.getParameterNames();
+        Enumeration e = httpRequest.getParameterNames();
         if (e == null) {
             return;
         }
         while (e.hasMoreElements()) {
-            String key = e.nextElement();
+            String key = (String) e.nextElement();
             requestParameterMap.put(key, httpRequest.getParameterValues(key));
         }
     }
@@ -373,11 +326,6 @@ public class AccessEvent implements Serializable, IAccessEvent {
             return;
         }
 
-        // attributeMap has been copied already. See also LOGBACK-1189
-        if(attributeMap != null) {
-            return;
-        }
-        
         attributeMap = new HashMap<String, Object>();
 
         Enumeration<String> names = httpRequest.getAttributeNames();
@@ -407,15 +355,16 @@ public class AccessEvent implements Serializable, IAccessEvent {
 
     @Override
     public String[] getRequestParameter(String key) {
-        String[] value = null;
-        
-        if(requestParameterMap != null) {
-            value = requestParameterMap.get(key);
-        } else if (httpRequest != null) {
-             value = httpRequest.getParameterValues(key);
+        if (httpRequest != null) {
+            String[] value = httpRequest.getParameterValues(key);
+            if (value == null) {
+                return new String[] { NA };
+            } else {
+                return value;
+            }
+        } else {
+            return new String[] { NA };
         }
-
-        return (value != null) ? value: NA_STRING_ARRAY;
     }
 
     @Override
@@ -456,10 +405,6 @@ public class AccessEvent implements Serializable, IAccessEvent {
         return statusCode;
     }
 
-    public long getElapsedSeconds() {
-        return elapsedTime < 0 ? elapsedTime : elapsedTime / 1000;
-    }
-
     public long getElapsedTime() {
         return elapsedTime;
     }
@@ -479,7 +424,7 @@ public class AccessEvent implements Serializable, IAccessEvent {
         if (Util.isFormUrlEncoded(httpRequest)) {
             StringBuilder buf = new StringBuilder();
 
-            Enumeration<String> pramEnumeration = httpRequest.getParameterNames();
+            Enumeration pramEnumeration = httpRequest.getParameterNames();
 
             // example: id=1234&user=cgu
             // number=1233&x=1
@@ -487,7 +432,7 @@ public class AccessEvent implements Serializable, IAccessEvent {
             try {
                 while (pramEnumeration.hasMoreElements()) {
 
-                    String key = pramEnumeration.nextElement();
+                    String key = (String) pramEnumeration.nextElement();
                     if (count++ != 0) {
                         buf.append("&");
                     }

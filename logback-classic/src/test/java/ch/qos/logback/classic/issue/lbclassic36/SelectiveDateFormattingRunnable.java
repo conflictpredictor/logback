@@ -22,7 +22,7 @@ import ch.qos.logback.core.contention.RunnableWithCounterAndDone;
 /**
  * A runnable which behaves differently depending on the desired locking model.
  * 
- * @author Ralph Goers
+ * @author Raplh Goers
  * @author Ceki Gulcu
  */
 public class SelectiveDateFormattingRunnable extends RunnableWithCounterAndDone {

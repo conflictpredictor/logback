@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -49,8 +47,7 @@ public class Compressor extends ContextAwareBase {
     /**
      * @param nameOfFile2Compress
      * @param nameOfCompressedFile
-     * @param innerEntryName 
-     *            The name of the file within the zip file. Use for ZIP compression.
+     * @param innerEntryName       The name of the file within the zip file. Use for ZIP compression.
      */
     public void compress(String nameOfFile2Compress, String nameOfCompressedFile, String innerEntryName) {
         switch (compressionMode) {
@@ -159,7 +156,7 @@ public class Compressor extends ContextAwareBase {
     }
 
     ZipEntry computeZipEntry(String filename) {
-        String nameOfFileNestedWithinArchive = computeFileNameStrWithoutCompSuffix(filename, compressionMode);
+        String nameOfFileNestedWithinArchive = computeFileNameStr_WCS(filename, compressionMode);
         return new ZipEntry(nameOfFileNestedWithinArchive);
     }
 
@@ -226,7 +223,7 @@ public class Compressor extends ContextAwareBase {
         }
     }
 
-    static public String computeFileNameStrWithoutCompSuffix(String fileNamePatternStr, CompressionMode compressionMode) {
+    static public String computeFileNameStr_WCS(String fileNamePatternStr, CompressionMode compressionMode) {
         int len = fileNamePatternStr.length();
         switch (compressionMode) {
         case GZ:
@@ -251,37 +248,10 @@ public class Compressor extends ContextAwareBase {
             addError("Failed to create parent directories for [" + file.getAbsolutePath() + "]");
         }
     }
-    
+
     @Override
     public String toString() {
         return this.getClass().getName();
     }
 
-    
-    public Future<?> asyncCompress(String nameOfFile2Compress, String nameOfCompressedFile, String innerEntryName) throws RolloverFailure {
-        CompressionRunnable runnable = new CompressionRunnable(nameOfFile2Compress, nameOfCompressedFile, innerEntryName);
-        ExecutorService executorService = context.getScheduledExecutorService();
-        Future<?> future = executorService.submit(runnable);
-        return future;
-    }
-
-
-    class CompressionRunnable implements Runnable {
-        final String nameOfFile2Compress;
-        final String nameOfCompressedFile;
-        final String innerEntryName;
-
-        public CompressionRunnable(String nameOfFile2Compress, String nameOfCompressedFile, String innerEntryName) {
-            this.nameOfFile2Compress = nameOfFile2Compress;
-            this.nameOfCompressedFile = nameOfCompressedFile;
-            this.innerEntryName = innerEntryName;
-        }
-
-        public void run() {
-            
-            Compressor.this.compress(nameOfFile2Compress, nameOfCompressedFile, innerEntryName);
-        }
-    }
-
-  
 }

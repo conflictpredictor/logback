@@ -11,14 +11,19 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.util;
+package ch.qos.logback.classic.util; 
+import java.util.HashMap;
+ 
+import java.util.Map;
+ 
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+ 
 import java.util.Set;
+ 
 
 import org.slf4j.spi.MDCAdapter;
+ 
 
 /**
  * A <em>Mapped Diagnostic Context</em>, or MDC in short, is an instrument for
@@ -36,39 +41,49 @@ import org.slf4j.spi.MDCAdapter;
  *
  * @author Ceki G&uuml;lc&uuml;
  */
-public class LogbackMDCAdapter implements MDCAdapter {
+public
+  class
+  LogbackMDCAdapter  implements MDCAdapter
+ {
+	
 
-    // The internal map is copied so as
+  // We wish to avoid unnecessarily copying of the map. To ensure
+  // efficient/timely copying, we have a variable keeping track of the last
+  // operation. A copy is necessary on 'put' or 'remove' but only if the last
+  // operation was a 'get'. Get operations never necessitate a copy nor
+  // successive 'put/remove' operations, only a get followed by a 'put/remove'
+  // requires copying the map.
+  // See http://jira.qos.ch/browse/LBCLASSIC-254 for the original discussion.
 
-    // We wish to avoid unnecessarily copying of the map. To ensure
-    // efficient/timely copying, we have a variable keeping track of the last
-    // operation. A copy is necessary on 'put' or 'remove' but only if the last
-    // operation was a 'get'. Get operations never necessitate a copy nor
-    // successive 'put/remove' operations, only a get followed by a 'put/remove'
-    // requires copying the map.
-    // See http://jira.qos.ch/browse/LOGBACK-620 for the original discussion.
-
-    // We no longer use CopyOnInheritThreadLocal in order to solve LBCLASSIC-183
-    // Initially the contents of the thread local in parent and child threads
-    // reference the same map. However, as soon as a thread invokes the put()
-    // method, the maps diverge as they should.
-    final ThreadLocal<Map<String, String>> copyOnThreadLocal = new ThreadLocal<Map<String, String>>();
+  // We no longer use CopyOnInheritThreadLocal in order to solve LBCLASSIC-183
+  // Initially the contents of the thread local in parent and child threads
+  // reference the same map. However, as soon as a thread invokes the put()
+  // method, the maps diverge as they should.
+  
+	
 
     private static final int WRITE_OPERATION = 1;
-    private static final int MAP_COPY_OPERATION = 2;
+
+	
+  
+	
 
     // keeps track of the last operation performed
     final ThreadLocal<Integer> lastOperation = new ThreadLocal<Integer>();
 
-    private Integer getAndSetLastOperation(int op) {
-        Integer lastOp = lastOperation.get();
-        lastOperation.set(op);
-        return lastOp;
-    }
+	
+
+    // START getAndSetLastOperation(int-int)//private Integer getAndSetLastOperation(int op) {
+    Integer lastOp = lastOperation.get();
+    lastOperation.set(op);
+    return lastOp;
+// END getAndSetLastOperation(int-int)//  }
+	
 
     private boolean wasLastOpReadOrNull(Integer lastOp) {
         return lastOp == null || lastOp.intValue() == MAP_COPY_OPERATION;
     }
+	
 
     private Map<String, String> duplicateAndInsertNewMap(Map<String, String> oldMap) {
         Map<String, String> newMap = Collections.synchronizedMap(new HashMap<String, String>());
@@ -83,6 +98,7 @@ public class LogbackMDCAdapter implements MDCAdapter {
         copyOnThreadLocal.set(newMap);
         return newMap;
     }
+	
 
     /**
      * Put a context value (the <code>val</code> parameter) as identified with the
@@ -110,6 +126,7 @@ public class LogbackMDCAdapter implements MDCAdapter {
             oldMap.put(key, val);
         }
     }
+	
 
     /**
      * Remove the the context identified by the <code>key</code> parameter.
@@ -132,6 +149,7 @@ public class LogbackMDCAdapter implements MDCAdapter {
             oldMap.remove(key);
         }
     }
+	
 
     /**
      * Clear all entries in the MDC.
@@ -140,6 +158,7 @@ public class LogbackMDCAdapter implements MDCAdapter {
         lastOperation.set(WRITE_OPERATION);
         copyOnThreadLocal.remove();
     }
+	
 
     /**
      * Get the context identified by the <code>key</code> parameter.
@@ -153,6 +172,7 @@ public class LogbackMDCAdapter implements MDCAdapter {
             return null;
         }
     }
+	
 
     /**
      * Get the current thread's MDC as a map. This method is intended to be used
@@ -162,20 +182,22 @@ public class LogbackMDCAdapter implements MDCAdapter {
         lastOperation.set(MAP_COPY_OPERATION);
         return copyOnThreadLocal.get();
     }
+	
 
     /**
      * Returns the keys in the MDC as a {@link Set}. The returned value can be
      * null.
      */
-    public Set<String> getKeys() {
-        Map<String, String> map = getPropertyMap();
+    // START getKeys({FormalParametersInternal})//public Set<String> getKeys() {
+    Map<String, String> map = getPropertyMap();
 
-        if (map != null) {
-            return map.keySet();
-        } else {
-            return null;
-        }
+    if (map != null) {
+      return map.keySet();
+    } else {
+      return null;
     }
+// END getKeys({FormalParametersInternal})//  }
+	
 
     /**
      * Return a copy of the current thread's context map. Returned value may be
@@ -189,6 +211,29 @@ public class LogbackMDCAdapter implements MDCAdapter {
             return new HashMap<String, String>(hashMap);
         }
     }
+	
+
+  
+	
+
+    // The internal map is copied so as
+
+    // We wish to avoid unnecessarily copying of the map. To ensure
+    // efficient/timely copying, we have a variable keeping track of the last
+    // operation. A copy is necessary on 'put' or 'remove' but only if the last
+    // operation was a 'get'. Get operations never necessitate a copy nor
+    // successive 'put/remove' operations, only a get followed by a 'put/remove'
+    // requires copying the map.
+    // See http://jira.qos.ch/browse/LOGBACK-620 for the original discussion.
+
+    // We no longer use CopyOnInheritThreadLocal in order to solve LBCLASSIC-183
+    // Initially the contents of the thread local in parent and child threads
+    // reference the same map. However, as soon as a thread invokes the put()
+    // method, the maps diverge as they should.
+    final ThreadLocal<Map<String, String>> copyOnThreadLocal = new ThreadLocal<Map<String, String>>();
+	
+    private static final int MAP_COPY_OPERATION = 2;
+	
 
     public void setContextMap(Map<String, String> contextMap) {
         lastOperation.set(WRITE_OPERATION);
@@ -199,4 +244,5 @@ public class LogbackMDCAdapter implements MDCAdapter {
         // the newMap replaces the old one for serialisation's sake
         copyOnThreadLocal.set(newMap);
     }
+
 }

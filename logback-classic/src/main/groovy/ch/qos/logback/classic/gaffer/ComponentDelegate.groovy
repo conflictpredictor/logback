@@ -36,16 +36,15 @@ class ComponentDelegate extends ContextAwareBase {
   String getLabelFistLetterInUpperCase() { getLabel()[0].toUpperCase() + getLabel().substring(1) }
 
   void methodMissing(String name, def args) {
-    NestingType nestingType = PropertyUtil.nestingType(component, name, null);
+    NestingType nestingType = PropertyUtil.nestingType(component, name);
     if (nestingType == NestingType.NA) {
-      addError("${getLabelFistLetterInUpperCase()} ${getComponentName()} of type [${component.getClass().canonicalName}] has no appplicable [${name}] property.")
+      addError("${getLabelFistLetterInUpperCase()} ${getComponentName()} of type [${component.getClass().canonicalName}] has no appplicable [${name}] property ")
       return;
     }
 
     String subComponentName
     Class clazz
     Closure closure
-    
     (subComponentName, clazz, closure) = analyzeArgs(args)
     if (clazz != null) {
       Object subComponent = clazz.newInstance()
@@ -87,7 +86,7 @@ class ComponentDelegate extends ContextAwareBase {
   }
 
   void propertyMissing(String name, def value) {
-    NestingType nestingType = PropertyUtil.nestingType(component, name, value);
+    NestingType nestingType = PropertyUtil.nestingType(component, name);
     if (nestingType == NestingType.NA) {
       addError("${getLabelFistLetterInUpperCase()} ${getComponentName()} of type [${component.getClass().canonicalName}] has no appplicable [${name}] property ")
       return;

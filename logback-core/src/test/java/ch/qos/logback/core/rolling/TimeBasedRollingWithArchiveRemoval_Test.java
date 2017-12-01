@@ -11,584 +11,491 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.rolling;
+package ch.qos.logback.core.rolling; 
 
-import static ch.qos.logback.core.CoreConstants.DAILY_DATE_PATTERN;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+ 
+ 
+ 
+
+import ch.qos.logback.core.rolling.helper.RollingCalendar;
+ 
+ 
+ 
+import ch.qos.logback.core.util.StatusPrinter;
+ 
+
+import org.junit.Before;
+ 
+import org.junit.Test;
+ 
 
 import java.io.File;
+ 
 import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+ 
+ 
+ 
 import java.util.regex.Matcher;
+ 
 import java.util.regex.Pattern;
+ 
 
-import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static ch.qos.logback.core.CoreConstants.DAILY_DATE_PATTERN;
+ 
+import static org.junit.Assert.assertEquals;
+ 
+import static org.junit.Assert.assertTrue;
+ 
+import java.util.ArrayList; 
+import java.util.Calendar; 
+import java.util.Date; 
+import java.util.HashSet; 
+import java.util.List; 
+import java.util.Set; 
 
-import ch.qos.logback.core.CoreConstants;
-import ch.qos.logback.core.pattern.SpacePadder;
-import ch.qos.logback.core.rolling.helper.RollingCalendar;
-import ch.qos.logback.core.status.StatusChecker;
-import ch.qos.logback.core.util.FileSize;
-import ch.qos.logback.core.util.FixedRateInvocationGate;
-import ch.qos.logback.core.util.StatusPrinter;
-
-public class TimeBasedRollingWithArchiveRemoval_Test extends ScaffoldingForRollingTests {
+public
+  class
+  TimeBasedRollingWithArchiveRemoval_Test  extends ScaffoldingForRollingTests
+ {
+	
     String MONTHLY_DATE_PATTERN = "yyyy-MM";
+
+	
     String MONTHLY_CRONOLOG_DATE_PATTERN = "yyyy/MM";
+
+	
     final String DAILY_CRONOLOG_DATE_PATTERN = "yyyy/MM/dd";
 
+	
+
     RollingFileAppender<Object> rfa = new RollingFileAppender<Object>();
+
+	
     TimeBasedRollingPolicy<Object> tbrp = new TimeBasedRollingPolicy<Object>();
+
+	
 
     // by default tbfnatp is an instance of DefaultTimeBasedFileNamingAndTriggeringPolicy
     TimeBasedFileNamingAndTriggeringPolicy<Object> tbfnatp = new DefaultTimeBasedFileNamingAndTriggeringPolicy<Object>();
 
-    StatusChecker checker = new StatusChecker(context);
+	
 
-    static long MILLIS_IN_MINUTE = 60 * 1000;
-    static long MILLIS_IN_HOUR = 60 * MILLIS_IN_MINUTE;
-    static long MILLIS_IN_DAY = 24 * MILLIS_IN_HOUR;
-    static long MILLIS_IN_MONTH = (long) ((365.242199 / 12) * MILLIS_IN_DAY);
-    static int MONTHS_IN_YEAR = 12;
+    long MILLIS_IN_MINUTE = 60 * 1000;
 
-    // Wed Mar 23 23:07:05 CET 2016
-    static final long WED_2016_03_23_T_230705_CET = 1458770825333L;
-    static final long THU_2016_03_17_T_230330_CET = 1458252210975L;
+	
+    long MILLIS_IN_HOUR = 60 * MILLIS_IN_MINUTE;
+
+	
+    long MILLIS_IN_DAY = 24 * MILLIS_IN_HOUR;
+
+	
+    long MILLIS_IN_MONTH = (long) ((365.242199 / 12) * MILLIS_IN_DAY);
+
+	
+    int MONTHS_IN_YEAR = 12;
+
+	
 
     int slashCount = 0;
-    int ticksPerPeriod = 216;
 
-    ConfigParameters cp; // initialized in setup
-    FixedRateInvocationGate fixedRateInvocationGate = new FixedRateInvocationGate(ticksPerPeriod / 2);
+	
 
-    @Before
-    public void setUp() {
-        super.setUp();
-        this.cp = new ConfigParameters(currentTime);
+    // START setUp({FormalParametersInternal})//@Before
+  public void setUp() {
+    super.setUp();
+// END setUp({FormalParametersInternal})//  }
+	
+
+    // START computeSlashCount(String-String)//private int computeSlashCount(String datePattern) {
+    if (datePattern == null)
+      return 0;
+    else {
+      int count = 0;
+      for (int i = 0; i < datePattern.length(); i++) {
+        char c = datePattern.charAt(i);
+        if (c == '/')
+          count++;
+      }
+      return count;
     }
-
-    private int computeSlashCount(String datePattern) {
-        if (datePattern == null)
-            return 0;
-        else {
-            int count = 0;
-            for (int i = 0; i < datePattern.length(); i++) {
-                char c = datePattern.charAt(i);
-                if (c == '/')
-                    count++;
-            }
-            return count;
-        }
-    }
+// END computeSlashCount(String-String)//  }
+	
 
     // test that the number of files at the end of the test is same as the expected number taking into account end dates
     // near the beginning of a new year. This test has been run in a loop with start date varying over a two years
     // with success.
-    @Test
-    public void monthlyRolloverOverManyPeriods() {
-        this.slashCount = computeSlashCount(MONTHLY_CRONOLOG_DATE_PATTERN);
-        int maxHistory = 2;
-        int simulatedNumberOfPeriods = 30;
-        String fileNamePattern = randomOutputDir + "/%d{" + MONTHLY_CRONOLOG_DATE_PATTERN + "}/clean.txt.zip";
+    // START monthlyRolloverOverManyPeriods({FormalParametersInternal})//@Test
+  public void monthlyRolloverOverManyPeriods() {
 
-        cp.maxHistory(maxHistory).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(simulatedNumberOfPeriods).periodDurationInMillis(MILLIS_IN_MONTH);
+    slashCount = computeSlashCount(MONTHLY_CRONOLOG_DATE_PATTERN);
+    int numPeriods = 40;
+    int maxHistory = 2;
+    String fileNamePattern = randomOutputDir + "/%d{" + MONTHLY_CRONOLOG_DATE_PATTERN + "}/clean.txt.zip";
 
-        long startTime = currentTime;
-        long endTime = logOverMultiplePeriods(cp);
-        System.out.println("randomOutputDir:" + randomOutputDir);
-        System.out.println("start:" + startTime + ", end=" + endTime);
-        int differenceInMonths = RollingCalendar.diffInMonths(startTime, endTime);
-        System.out.println("differenceInMonths:" + differenceInMonths);
-        Calendar startTimeAsCalendar = Calendar.getInstance();
-        startTimeAsCalendar.setTimeInMillis(startTime);
-        int indexOfStartPeriod = startTimeAsCalendar.get(Calendar.MONTH);
-        boolean withExtraFolder = extraFolder(differenceInMonths, MONTHS_IN_YEAR, indexOfStartPeriod, maxHistory);
+    long startTime = currentTime;
+    long endTime = logOverMultiplePeriodsContinuously(currentTime, fileNamePattern, MILLIS_IN_MONTH, maxHistory,
+            numPeriods);
+    System.out.println("randomOutputDir:" + randomOutputDir);
+    System.out.println("start:" + startTime + ", end=" + endTime);
+    int differenceInMonths = RollingCalendar.diffInMonths(startTime, endTime);
+    System.out.println("differenceInMonths:" + differenceInMonths);
+    Calendar startTimeAsCalendar = Calendar.getInstance();
+    startTimeAsCalendar.setTimeInMillis(startTime);
+    int indexOfStartPeriod = startTimeAsCalendar.get(Calendar.MONTH);
+    boolean withExtraFolder = extraFolder(differenceInMonths, MONTHS_IN_YEAR, indexOfStartPeriod, maxHistory);
 
-        checkFileCount(expectedCountWithFolders(maxHistory, withExtraFolder));
-    }
+    check(expectedCountWithFolders(maxHistory, withExtraFolder));
+// END monthlyRolloverOverManyPeriods({FormalParametersInternal})//  }
+	
 
-    long generateDailyRollover(ConfigParameters cp) {
-        this.slashCount = computeSlashCount(DAILY_DATE_PATTERN);
-        cp.fileNamePattern(randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt");
-        return logOverMultiplePeriods(cp);
-    }
+    // START generateDailyRollover(long-long-int-int-int-int-int-int-int-int)//void generateDailyRollover(long now, int maxHistory, int simulatedNumberOfPeriods, int startInactivity,
+                             int numInactivityPeriods) {
+    slashCount = computeSlashCount(DAILY_DATE_PATTERN);
+    logOverMultiplePeriods(now, randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt", MILLIS_IN_DAY, maxHistory, simulatedNumberOfPeriods, startInactivity, numInactivityPeriods);
+    check(expectedCountWithoutFoldersWithInactivity(maxHistory, simulatedNumberOfPeriods, startInactivity + numInactivityPeriods));
+// END generateDailyRollover(long-long-int-int-int-int-int-int-int-int)//  }
+	
 
-    long generateDailyRolloverAndCheckFileCount(ConfigParameters cp) {
-        long millisAtEnd = generateDailyRollover(cp);
-        int periodBarriersCrossed = computeCrossedDayBarriers(currentTime, millisAtEnd);
-        System.out.println("**** periodBarriersCrossed=" + periodBarriersCrossed);
-        checkFileCount(expectedCountWithoutFoldersWithInactivity(cp.maxHistory, periodBarriersCrossed, cp.startInactivity + cp.numInactivityPeriods));
-        return millisAtEnd;
-    }
-
-    @Test
-    public void checkCrossedPeriodsWithDSTBarrier() {
-        long SAT_2016_03_26_T_230705_CET = WED_2016_03_23_T_230705_CET + 3 * CoreConstants.MILLIS_IN_ONE_DAY;
-        System.out.println("SAT_2016_03_26_T_230705_CET " + new Date(SAT_2016_03_26_T_230705_CET));
-        long MON_2016_03_28_T_000705_CET = SAT_2016_03_26_T_230705_CET + CoreConstants.MILLIS_IN_ONE_DAY;
-        System.out.println("MON_2016_03_28_T_000705_CET " + new Date(MON_2016_03_28_T_000705_CET));
-
-        int result = computeCrossedDayBarriers(SAT_2016_03_26_T_230705_CET, MON_2016_03_28_T_000705_CET, "CET");
-        assertEquals(2, result);
-    }
-
-    private int computeCrossedDayBarriers(long currentTime, long millisAtEnd) {
-        return computeCrossedDayBarriers(currentTime, millisAtEnd, null);
-    }
-
-    private int computeCrossedDayBarriers(long currentTime, long millisAtEnd, String timeZoneID) {
-        DateTimeZone dateTimeZone = DateTimeZone.getDefault();
-        if (timeZoneID != null) {
-            dateTimeZone = DateTimeZone.forID(timeZoneID);
-        }
-        LocalDate startInstant = new LocalDate(currentTime, dateTimeZone);
-        LocalDate endInstant = new LocalDate(millisAtEnd, dateTimeZone);
-        Days days = Days.daysBetween(startInstant, endInstant);
-        return days.getDays();
-    }
-
-    @Test
-    public void checkCleanupForBasicDailyRollover() {
-        cp.maxHistory(20).simulatedNumberOfPeriods(20 * 3).startInactivity(0).numInactivityPeriods(0);
-        generateDailyRolloverAndCheckFileCount(cp);
-    }
-
-    @Test
-    public void checkCleanupForBasicDailyRolloverWithSizeCap() {
-        long bytesOutputPerPeriod = 15984;
-        int sizeInUnitsOfBytesPerPeriod = 2;
-
-        cp.maxHistory(5).simulatedNumberOfPeriods(10).sizeCap(sizeInUnitsOfBytesPerPeriod * bytesOutputPerPeriod + 1000);
-        generateDailyRollover(cp);
-        StatusPrinter.print(context);
-        checkFileCount(sizeInUnitsOfBytesPerPeriod + 1);
-    }
-
-    @Test
-    public void checkThatSmallTotalSizeCapLeavesAtLeastOneArhcive() {
-        long WED_2016_03_23_T_131345_CET = WED_2016_03_23_T_230705_CET - 10 * CoreConstants.MILLIS_IN_ONE_HOUR;
-
-        // long bytesOutputPerPeriod = 15984;
-
-        cp = new ConfigParameters(WED_2016_03_23_T_131345_CET);
-        final int verySmallCapSize = 1;
-        cp.maxHistory(5).simulatedNumberOfPeriods(3).sizeCap(verySmallCapSize);
-        generateDailyRollover(cp);
-        StatusPrinter.print(context);
-        checkFileCountAtMost(1);
-       
-    }
-
-    @Test
-    public void checkCleanupForBasicDailyRolloverWithMaxSize() {
-        cp.maxHistory(6).simulatedNumberOfPeriods(30).startInactivity(10).numInactivityPeriods(1);
-        generateDailyRolloverAndCheckFileCount(cp);
-    }
+    // START basicDailyRollover({FormalParametersInternal})//@Test
+  public void basicDailyRollover() {
+    int maxHistory = 20;
+    int simulatedNumberOfPeriods = 20 * 3;
+    int startInactivity = 0;
+    int numInactivityPeriods = 0;
+    generateDailyRollover(currentTime, maxHistory, simulatedNumberOfPeriods, startInactivity, numInactivityPeriods);
+// END basicDailyRollover({FormalParametersInternal})//  }
+	
 
     // Since the duration of a month (in seconds) varies from month to month, tests with inactivity period must
     // be conducted with daily rollover not monthly
-    @Test
-    public void checkCleanupForDailyRollover_15Periods() {
-        cp.maxHistory(5).simulatedNumberOfPeriods(15).startInactivity(6).numInactivityPeriods(3);
-        generateDailyRolloverAndCheckFileCount(cp);
-    }
+    // START dailyRollover15({FormalParametersInternal})//@Test
+  public void dailyRollover15() {
+    int maxHistory = 5;
+    int simulatedNumberOfPeriods = 15;
+    int startInactivity = 6;
+    int numInactivityPeriods = 3;
+    generateDailyRollover(currentTime, maxHistory, simulatedNumberOfPeriods, startInactivity, numInactivityPeriods);
+// END dailyRollover15({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void checkCleanupForDailyRolloverWithInactivity_30Periods() {
-        // / -------
-        cp.maxHistory(2).simulatedNumberOfPeriods(30).startInactivity(3).numInactivityPeriods(1);
-        generateDailyRolloverAndCheckFileCount(cp);
-    }
+    // START dailyRolloverWithInactivity70({FormalParametersInternal})//@Test
+  public void dailyRolloverWithInactivity70() {
+    int maxHistory = 6;
+    int simulatedNumberOfPeriods = 70;
+    int startInactivity = 30;
+    int numInactivityPeriods = 1;
+    generateDailyRollover(currentTime, maxHistory, simulatedNumberOfPeriods, startInactivity, numInactivityPeriods);
+// END dailyRolloverWithInactivity70({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void checkCleanupForDailyRolloverWithInactivity_10Periods() {
-        this.currentTime = THU_2016_03_17_T_230330_CET;
-        cp.maxHistory(6).simulatedNumberOfPeriods(10).startInactivity(2).numInactivityPeriods(2);
-        generateDailyRolloverAndCheckFileCount(cp);
-    }
+    // START dailyRolloverWithInactivity10({FormalParametersInternal})//@Test
+  public void dailyRolloverWithInactivity10() {
+    int maxHistory = 6;
+    int simulatedNumberOfPeriods = 10;
+    int startInactivity = 3;
+    int numInactivityPeriods = 4;
+    generateDailyRollover(currentTime, maxHistory, simulatedNumberOfPeriods, startInactivity, numInactivityPeriods);
+// END dailyRolloverWithInactivity10({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void checkCleanupForDailyRolloverWithSecondPhase() {
-        slashCount = computeSlashCount(DAILY_DATE_PATTERN);
-        int maxHistory = 5;
-        String fileNamePattern = randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt";
+    // START dailyRolloverWithSecondPhase({FormalParametersInternal})//@Test
+  public void dailyRolloverWithSecondPhase() {
+    slashCount = computeSlashCount(DAILY_DATE_PATTERN);
+    int maxHistory = 5;
+    long endTime = logOverMultiplePeriodsContinuously(currentTime, randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt",
+            MILLIS_IN_DAY, maxHistory, maxHistory * 2);
+    logOverMultiplePeriodsContinuously(endTime + MILLIS_IN_DAY * 10, randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt",
+            MILLIS_IN_DAY, maxHistory, maxHistory);
+    check(expectedCountWithoutFolders(maxHistory));
+// END dailyRolloverWithSecondPhase({FormalParametersInternal})//  }
+	
 
-        ConfigParameters cp0 = new ConfigParameters(currentTime).maxHistory(maxHistory).fileNamePattern(fileNamePattern)
-                        .simulatedNumberOfPeriods(maxHistory * 2);
-        long endTime = logOverMultiplePeriods(cp0);
+    // START dailyCronologRollover({FormalParametersInternal})//@Test
+  public void dailyCronologRollover() {
+    slashCount = computeSlashCount(DAILY_CRONOLOG_DATE_PATTERN);
+    logOverMultiplePeriodsContinuously(currentTime, randomOutputDir + "/%d{" + DAILY_CRONOLOG_DATE_PATTERN + "}/clean.txt.zip",
+            MILLIS_IN_DAY, 8, 8 * 3);
+    int expectedDirMin = 9 + slashCount;
+    int expectDirMax = expectedDirMin + 1 + 1;
+    expectedFileAndDirCount(9, expectedDirMin, expectDirMax);
+// END dailyCronologRollover({FormalParametersInternal})//  }
+	
 
-        ConfigParameters cp1 = new ConfigParameters(endTime + MILLIS_IN_DAY * 10).maxHistory(maxHistory).fileNamePattern(fileNamePattern)
-                        .simulatedNumberOfPeriods(maxHistory);
-        logOverMultiplePeriods(cp1);
-        checkFileCount(expectedCountWithoutFolders(maxHistory));
-    }
+    // START dailySizeBasedRollover({FormalParametersInternal})//@Test
+  public void dailySizeBasedRollover() {
+    SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
+    sizeAndTimeBasedFNATP.setMaxFileSize("10000");
+    tbfnatp = sizeAndTimeBasedFNATP;
+    slashCount = computeSlashCount(DAILY_DATE_PATTERN);
+    logOverMultiplePeriodsContinuously(currentTime, randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}-clean.%i.zip", MILLIS_IN_DAY,
+            5, 5 * 4);
+    checkPatternCompliance(5 + 1 + slashCount, "\\d{4}-\\d{2}-\\d{2}-clean(\\.\\d)(.zip)?");
+// END dailySizeBasedRollover({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void dailyRolloverWithCronologPattern() {
-        this.slashCount = computeSlashCount(DAILY_CRONOLOG_DATE_PATTERN);
-        String fileNamePattern = randomOutputDir + "/%d{" + DAILY_CRONOLOG_DATE_PATTERN + "}/clean.txt.zip";
-        cp.maxHistory(8).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(8 * 3);
-        logOverMultiplePeriods(cp);
-        int expectedDirMin = 9 + slashCount;
-        int expectDirMax = expectedDirMin + 1 + 1;
-        expectedFileAndDirCount(9, expectedDirMin, expectDirMax);
-    }
+    // START dailyChronologSizeBasedRollover({FormalParametersInternal})//@Test
+  public void dailyChronologSizeBasedRollover() {
+    SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
+    sizeAndTimeBasedFNATP.setMaxFileSize("10000");
+    tbfnatp = sizeAndTimeBasedFNATP;
+    slashCount = 1;
+    logOverMultiplePeriodsContinuously(currentTime, randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}/clean.%i.zip", MILLIS_IN_DAY,
+            5, 5 * 4);
+    checkDirPatternCompliance(6);
+// END dailyChronologSizeBasedRollover({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void dailySizeBasedRolloverWithoutCap() {
-        SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
-        sizeAndTimeBasedFNATP.invocationGate = fixedRateInvocationGate;
+    // START dailyChronologSizeBasedRolloverWithSecondPhase({FormalParametersInternal})//@Test
+  public void dailyChronologSizeBasedRolloverWithSecondPhase() {
+    SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
+    sizeAndTimeBasedFNATP.setMaxFileSize("10000");
+    tbfnatp = sizeAndTimeBasedFNATP;
+    slashCount = 1;
+    int maxHistory = 5;
+    int simulatedNumberOfPeriods = maxHistory * 4;
+    long endTime = logOverMultiplePeriodsContinuously(currentTime, randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}/clean.%i", MILLIS_IN_DAY,
+            maxHistory, 3);
+    logOverMultiplePeriodsContinuously(endTime + MILLIS_IN_DAY * 7, randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}/clean.%i",
+            MILLIS_IN_DAY, maxHistory, simulatedNumberOfPeriods);
+    checkDirPatternCompliance(maxHistory + 1);
+// END dailyChronologSizeBasedRolloverWithSecondPhase({FormalParametersInternal})//  }
+	
 
-        sizeAndTimeBasedFNATP.setMaxFileSize(new FileSize(10000));
-        tbfnatp = sizeAndTimeBasedFNATP;
-        this.slashCount = computeSlashCount(DAILY_DATE_PATTERN);
-        String fileNamePattern = randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}-clean.%i.zip";
-        cp.maxHistory(5).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(5 * 4);
-        logOverMultiplePeriods(cp);
-        checkPatternCompliance(5 + 1 + slashCount, "\\d{4}-\\d{2}-\\d{2}-clean(\\.\\d)(.zip)?");
-    }
-
-    @Test
-    public void dailySizeBasedRolloverWithSizeCap() {
-        SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
-        sizeAndTimeBasedFNATP.invocationGate = new FixedRateInvocationGate(ticksPerPeriod / 8);
-        long bytesPerPeriod = 17000;
-        long fileSize = (bytesPerPeriod) / 5;
-        int expectedFileCount = 10;
-        long sizeCap = expectedFileCount * fileSize;
-        sizeAndTimeBasedFNATP.setMaxFileSize(new FileSize(fileSize));
-        tbfnatp = sizeAndTimeBasedFNATP;
-        this.slashCount = computeSlashCount(DAILY_DATE_PATTERN);
-
-        // 2016-03-05 00:14:39 CET
-        long simulatedTime = 1457133279186L;
-        ConfigParameters params = new ConfigParameters(simulatedTime);
-        String fileNamePattern = randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}-clean.%i";
-        params.maxHistory(60).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(10).sizeCap(sizeCap);
-        logOverMultiplePeriods(params);
-
-        List<File> foundFiles = findFilesByPattern("\\d{4}-\\d{2}-\\d{2}-clean(\\.\\d)");
-        Collections.sort(foundFiles, new Comparator<File>() {
-            public int compare(File f0, File f1) {
-                String s0 = f0.getName().toString();
-                String s1 = f1.getName().toString();
-                return s0.compareTo(s1);
-            }
-        });
-        System.out.print(foundFiles);
-        StatusPrinter.print(context);
-        checkFileCount(expectedFileCount - 1);
-    }
-
-    @Test
-    public void dailyChronologSizeBasedRollover() {
-        SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
-        sizeAndTimeBasedFNATP.setMaxFileSize(new FileSize(10000));
-        sizeAndTimeBasedFNATP.invocationGate = fixedRateInvocationGate;
-        tbfnatp = sizeAndTimeBasedFNATP;
-        slashCount = 1;
-        String fileNamePattern = randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}/clean.%i.zip";
-        cp.maxHistory(5).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(5 * 3);
-        logOverMultiplePeriods(cp);
-        checkDirPatternCompliance(6);
-    }
-
-    @Test
-    public void dailyChronologSizeBasedRolloverWithSecondPhase() {
-        SizeAndTimeBasedFNATP<Object> sizeAndTimeBasedFNATP = new SizeAndTimeBasedFNATP<Object>();
-        sizeAndTimeBasedFNATP.setMaxFileSize(new FileSize(10000));
-        sizeAndTimeBasedFNATP.invocationGate = fixedRateInvocationGate;
-        tbfnatp = sizeAndTimeBasedFNATP;
-        this.slashCount = 1;
-        String fileNamePattern = randomOutputDir + "/%d{" + DAILY_DATE_PATTERN + "}/clean.%i";
-        int maxHistory = 5;
-        cp.maxHistory(maxHistory).fileNamePattern(fileNamePattern).simulatedNumberOfPeriods(3);
-        long endTime = logOverMultiplePeriods(cp);
-
-        int simulatedNumberOfPeriods = maxHistory * 4;
-        ConfigParameters cp1 = new ConfigParameters(endTime + MILLIS_IN_DAY * 7).maxHistory(maxHistory).fileNamePattern(fileNamePattern)
-                        .simulatedNumberOfPeriods(simulatedNumberOfPeriods);
-        logOverMultiplePeriods(cp1);
-        checkDirPatternCompliance(maxHistory + 1);
-    }
-
-    void logTwiceAndStop(long currentTime, String fileNamePattern, int maxHistory) {
-        ConfigParameters params = new ConfigParameters(currentTime).fileNamePattern(fileNamePattern).maxHistory(maxHistory);
-        buildRollingFileAppender(params, DO_CLEAN_HISTORY_ON_START);
-        rfa.doAppend("Hello ----------------------------------------------------------" + new Date(currentTime));
-        currentTime += MILLIS_IN_DAY / 2;
-        add(tbrp.compressionFuture);
-        add(tbrp.cleanUpFuture);
-        waitForJobsToComplete();
-        tbrp.timeBasedFileNamingAndTriggeringPolicy.setCurrentTime(currentTime);
-        rfa.doAppend("Hello ----------------------------------------------------------" + new Date(currentTime));
-        rfa.stop();
-    }
+    // START logOncePeriod(long-long-String-String-int-int)//void logOncePeriod(long currentTime, String fileNamePattern, int maxHistory) {
+    buildRollingFileAppender(currentTime, fileNamePattern, maxHistory, DO_CLEAN_HISTORY_ON_START);
+    rfa.doAppend("Hello ----------------------------------------------------------" + new Date(currentTime));
+    rfa.stop();
+// END logOncePeriod(long-long-String-String-int-int)//  }
+	
 
     @Test
     public void cleanHistoryOnStart() {
-        long simulatedTime = WED_2016_03_23_T_230705_CET;
-        System.out.println(new Date(simulatedTime));
-
+        long now = this.currentTime;
         String fileNamePattern = randomOutputDir + "clean-%d{" + DAILY_DATE_PATTERN + "}.txt";
         int maxHistory = 3;
         for (int i = 0; i <= 5; i++) {
-            logTwiceAndStop(simulatedTime, fileNamePattern, maxHistory);
-            simulatedTime += MILLIS_IN_DAY;
+            logOncePeriod(now, fileNamePattern, maxHistory);
+            now = now + MILLIS_IN_DAY;
         }
-        StatusPrinter.print(context);
-        checkFileCount(expectedCountWithoutFolders(maxHistory));
+        // StatusPrinter.print(context);
+        check(expectedCountWithoutFolders(maxHistory));
     }
+	
 
     @Test
     public void cleanHistoryOnStartWithDayPattern() {
-        long simulatedTime = WED_2016_03_23_T_230705_CET;
+        long now = this.currentTime;
         String fileNamePattern = randomOutputDir + "clean-%d{yyyy-MM-dd}.txt";
         int maxHistory = 3;
         for (int i = 0; i <= 5; i++) {
-            logTwiceAndStop(simulatedTime, fileNamePattern, maxHistory);
-            simulatedTime += MILLIS_IN_DAY;
+            logOncePeriod(now, fileNamePattern, maxHistory);
+            now = now + MILLIS_IN_DAY;
         }
         StatusPrinter.print(context);
-        checkFileCount(expectedCountWithoutFolders(maxHistory));
+        check(expectedCountWithoutFolders(maxHistory));
     }
+	
 
-    @Ignore
     @Test
-    // this test assumes a high degree of collisions in the archived files. Every 24 hours, the archive
-    // belonging to the previous day will be overwritten. Given that logback goes 14 days (336 hours) in history
-    // to clean files on start up, it is bound to delete more recent files. It is not logback's responsibility
-    // to cater for such degenerate cases.
     public void cleanHistoryOnStartWithHourPattern() {
         long now = this.currentTime;
         String fileNamePattern = randomOutputDir + "clean-%d{HH}.txt";
         int maxHistory = 3;
         for (int i = 0; i <= 5; i++) {
-            logTwiceAndStop(now, fileNamePattern, maxHistory);
+            logOncePeriod(now, fileNamePattern, maxHistory);
             now = now + MILLIS_IN_HOUR;
         }
-        StatusPrinter.print(context);
-        checkFileCount(expectedCountWithoutFolders(maxHistory));
+        // StatusPrinter.print(context);
+        check(expectedCountWithoutFolders(maxHistory));
     }
+	
 
-    int expectedCountWithoutFolders(int maxHistory) {
-        return maxHistory + 1;
-    }
+    // START expectedCountWithoutFolders(int-int)//int expectedCountWithoutFolders(int maxHistory) {
+    return maxHistory + 1;
+// END expectedCountWithoutFolders(int-int)//  }
+	
 
-    int expectedCountWithFolders(int maxHistory, boolean withExtraFolder) {
-        int numLogFiles = (maxHistory + 1);
-        int numLogFilesAndFolders = numLogFiles * 2;
-        int result = numLogFilesAndFolders + slashCount;
-        if (withExtraFolder)
-            result += 1;
-        return result;
-    }
+    // START expectedCountWithFolders(int-int-boolean-boolean)//int expectedCountWithFolders(int maxHistory, boolean withExtraFolder) {
+    int numLogFiles = (maxHistory + 1);
+    int numLogFilesAndFolders = numLogFiles * 2;
+    int result = numLogFilesAndFolders + slashCount;
+    if (withExtraFolder) result += 1;
+    return result;
+// END expectedCountWithFolders(int-int-boolean-boolean)//  }
+	
 
-    void buildRollingFileAppender(ConfigParameters cp, boolean cleanHistoryOnStart) {
-        rfa.setContext(context);
-        rfa.setEncoder(encoder);
-        tbrp.setContext(context);
-        tbrp.setFileNamePattern(cp.fileNamePattern);
-        tbrp.setMaxHistory(cp.maxHistory);
-        tbrp.setTotalSizeCap(new FileSize(cp.sizeCap));
-        tbrp.setParent(rfa);
-        tbrp.setCleanHistoryOnStart(cleanHistoryOnStart);
-        tbrp.timeBasedFileNamingAndTriggeringPolicy = tbfnatp;
-        tbrp.timeBasedFileNamingAndTriggeringPolicy.setCurrentTime(cp.simulatedTime);
-        tbrp.start();
-        rfa.setRollingPolicy(tbrp);
-        rfa.start();
-    }
+    // START buildRollingFileAppender(long-long-String-String-int-int-boolean-boolean)//void buildRollingFileAppender(long currentTime, String fileNamePattern, int maxHistory,
+                                boolean cleanHistoryOnStart) {
+    rfa.setContext(context);
+    rfa.setEncoder(encoder);
+    tbrp.setContext(context);
+    tbrp.setFileNamePattern(fileNamePattern);
+    tbrp.setMaxHistory(maxHistory);
+    tbrp.setParent(rfa);
+    tbrp.setCleanHistoryOnStart(cleanHistoryOnStart);
+    tbrp.timeBasedFileNamingAndTriggeringPolicy = tbfnatp;
+    tbrp.timeBasedFileNamingAndTriggeringPolicy.setCurrentTime(currentTime);
+    tbrp.start();
+    rfa.setRollingPolicy(tbrp);
+    rfa.start();
+// END buildRollingFileAppender(long-long-String-String-int-int-boolean-boolean)//  }
+	
 
     boolean DO_CLEAN_HISTORY_ON_START = true;
+
+	
     boolean DO_NOT_CLEAN_HISTORY_ON_START = false;
 
-    long logOverMultiplePeriods(ConfigParameters cp) {
+	
 
-        buildRollingFileAppender(cp, DO_NOT_CLEAN_HISTORY_ON_START);
+    // START logOverMultiplePeriodsContinuously(long-long-String-String-long-long-int-int-int-int)//long logOverMultiplePeriodsContinuously(long simulatedTime, String fileNamePattern, long periodDurationInMillis, int maxHistory,
+                                          int simulatedNumberOfPeriods) {
+    return logOverMultiplePeriods(simulatedTime, fileNamePattern, periodDurationInMillis, maxHistory,
+            simulatedNumberOfPeriods, 0, 0);
+// END logOverMultiplePeriodsContinuously(long-long-String-String-long-long-int-int-int-int)//  }
+	
 
-        int runLength = cp.simulatedNumberOfPeriods * ticksPerPeriod;
-        int startInactivityIndex = cp.startInactivity * ticksPerPeriod;
-        int endInactivityIndex = startInactivityIndex + cp.numInactivityPeriods * ticksPerPeriod;
-        long tickDuration = cp.periodDurationInMillis / ticksPerPeriod;
+    // START logOverMultiplePeriods(long-long-String-String-long-long-int-int-int-int-int-int-int-int)//long logOverMultiplePeriods(long simulatedTime, String fileNamePattern, long periodDurationInMillis, int maxHistory,
+                              int simulatedNumberOfPeriods, int startInactivity,
+                              int numInactivityPeriods) {
+    buildRollingFileAppender(simulatedTime, fileNamePattern, maxHistory, DO_NOT_CLEAN_HISTORY_ON_START);
+    int ticksPerPeriod = 512;
+    int runLength = simulatedNumberOfPeriods * ticksPerPeriod;
+    int startInactivityIndex = 1 + startInactivity * ticksPerPeriod;
+    int endInactivityIndex = startInactivityIndex + numInactivityPeriods * ticksPerPeriod;
+    long tickDuration = periodDurationInMillis / ticksPerPeriod;
 
-        System.out.println("cp.periodDurationInMillis=" + cp.periodDurationInMillis + ", tickDuration=:" + tickDuration + ", runLength=" + runLength);
-        for (int i = 0; i <= runLength; i++) {
-            Date currentDate = new Date(tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime());
-            if (i < startInactivityIndex || i > endInactivityIndex) {
-                StringBuilder sb = new StringBuilder("Hello");
-                String currentDateStr = currentDate.toString();
-                String iAsString = Integer.toString(i);
-                sb.append(currentDateStr);
-                SpacePadder.spacePad(sb, 66 + (3 - iAsString.length() - currentDateStr.length()));
-                sb.append(iAsString);
-                rfa.doAppend(sb.toString());
-            } 
+    for (int i = 0; i <= runLength; i++) {
+      if (i < startInactivityIndex || i > endInactivityIndex) {
+        rfa.doAppend("Hello ----------------------------------------------------------" + i);
+      }
+      tbrp.timeBasedFileNamingAndTriggeringPolicy.setCurrentTime(addTime(tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime(),
+              tickDuration));
+      add(tbrp.future);
+      waitForJobsToComplete();
+    }
+    rfa.stop();
+    return tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime();
+// END logOverMultiplePeriods(long-long-String-String-long-long-int-int-int-int-int-int-int-int)//  }
+	
 
-            tbrp.timeBasedFileNamingAndTriggeringPolicy.setCurrentTime(addTime(tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime(), tickDuration));
-            
-            add(tbrp.compressionFuture);
-            add(tbrp.cleanUpFuture);
-            waitForJobsToComplete();
+    // START extraFolder(int-int-int-int-int-int-int-int)//boolean extraFolder(int numPeriods, int periodsPerEra, int beginPeriod, int maxHistory) {
+    int valueOfLastMonth = ((beginPeriod) + numPeriods) % periodsPerEra;
+    return (valueOfLastMonth < maxHistory);
+// END extraFolder(int-int-int-int-int-int-int-int)//  }
+	
+
+    // START addTime(long-long-long-long)//long addTime(long time, long timeToWait) {
+    return time + timeToWait;
+// END addTime(long-long-long-long)//  }
+	
+
+    // START expectedFileAndDirCount(int-int-int-int-int-int)//void expectedFileAndDirCount(int expectedFileAndDirCount, int expectedDirCountMin, int expectedDirCountMax) {
+    File dir = new File(randomOutputDir);
+    List<File> fileList = new ArrayList<File>();
+    findFilesInFolderRecursivelyByPatterMatch(dir, fileList, "clean");
+    List<File> dirList = new ArrayList<File>();
+    findAllFoldersInFolderRecursively(dir, dirList);
+    String msg = "expectedDirCountMin=" + expectedDirCountMin + ", expectedDirCountMax=" + expectedDirCountMax + " actual value=" + dirList.size();
+    assertTrue(msg, expectedDirCountMin <= dirList.size() && dirList.size() <= expectedDirCountMax);
+// END expectedFileAndDirCount(int-int-int-int-int-int)//  }
+	
+
+    // START check(int-int)//void check(int expectedCount) {
+    File dir = new File(randomOutputDir);
+    List<File> fileList = new ArrayList<File>();
+    findAllDirsOrStringContainsFilesRecursively(dir, fileList, "clean");
+    assertEquals(expectedCount, fileList.size());
+// END check(int-int)//  }
+	
+
+    // START expectedCountWithoutFoldersWithInactivity(int-int-int-int-int-int)//int expectedCountWithoutFoldersWithInactivity(int maxHistory, int totalPeriods, int endOfInactivity) {
+    int availableHistory = (totalPeriods + 1) - endOfInactivity;
+    int actualHistory = Math.min(availableHistory, maxHistory + 1);
+    return actualHistory;
+// END expectedCountWithoutFoldersWithInactivity(int-int-int-int-int-int)//  }
+	
+
+    // START genericFindMatching(FileMatchFunction-FileMatchFunction-File-File-List<File>-List<File>-String-String-boolean-boolean)//void genericFindMatching(final FileMatchFunction matchFunc, File dir, List<File> fileList, final String pattern, boolean includeDirs) {
+    if (dir.isDirectory()) {
+      File[] matchArray = dir.listFiles(new FileFilter() {
+        public boolean accept(File f) {
+          return f.isDirectory() || matchFunc.match(f, pattern);
         }
-        
-        
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        rfa.stop();
+      });
+      for (File f : matchArray) {
+        if (f.isDirectory()) {
+          if (includeDirs) fileList.add(f);
+          genericFindMatching(matchFunc, f, fileList, pattern, includeDirs);
+        } else
+          fileList.add(f);
+      }
+    }
+// END genericFindMatching(FileMatchFunction-FileMatchFunction-File-File-List<File>-List<File>-String-String-boolean-boolean)//  }
+	
 
-        System.out.println("Current time at end of loop: "+new Date(tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime()));
-        return tbrp.timeBasedFileNamingAndTriggeringPolicy.getCurrentTime();
-    }
+    // START findAllFoldersInFolderRecursively(File-File-List<File>-List<File>)//private void findAllFoldersInFolderRecursively(File dir, List<File> fileList) {
+    FileMatchFunction alwaysFalse = new FileMatchFunction() {
+      public boolean match(File f, String pattern) {
+        return false;
+      }
+    };
+    genericFindMatching(alwaysFalse, dir, fileList, null, true);
+// END findAllFoldersInFolderRecursively(File-File-List<File>-List<File>)//  }
+	
 
-    void fillWithChar(StringBuffer sb, char c, int count) {
-        for (int i = 0; i < count; i++) {
-            sb.append(c);
-        }
-    }
+    // START findAllDirsOrStringContainsFilesRecursively(File-File-List<File>-List<File>-String-String)//private void findAllDirsOrStringContainsFilesRecursively(File dir, List<File> fileList, String pattern) {
+    FileMatchFunction matchFunction = new FileMatchFunction() {
+      public boolean match(File f, String pattern) {
+        return f.getName().contains(pattern);
+      }
+    };
+    genericFindMatching(matchFunction, dir, fileList, pattern, true);
+// END findAllDirsOrStringContainsFilesRecursively(File-File-List<File>-List<File>-String-String)//  }
+	
 
-    boolean extraFolder(int numPeriods, int periodsPerEra, int beginPeriod, int maxHistory) {
-        int valueOfLastMonth = ((beginPeriod) + numPeriods) % periodsPerEra;
-        return (valueOfLastMonth < maxHistory);
-    }
+    // START findFilesInFolderRecursivelyByPatterMatch(File-File-List<File>-List<File>-String-String)//void findFilesInFolderRecursivelyByPatterMatch(File dir, List<File> fileList, String pattern) {
+    FileMatchFunction matchByPattern = new FileMatchFunction() {
+      public boolean match(File f, String pattern) {
+        return f.getName().matches(pattern);
+      }
+    };
+    genericFindMatching(matchByPattern, dir, fileList, pattern, false);
+// END findFilesInFolderRecursivelyByPatterMatch(File-File-List<File>-List<File>-String-String)//  }
+	
 
-    long addTime(long time, long timeToWait) {
-        return time + timeToWait;
+    // START groupByClass(List<File>-List<File>-String-String)//Set<String> groupByClass(List<File> fileList, String regex) {
+    Pattern p = Pattern.compile(regex);
+    Set<String> set = new HashSet<String>();
+    for (File f : fileList) {
+      String n = f.getName();
+      Matcher m = p.matcher(n);
+      m.matches();
+      int begin = m.start(1);
+      String reduced = n.substring(0, begin);
+      set.add(reduced);
     }
+    return set;
+// END groupByClass(List<File>-List<File>-String-String)//  }
+	
 
-    void expectedFileAndDirCount(int expectedFileAndDirCount, int expectedDirCountMin, int expectedDirCountMax) {
-        File dir = new File(randomOutputDir);
-        List<File> fileList = new ArrayList<File>();
-        findFilesInFolderRecursivelyByPatterMatch(dir, fileList, "clean");
-        List<File> dirList = new ArrayList<File>();
-        findAllFoldersInFolderRecursively(dir, dirList);
-        String msg = "expectedDirCountMin=" + expectedDirCountMin + ", expectedDirCountMax=" + expectedDirCountMax + " actual value=" + dirList.size();
-        assertTrue(msg, expectedDirCountMin <= dirList.size() && dirList.size() <= expectedDirCountMax);
-    }
+    // START checkPatternCompliance(int-int-String-String)//void checkPatternCompliance(int expectedClassCount, String regex) {
+    File dir = new File(randomOutputDir);
+    List<File> fileList = new ArrayList<File>();
+    findFilesInFolderRecursivelyByPatterMatch(dir, fileList, regex);
+    Set<String> set = groupByClass(fileList, regex);
+    assertEquals(expectedClassCount, set.size());
+// END checkPatternCompliance(int-int-String-String)//  }
+	
 
-    void checkFileCount(int expectedCount) {
-        File dir = new File(randomOutputDir);
-        List<File> fileList = new ArrayList<File>();
-        findAllDirsOrStringContainsFilesRecursively(dir, fileList, "clean");
-        assertEquals(expectedCount, fileList.size());
+    // START checkDirPatternCompliance(int-int)//void checkDirPatternCompliance(int expectedClassCount) {
+    File dir = new File(randomOutputDir);
+    List<File> fileList = new ArrayList<File>();
+    findAllFoldersInFolderRecursively(dir, fileList);
+    for (File f : fileList) {
+      assertTrue(f.list().length >= 1);
     }
+    assertEquals(expectedClassCount, fileList.size());
+// END checkDirPatternCompliance(int-int)//  }
 
-    void checkFileCountAtMost(int expectedCount) {
-        File dir = new File(randomOutputDir);
-        List<File> fileList = new ArrayList<File>();
-        findAllDirsOrStringContainsFilesRecursively(dir, fileList, "clean");
-        int fileListSize = fileList.size();
-        
-        assertTrue("file list size "+ fileListSize+", expectedCount="+expectedCount, fileListSize <= expectedCount);
-    }
-    
-    int expectedCountWithoutFoldersWithInactivity(int maxHistory, int totalPeriods, int endOfInactivity) {
-        int availableHistory = (totalPeriods + 1) - endOfInactivity;
-        int actualHistory = Math.min(availableHistory, maxHistory + 1);
-        return actualHistory;
-    }
-
-    void genericFindMatching(final FileMatchFunction matchFunc, File dir, List<File> fileList, final String pattern, boolean includeDirs) {
-        if (dir.isDirectory()) {
-            File[] matchArray = dir.listFiles(new FileFilter() {
-                public boolean accept(File f) {
-                    return f.isDirectory() || matchFunc.match(f, pattern);
-                }
-            });
-            for (File f : matchArray) {
-                if (f.isDirectory()) {
-                    if (includeDirs)
-                        fileList.add(f);
-                    genericFindMatching(matchFunc, f, fileList, pattern, includeDirs);
-                } else
-                    fileList.add(f);
-            }
-        }
-    }
-
-    private void findAllFoldersInFolderRecursively(File dir, List<File> fileList) {
-        FileMatchFunction alwaysFalse = new FileMatchFunction() {
-            public boolean match(File f, String pattern) {
-                return false;
-            }
-        };
-        genericFindMatching(alwaysFalse, dir, fileList, null, true);
-    }
-
-    private void findAllDirsOrStringContainsFilesRecursively(File dir, List<File> fileList, String pattern) {
-        FileMatchFunction matchFunction = new FileMatchFunction() {
-            public boolean match(File f, String pattern) {
-                return f.getName().contains(pattern);
-            }
-        };
-        genericFindMatching(matchFunction, dir, fileList, pattern, true);
-    }
-
-    void findFilesInFolderRecursivelyByPatterMatch(File dir, List<File> fileList, String pattern) {
-        FileMatchFunction matchByPattern = new FileMatchFunction() {
-            public boolean match(File f, String pattern) {
-                return f.getName().matches(pattern);
-            }
-        };
-        genericFindMatching(matchByPattern, dir, fileList, pattern, false);
-    }
-
-    Set<String> groupByClass(List<File> fileList, String regex) {
-        Pattern p = Pattern.compile(regex);
-        Set<String> set = new HashSet<String>();
-        for (File f : fileList) {
-            String n = f.getName();
-            Matcher m = p.matcher(n);
-            m.matches();
-            int begin = m.start(1);
-            String reduced = n.substring(0, begin);
-            set.add(reduced);
-        }
-        return set;
-    }
-
-    void checkPatternCompliance(int expectedClassCount, String regex) {
-        Set<String> set = findFilesByPatternClass(regex);
-        assertEquals(expectedClassCount, set.size());
-    }
-
-    private List<File> findFilesByPattern(String regex) {
-        File dir = new File(randomOutputDir);
-        List<File> fileList = new ArrayList<File>();
-        findFilesInFolderRecursivelyByPatterMatch(dir, fileList, regex);
-        return fileList;
-    }
-
-    private Set<String> findFilesByPatternClass(String regex) {
-        List<File> fileList = findFilesByPattern(regex);
-        Set<String> set = groupByClass(fileList, regex);
-        return set;
-    }
-
-    void checkDirPatternCompliance(int expectedClassCount) {
-        File dir = new File(randomOutputDir);
-        List<File> fileList = new ArrayList<File>();
-        findAllFoldersInFolderRecursively(dir, fileList);
-        for (File f : fileList) {
-            assertTrue(f.list().length >= 1);
-        }
-        assertEquals(expectedClassCount, fileList.size());
-    }
 }

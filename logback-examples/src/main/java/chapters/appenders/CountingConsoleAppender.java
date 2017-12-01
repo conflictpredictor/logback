@@ -13,16 +13,18 @@
  */
 package chapters.appenders;
 
+import java.io.IOException;
+
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.Layout;
 
 public class CountingConsoleAppender extends AppenderBase<ILoggingEvent> {
     static int DEFAULT_LIMIT = 10;
     int counter = 0;
     int limit = DEFAULT_LIMIT;
 
-    Layout<ILoggingEvent> layout;
+    PatternLayoutEncoder encoder;
 
     public void setLimit(int limit) {
         this.limit = limit;
@@ -34,13 +36,15 @@ public class CountingConsoleAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     public void start() {
-        if (this.layout == null) {
-            addError("No layout set for the appender named [" + name + "].");
+        if (this.encoder == null) {
+            addError("No encoder set for the appender named [" + name + "].");
             return;
         }
 
-        String header = layout.getFileHeader();
-        System.out.print(header);
+        try {
+            encoder.init(System.out);
+        } catch (IOException e) {
+        }
         super.start();
     }
 
@@ -48,20 +52,21 @@ public class CountingConsoleAppender extends AppenderBase<ILoggingEvent> {
         if (counter >= limit) {
             return;
         }
-        // output the events as formatted by patternLayout
-        String eventStr = this.layout.doLayout(event);
-
-        System.out.print(eventStr);
+        // output the events as formatted by the wrapped layout
+        try {
+            this.encoder.doEncode(event);
+        } catch (IOException e) {
+        }
 
         // prepare for next event
         counter++;
     }
 
-    public Layout<ILoggingEvent> getLayout() {
-        return layout;
+    public PatternLayoutEncoder getEncoder() {
+        return encoder;
     }
 
-    public void setLayout(Layout<ILoggingEvent> layout) {
-        this.layout = layout;
+    public void setEncoder(PatternLayoutEncoder encoder) {
+        this.encoder = encoder;
     }
 }

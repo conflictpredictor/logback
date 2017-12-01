@@ -14,13 +14,17 @@
 package ch.qos.logback.access.pattern;
 
 import ch.qos.logback.access.spi.IAccessEvent;
-import ch.qos.logback.core.Context;
 import ch.qos.logback.core.pattern.Converter;
 import ch.qos.logback.core.pattern.ConverterUtil;
 import ch.qos.logback.core.pattern.PostCompileProcessor;
+import ch.qos.logback.core.Context;
 
 public class EnsureLineSeparation implements PostCompileProcessor<IAccessEvent> {
 
+    /**
+   * Add a line separator converter so that access event appears on a separate
+   * line.
+   */
     /**
      * Add a line separator converter so that access event appears on a separate
      * line.
@@ -29,7 +33,6 @@ public class EnsureLineSeparation implements PostCompileProcessor<IAccessEvent> 
     public void process(Context context, Converter<IAccessEvent> head) {
         if (head == null)
             throw new IllegalArgumentException("Empty converter chain");
-
         // if head != null, then tail != null as well
         Converter<IAccessEvent> tail = ConverterUtil.findTail(head);
         Converter<IAccessEvent> newLineConverter = new LineSeparatorConverter();

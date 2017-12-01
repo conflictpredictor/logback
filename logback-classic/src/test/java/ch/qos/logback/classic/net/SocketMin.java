@@ -50,9 +50,7 @@ public class SocketMin {
 
     static void init(String host, String portStr) {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        BasicConfigurator bc = new BasicConfigurator();
-        bc.setContext(root.getLoggerContext());
-        bc.configure(root.getLoggerContext());
+        BasicConfigurator.configure(root.getLoggerContext());
         try {
             int port = Integer.parseInt(portStr);
             logger.info("Creating socket appender (" + host + "," + port + ").");

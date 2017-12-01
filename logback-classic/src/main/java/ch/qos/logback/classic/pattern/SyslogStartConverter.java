@@ -11,71 +11,100 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.pattern;
+package ch.qos.logback.classic.pattern; 
 
 import java.net.InetAddress;
+ 
 import java.net.UnknownHostException;
+ 
 import java.text.SimpleDateFormat;
+ 
 import java.util.Calendar;
+ 
 import java.util.Date;
+ 
 import java.util.Locale;
+ 
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
+ 
 import ch.qos.logback.core.net.SyslogAppenderBase;
+ 
 
-public class SyslogStartConverter extends ClassicConverter {
+public
+  class
+  SyslogStartConverter  extends ClassicConverter
+ {
+	
 
     long lastTimestamp = -1;
+
+	
     String timesmapStr = null;
+
+	
     SimpleDateFormat simpleMonthFormat;
+
+	
     SimpleDateFormat simpleTimeFormat;
-    private final Calendar calendar = Calendar.getInstance(Locale.US);
+
+	
+    private final Calendar calendar  = Calendar.getInstance(Locale.US);
+
+	
 
     String localHostName;
+
+	
     int facility;
 
-    public void start() {
-        int errorCount = 0;
+	
 
-        String facilityStr = getFirstOption();
-        if (facilityStr == null) {
-            addError("was expecting a facility string as an option");
-            return;
-        }
-
-        facility = SyslogAppenderBase.facilityStringToint(facilityStr);
-
-        localHostName = getLocalHostname();
-        try {
-            // hours should be in 0-23, see also http://jira.qos.ch/browse/LBCLASSIC-48
-            simpleMonthFormat = new SimpleDateFormat("MMM", Locale.US);
-            simpleTimeFormat = new SimpleDateFormat("HH:mm:ss", Locale.US);
-        } catch (IllegalArgumentException e) {
-            addError("Could not instantiate SimpleDateFormat", e);
-            errorCount++;
-        }
-
-        if (errorCount == 0) {
-            super.start();
-        }
+    // START start({FormalParametersInternal})//public void start() {
+    int errorCount = 0;
+    
+    String facilityStr = getFirstOption();
+    if (facilityStr == null) {
+      addError("was expecting a facility string as an option");
+      return;
     }
 
-    public String convert(ILoggingEvent event) {
-        StringBuilder sb = new StringBuilder();
-
-        int pri = facility + LevelToSyslogSeverity.convert(event);
-
-        sb.append("<");
-        sb.append(pri);
-        sb.append(">");
-        sb.append(computeTimeStampString(event.getTimeStamp()));
-        sb.append(' ');
-        sb.append(localHostName);
-        sb.append(' ');
-
-        return sb.toString();
+    facility = SyslogAppenderBase.facilityStringToint(facilityStr);
+  
+    localHostName = getLocalHostname();
+    try {
+      // hours should be in 0-23, see also http://jira.qos.ch/browse/LBCLASSIC-48
+      simpleMonthFormat = new SimpleDateFormat("MMM", Locale.US);
+      simpleTimeFormat = new SimpleDateFormat("HH:mm:ss", Locale.US);
+    } catch (IllegalArgumentException e) {
+      addError("Could not instantiate SimpleDateFormat", e);
+      errorCount++;
     }
+
+    if(errorCount == 0) {
+      super.start();
+    }
+// END start({FormalParametersInternal})//  }
+	
+
+    // START convert(ILoggingEvent-ILoggingEvent)//public String convert(ILoggingEvent event) {
+    StringBuilder sb = new StringBuilder();
+
+    int pri = facility + LevelToSyslogSeverity.convert(event);
+  
+    sb.append("<");
+    sb.append(pri);
+    sb.append(">");
+    sb.append(computeTimeStampString(event.getTimeStamp()));
+    sb.append(' ');
+    sb.append(localHostName);
+    sb.append(' ');
+
+    return sb.toString();
+// END convert(ILoggingEvent-ILoggingEvent)//  }
+	
 
     /**
      * This method gets the network name of the machine we are running on.
@@ -83,15 +112,16 @@ public class SyslogStartConverter extends ClassicConverter {
      * cannot be found.
      * @return String the name of the local host
      */
-    public String getLocalHostname() {
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostName();
-        } catch (UnknownHostException uhe) {
-            addError("Could not determine local host name", uhe);
-            return "UNKNOWN_LOCALHOST";
-        }
+    // START getLocalHostname({FormalParametersInternal})//public String getLocalHostname() {
+    try {
+      InetAddress addr = InetAddress.getLocalHost();
+      return addr.getHostName();
+    } catch (UnknownHostException uhe) {
+      addError("Could not determine local host name", uhe);
+      return "UNKNOWN_LOCALHOST";
     }
+// END getLocalHostname({FormalParametersInternal})//  }
+	
 
     String computeTimeStampString(long now) {
         synchronized (this) {
@@ -108,4 +138,5 @@ public class SyslogStartConverter extends ClassicConverter {
             return timesmapStr;
         }
     }
+
 }

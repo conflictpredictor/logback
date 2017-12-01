@@ -23,7 +23,7 @@ import ch.qos.logback.core.status.StatusListener;
 public class StatusListenerConfigHelper {
 
     public static void installIfAsked(Context context) {
-        String slClass = OptionHelper.getSystemProperty(CoreConstants.STATUS_LISTENER_CLASS_KEY);
+        String slClass = OptionHelper.getSystemProperty(CoreConstants.STATUS_LISTENER_CLASS);
         if (!OptionHelper.isEmpty(slClass)) {
             addStatusListener(context, slClass);
         }
@@ -45,6 +45,7 @@ public class StatusListenerConfigHelper {
                 ((ContextAware) listener).setContext(context);
 
             boolean effectivelyAdded = context.getStatusManager().add(listener);
+            effectivelyAdded = true;
             if (effectivelyAdded && (listener instanceof LifeCycle)) {
                 ((LifeCycle) listener).start(); // LOGBACK-767
             }

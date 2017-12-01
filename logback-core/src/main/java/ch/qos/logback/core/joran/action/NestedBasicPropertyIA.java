@@ -16,19 +16,17 @@ package ch.qos.logback.core.joran.action;
 import java.util.Stack;
 
 import ch.qos.logback.core.joran.spi.ElementPath;
-
 import org.xml.sax.Attributes;
 
 import ch.qos.logback.core.joran.spi.InterpretationContext;
 import ch.qos.logback.core.joran.util.PropertySetter;
-import ch.qos.logback.core.joran.util.beans.BeanDescriptionCache;
 import ch.qos.logback.core.util.AggregationType;
 
 /**
  * This action is responsible for tying together a parent object with one of its
  * <em>simple</em> properties specified as an element but for which there is
  * no explicit rule.
- *
+ * 
  * @author Ceki G&uuml;lc&uuml;
  */
 public class NestedBasicPropertyIA extends ImplicitAction {
@@ -41,12 +39,6 @@ public class NestedBasicPropertyIA extends ImplicitAction {
     // be followed by the corresponding pop.
     Stack<IADataForBasicProperty> actionDataStack = new Stack<IADataForBasicProperty>();
 
-    private final BeanDescriptionCache beanDescriptionCache;
-
-    public NestedBasicPropertyIA(BeanDescriptionCache beanDescriptionCache) {
-        this.beanDescriptionCache = beanDescriptionCache;
-    }
-
     public boolean isApplicable(ElementPath elementPath, Attributes attributes, InterpretationContext ec) {
         // System.out.println("in NestedSimplePropertyIA.isApplicable [" + pattern +
         // "]");
@@ -58,7 +50,7 @@ public class NestedBasicPropertyIA extends ImplicitAction {
         }
 
         Object o = ec.peekObject();
-        PropertySetter parentBean = new PropertySetter(beanDescriptionCache, o);
+        PropertySetter parentBean = new PropertySetter(o);
         parentBean.setContext(context);
 
         AggregationType aggregationType = parentBean.computeAggregationType(nestedElementTagName);
@@ -96,9 +88,6 @@ public class NestedBasicPropertyIA extends ImplicitAction {
             break;
         case AS_BASIC_PROPERTY_COLLECTION:
             actionData.parentBean.addBasicProperty(actionData.propertyName, finalBody);
-            break;
-        default:
-            addError("Unexpected aggregationType " + actionData.aggregationType);
         }
     }
 

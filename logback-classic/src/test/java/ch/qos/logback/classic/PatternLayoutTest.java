@@ -40,14 +40,12 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
     Logger logger = lc.getLogger(ConverterTest.class);
     Logger root = lc.getLogger(Logger.ROOT_LOGGER_NAME);
 
-    String aMessage = "Some message";
-    
     ILoggingEvent le;
 
     public PatternLayoutTest() {
         super();
         Exception ex = new Exception("Bogus exception");
-        le = makeLoggingEvent(aMessage, ex);
+        le = makeLoggingEvent(ex);
     }
 
     @Before
@@ -55,16 +53,16 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
         pl.setContext(lc);
     }
 
-    ILoggingEvent makeLoggingEvent(String msg, Exception ex) {
-        return new LoggingEvent(ch.qos.logback.core.pattern.FormattingConverter.class.getName(), logger, Level.INFO, msg, ex, null);
+    ILoggingEvent makeLoggingEvent(Exception ex) {
+        return new LoggingEvent(ch.qos.logback.core.pattern.FormattingConverter.class.getName(), logger, Level.INFO, "Some message", ex, null);
     }
 
-
+    @Override
     public ILoggingEvent getEventObject() {
-        return makeLoggingEvent("Some message", null);
+        return makeLoggingEvent(null);
     }
 
-      public PatternLayoutBase<ILoggingEvent> getPatternLayoutBase() {
+    public PatternLayoutBase<ILoggingEvent> getPatternLayoutBase() {
         return new PatternLayout();
     }
 
@@ -121,8 +119,9 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
     public void testWithParenthesis() {
         pl.setPattern("\\(%msg:%msg\\) %msg");
         pl.start();
-        le = makeLoggingEvent(aMessage, null);
+        le = makeLoggingEvent(null);
         String val = pl.doLayout(le);
+        // System.out.println("VAL == " + val);
         assertEquals("(Some message:Some message) Some message", val);
     }
 
@@ -194,7 +193,7 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
     }
 
     @Test
-    public void smokeReplace() {
+    public void somekeReplace() {
         pl.setPattern("%replace(a1234b){'\\d{4}', 'XXXX'}");
         pl.start();
         StatusPrinter.print(lc);
@@ -202,18 +201,6 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
         assertEquals("aXXXXb", val);
     }
 
-    @Test
-    public void replaceNewline() {
-        String pattern = "%replace(A\nB){'\n', '\n\t'}";
-        String substPattern = OptionHelper.substVars(pattern, null, lc);
-        assertEquals(pattern, substPattern);
-        pl.setPattern(substPattern);
-        pl.start();
-        StatusPrinter.print(lc);
-        String val = pl.doLayout(makeLoggingEvent("", null));
-        assertEquals("A\n\tB", val);
-    }
-    
     @Test
     public void replaceWithJoran() throws JoranException {
         configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "pattern/replace0.xml");
@@ -227,17 +214,4 @@ public class PatternLayoutTest extends AbstractPatternLayoutBaseTest<ILoggingEve
         assertEquals("And the number is XXXX, expiring on 12/2010", sla.strList.get(0));
     }
 
-    @Test
-    public void replaceWithJoran_NEWLINE() throws JoranException {
-        lc.putProperty("TAB", "\t");
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "pattern/replaceNewline.xml");
-        StatusPrinter.print(lc);
-        root.getAppender("LIST");
-        String msg = "A\nC";
-        logger.debug(msg);
-        StringListAppender<ILoggingEvent> sla = (StringListAppender<ILoggingEvent>) root.getAppender("LIST");
-        assertNotNull(sla);
-        assertEquals(1, sla.strList.size());
-        assertEquals("A\n\tC", sla.strList.get(0));
-    }
 }

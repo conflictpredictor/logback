@@ -11,18 +11,27 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.log4j;
+package ch.qos.logback.classic.log4j; 
 
 import java.util.Map;
+ 
 import java.util.Set;
+ 
 import java.util.Map.Entry;
+ 
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.classic.spi.IThrowableProxy;
+ 
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
+ 
 import ch.qos.logback.core.CoreConstants;
+ 
 import ch.qos.logback.core.LayoutBase;
+ 
 import ch.qos.logback.core.helpers.Transform;
+ 
 
 // Code is based on revision 309623 of org.apache.log4j.xml.XMLLayout dated "Wed
 // Jul 31 09:25:14 2002 UTC" as authored by Ceki Gulcu.
@@ -35,19 +44,34 @@ import ch.qos.logback.core.helpers.Transform;
  * 
  * @author Ceki G&uuml;lc&uuml;
  */
-public class XMLLayout extends LayoutBase<ILoggingEvent> {
+public
+  class
+  XMLLayout  extends LayoutBase<ILoggingEvent>
+ {
+	
 
     private final int DEFAULT_SIZE = 256;
+
+	
     private final int UPPER_LIMIT = 2048;
 
+	
+
     private StringBuilder buf = new StringBuilder(DEFAULT_SIZE);
+
+	
     private boolean locationInfo = false;
+
+	
     private boolean properties = false;
 
-    @Override
-    public void start() {
-        super.start();
-    }
+	
+
+    // START start({FormalParametersInternal})//@Override
+  public void start() {
+    super.start();
+// END start({FormalParametersInternal})//  }
+	
 
     /**
      * The <b>LocationInfo</b> option takes a boolean value. By default, it is
@@ -59,16 +83,18 @@ public class XMLLayout extends LayoutBase<ILoggingEvent> {
      * org.apache.log4j.net.SMTPAppender} then make sure to set the
      * <b>LocationInfo</b> option of that appender as well.
      */
-    public void setLocationInfo(boolean flag) {
-        locationInfo = flag;
-    }
+    // START setLocationInfo(boolean-boolean)//public void setLocationInfo(boolean flag) {
+    locationInfo = flag;
+// END setLocationInfo(boolean-boolean)//  }
+	
 
     /**
      * Returns the current value of the <b>LocationInfo</b> option.
      */
-    public boolean getLocationInfo() {
-        return locationInfo;
-    }
+    // START getLocationInfo({FormalParametersInternal})//public boolean getLocationInfo() {
+    return locationInfo;
+// END getLocationInfo({FormalParametersInternal})//  }
+	
 
     /**
      * Sets whether MDC key-value pairs should be output, default false.
@@ -77,9 +103,10 @@ public class XMLLayout extends LayoutBase<ILoggingEvent> {
      *                new value.
      * @since 1.2.15
      */
-    public void setProperties(final boolean flag) {
-        properties = flag;
-    }
+    // START setProperties(boolean-boolean)//public void setProperties(final boolean flag) {
+    properties = flag;
+// END setProperties(boolean-boolean)//  }
+	
 
     /**
      * Gets whether MDC key-value pairs should be output.
@@ -87,9 +114,10 @@ public class XMLLayout extends LayoutBase<ILoggingEvent> {
      * @return true if MDC key-value pairs are output.
      * @since 1.2.15
      */
-    public boolean getProperties() {
-        return properties;
-    }
+    // START getProperties({FormalParametersInternal})//public boolean getProperties() {
+    return properties;
+// END getProperties({FormalParametersInternal})//  }
+	
 
     /**
      * Formats a {@link ILoggingEvent} in conformity with the log4j.dtd.
@@ -176,10 +204,11 @@ public class XMLLayout extends LayoutBase<ILoggingEvent> {
 
         return buf.toString();
     }
+	
 
-    @Override
-    public String getContentType() {
-        return "text/xml";
-    }
+    // START getContentType({FormalParametersInternal})//@Override
+  public String getContentType() {
+    return "text/xml";
+// END getContentType({FormalParametersInternal})//  }
 
 }

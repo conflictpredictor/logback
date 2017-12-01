@@ -25,7 +25,7 @@ import java.io.File;
  *
  * @see #getPropertyValue()
  *
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 public class FileExistsPropertyDefiner extends PropertyDefinerBase {
 

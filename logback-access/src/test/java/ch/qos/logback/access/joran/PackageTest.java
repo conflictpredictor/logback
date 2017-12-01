@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ JoranConfiguratorTest.class, ConditionalTest.class })

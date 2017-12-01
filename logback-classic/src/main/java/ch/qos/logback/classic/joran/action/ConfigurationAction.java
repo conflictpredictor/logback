@@ -11,36 +11,55 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.joran.action;
+package ch.qos.logback.classic.joran.action; 
 
-import java.net.URL;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import ch.qos.logback.classic.util.EnvUtil;
+ 
+import ch.qos.logback.core.status.OnConsoleStatusListener;
+ 
 
 import org.xml.sax.Attributes;
+ 
 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.ReconfigureOnChangeTask;
-import ch.qos.logback.classic.util.EnvUtil;
-import ch.qos.logback.core.CoreConstants;
+ 
+import ch.qos.logback.classic.turbo.ReconfigureOnChangeFilter;
+ 
 import ch.qos.logback.core.joran.action.Action;
+ 
 import ch.qos.logback.core.joran.spi.InterpretationContext;
-import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
-import ch.qos.logback.core.status.OnConsoleStatusListener;
+ 
 import ch.qos.logback.core.util.ContextUtil;
+ 
 import ch.qos.logback.core.util.Duration;
+ 
 import ch.qos.logback.core.util.OptionHelper;
-import ch.qos.logback.core.util.StatusListenerConfigHelper;
+ 
+import ch.qos.logback.core.util.StatusListenerConfigHelper; 
 
-public class ConfigurationAction extends Action {
+public
+  class
+  ConfigurationAction  extends Action
+ {
+	
     static final String INTERNAL_DEBUG_ATTR = "debug";
-    static final String PACKAGING_DATA_ATTR = "packagingData";
+
+	
+  
+	
     static final String SCAN_ATTR = "scan";
+
+	
     static final String SCAN_PERIOD_ATTR = "scanPeriod";
+
+	
     static final String DEBUG_SYSTEM_PROPERTY_KEY = "logback.debug";
 
+	
+
     long threshold = 0;
+
+	
 
     public void begin(InterpretationContext ic, String name, Attributes attributes) {
         threshold = System.currentTimeMillis();
@@ -61,12 +80,14 @@ public class ConfigurationAction extends Action {
 
         processScanAttrib(ic, attributes);
 
+        ContextUtil contextUtil = new ContextUtil(context);
+        contextUtil.addHostNameAsProperty();
+
         LoggerContext lc = (LoggerContext) context;
         boolean packagingData = OptionHelper.toBoolean(ic.subst(attributes.getValue(PACKAGING_DATA_ATTR)), LoggerContext.DEFAULT_PACKAGING_DATA);
         lc.setPackagingDataEnabled(packagingData);
 
         if (EnvUtil.isGroovyAvailable()) {
-            ContextUtil contextUtil = new ContextUtil(context);
             contextUtil.addGroovyPackages(lc.getFrameworkPackages());
         }
 
@@ -74,6 +95,7 @@ public class ConfigurationAction extends Action {
         // stack
         ic.pushObject(getContext());
     }
+	
 
     String getSystemProperty(String name) {
         /*
@@ -86,58 +108,38 @@ public class ConfigurationAction extends Action {
             return null;
         }
     }
+	
 
-    void processScanAttrib(InterpretationContext ic, Attributes attributes) {
-        String scanAttrib = ic.subst(attributes.getValue(SCAN_ATTR));
-        if (!OptionHelper.isEmpty(scanAttrib) && !"false".equalsIgnoreCase(scanAttrib)) {
-
-            ScheduledExecutorService scheduledExecutorService = context.getScheduledExecutorService();
-            URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(context);
-            if (mainURL == null) {
-                addWarn("Due to missing top level configuration file, reconfiguration on change (configuration file scanning) cannot be done.");
-                return;
-            }
-            ReconfigureOnChangeTask rocTask = new ReconfigureOnChangeTask();
-            rocTask.setContext(context);
-
-            context.putObject(CoreConstants.RECONFIGURE_ON_CHANGE_TASK, rocTask);
-
-            String scanPeriodAttrib = ic.subst(attributes.getValue(SCAN_PERIOD_ATTR));
-            Duration duration = getDuration(scanAttrib, scanPeriodAttrib);
-
-            if (duration == null) {
-                return;
-            }
-
-            addInfo("Will scan for changes in [" + mainURL + "] ");
-            // Given that included files are encountered at a later phase, the complete list of files 
-            // to scan can only be determined when the configuration is loaded in full.
-            // However, scan can be active if mainURL is set. Otherwise, when changes are detected
-            // the top level config file cannot be accessed.
-            addInfo("Setting ReconfigureOnChangeTask scanning period to " + duration);
- 
-            ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(rocTask, duration.getMilliseconds(), duration.getMilliseconds(),
-                            TimeUnit.MILLISECONDS);
-            context.addScheduledFuture(scheduledFuture);
+    // START processScanAttrib(InterpretationContext-InterpretationContext-Attributes-Attributes)//void processScanAttrib(InterpretationContext ic, Attributes attributes) {
+    String scanAttrib = ic.subst(attributes.getValue(SCAN_ATTR));
+    if (!OptionHelper.isEmpty(scanAttrib)
+            && !"false".equalsIgnoreCase(scanAttrib)) {
+      ReconfigureOnChangeFilter rocf = new ReconfigureOnChangeFilter();
+      rocf.setContext(context);
+      String scanPeriodAttrib = ic.subst(attributes.getValue(SCAN_PERIOD_ATTR));
+      if (!OptionHelper.isEmpty(scanPeriodAttrib)) {
+        try {
+          Duration duration = Duration.valueOf(scanPeriodAttrib);
+          rocf.setRefreshPeriod(duration.getMilliseconds());
+          addInfo("Setting ReconfigureOnChangeFilter scanning period to "
+                  + duration);
+        } catch (NumberFormatException nfe) {
+          addError("Error while converting [" + scanAttrib + "] to long", nfe);
         }
+      }
+      rocf.start();
+      LoggerContext lc = (LoggerContext) context;
+      addInfo("Adding ReconfigureOnChangeFilter as a turbo filter");
+      lc.addTurboFilter(rocf);
     }
+// END processScanAttrib(InterpretationContext-InterpretationContext-Attributes-Attributes)//  }
+	
 
-    private Duration getDuration(String scanAttrib, String scanPeriodAttrib) {
-        Duration duration = null;
+    // START end(InterpretationContext-InterpretationContext-String-String)//public void end(InterpretationContext ec, String name) {
+    addInfo("End of configuration.");
+    ec.popObject();
+// END end(InterpretationContext-InterpretationContext-String-String)//  }
+	
+    static final String PACKAGING_DATA_ATTR = "packagingData";
 
-        if (!OptionHelper.isEmpty(scanPeriodAttrib)) {
-            try {
-                duration = Duration.valueOf(scanPeriodAttrib);
-
-            } catch (NumberFormatException nfe) {
-                addError("Error while converting [" + scanAttrib + "] to long", nfe);
-            }
-        }
-        return duration;
-    }
-
-    public void end(InterpretationContext ec, String name) {
-        addInfo("End of configuration.");
-        ec.popObject();
-    }
 }

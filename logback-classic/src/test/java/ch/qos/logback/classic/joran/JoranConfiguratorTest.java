@@ -11,58 +11,100 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.joran;
+package ch.qos.logback.classic.joran; 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import java.io.File;
+ 
 import java.io.IOException;
+ 
 import java.text.SimpleDateFormat;
+ 
 import java.util.Date;
+ 
+import java.util.concurrent.TimeUnit;
+ 
 
+import ch.qos.logback.classic.jul.JULHelper;
+ 
+import ch.qos.logback.core.pattern.parser.Parser;
+ 
+import ch.qos.logback.core.spi.ScanException;
+ 
+import ch.qos.logback.core.status.Status;
+ 
+import ch.qos.logback.core.testUtil.RandomUtil;
+ 
+import ch.qos.logback.core.util.CachingDateFormatter;
+ 
 import org.junit.Ignore;
+ 
 import org.junit.Test;
+ 
 import org.slf4j.MDC;
+ 
 
 import ch.qos.logback.classic.ClassicTestConstants;
+ 
 import ch.qos.logback.classic.Level;
+ 
 import ch.qos.logback.classic.Logger;
+ 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.jul.JULHelper;
+ 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.classic.turbo.DebugUsersTurboFilter;
+ 
 import ch.qos.logback.classic.turbo.NOPTurboFilter;
+ 
 import ch.qos.logback.classic.turbo.TurboFilter;
+ 
 import ch.qos.logback.core.ConsoleAppender;
+ 
 import ch.qos.logback.core.CoreConstants;
+ 
 import ch.qos.logback.core.encoder.LayoutWrappingEncoder;
+ 
 import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.pattern.parser.Parser;
+ 
 import ch.qos.logback.core.read.ListAppender;
-import ch.qos.logback.core.spi.ScanException;
-import ch.qos.logback.core.status.Status;
+ 
 import ch.qos.logback.core.status.StatusChecker;
-import ch.qos.logback.core.testUtil.RandomUtil;
+ 
 import ch.qos.logback.core.testUtil.StringListAppender;
-import ch.qos.logback.core.util.CachingDateFormatter;
+ 
 
-public class JoranConfiguratorTest {
+import static org.junit.Assert.*;
+ 
+
+public
+  class
+  JoranConfiguratorTest {
+	
 
     LoggerContext loggerContext = new LoggerContext();
+
+	
     Logger logger = loggerContext.getLogger(this.getClass().getName());
+
+	
     Logger root = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+
+	
     StatusChecker checker = new StatusChecker(loggerContext);
+
+	
     int diff = RandomUtil.getPositiveInt();
 
-    void configure(String file) throws JoranException {
-        JoranConfigurator jc = new JoranConfigurator();
-        jc.setContext(loggerContext);
-        loggerContext.putProperty("diff", "" + diff);
-        jc.doConfigure(file);
-    }
+	
+
+    // START configure(String-String)//void configure(String file) throws JoranException {
+    JoranConfigurator jc = new JoranConfigurator();
+    jc.setContext(loggerContext);
+    loggerContext.putProperty("diff", "" + diff);
+    jc.doConfigure(file);
+// END configure(String-String)//  }
+	
 
     @Test
     public void simpleList() throws JoranException {
@@ -78,6 +120,7 @@ public class JoranConfiguratorTest {
         ILoggingEvent le = (ILoggingEvent) listAppender.list.get(0);
         assertEquals(msg, le.getMessage());
     }
+	
 
     @Test
     public void level() throws JoranException {
@@ -88,13 +131,15 @@ public class JoranConfiguratorTest {
         logger.debug(msg);
         assertEquals(0, listAppender.list.size());
     }
+	
 
-    @Test
-    public void additivity() throws JoranException {
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "additivity.xml");
-        Logger logger = loggerContext.getLogger("additivityTest");
-        assertFalse(logger.isAdditive());
-    }
+    // START additivity({FormalParametersInternal})//@Test
+  public void additivity() throws JoranException {
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "additivity.xml");
+    Logger logger = loggerContext.getLogger("additivityTest");
+    assertFalse(logger.isAdditive());
+// END additivity({FormalParametersInternal})//  }
+	
 
     @Test
     public void rootLoggerLevelSettingBySystemProperty() throws JoranException {
@@ -110,6 +155,7 @@ public class JoranConfiguratorTest {
         assertEquals(0, listAppender.list.size());
         System.clearProperty(propertyName);
     }
+	
 
     @Test
     public void loggerLevelSettingBySystemProperty() throws JoranException {
@@ -124,6 +170,7 @@ public class JoranConfiguratorTest {
         assertEquals(1, listAppender.list.size());
         System.clearProperty(propertyName);
     }
+	
 
     @Test
     public void appenderRefSettingBySystemProperty() throws JoranException {
@@ -138,63 +185,70 @@ public class JoranConfiguratorTest {
         assertEquals(1, listAppender.list.size());
         System.clearProperty(propertyName);
     }
+	
 
-    @Test
-    public void statusListener() throws JoranException {
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "statusListener.xml");
-    }
+    // START statusListener({FormalParametersInternal})//@Test
+  public void statusListener() throws JoranException {
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "statusListener.xml");
+// END statusListener({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void contextRename() throws JoranException {
-        loggerContext.setName(CoreConstants.DEFAULT_CONTEXT_NAME);
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "contextRename.xml");
-        assertEquals("wombat", loggerContext.getName());
-    }
+    // START contextRename({FormalParametersInternal})//@Test
+  public void contextRename() throws JoranException {
+    loggerContext.setName(CoreConstants.DEFAULT_CONTEXT_NAME);
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "contextRename.xml");
+    assertEquals("wombat", loggerContext.getName());
+// END contextRename({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void eval() throws JoranException {
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "callerData.xml");
+    // START eval({FormalParametersInternal})//@Test
+  public void eval() throws JoranException {
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "callerData.xml");
 
-        String msg = "hello world";
-        logger.debug("toto");
-        logger.debug(msg);
+    String msg = "hello world";
+    logger.debug("toto");
+    logger.debug(msg);
 
-        StringListAppender<ILoggingEvent> slAppender = (StringListAppender<ILoggingEvent>) loggerContext.getLogger("root").getAppender("STR_LIST");
-        assertNotNull(slAppender);
-        assertEquals(2, slAppender.strList.size());
-        assertTrue(slAppender.strList.get(0).contains(" DEBUG - toto"));
+    StringListAppender<ILoggingEvent> slAppender = (StringListAppender<ILoggingEvent>) loggerContext
+            .getLogger("root").getAppender("STR_LIST");
+    assertNotNull(slAppender);
+    assertEquals(2, slAppender.strList.size());
+    assertTrue(slAppender.strList.get(0).contains(" DEBUG - toto"));
 
-        String str1 = slAppender.strList.get(1);
-        assertTrue(str1.contains("Caller+0"));
-        assertTrue(str1.contains(" DEBUG - hello world"));
-    }
+    String str1 = slAppender.strList.get(1);
+    assertTrue(str1.contains("Caller+0"));
+    assertTrue(str1.contains(" DEBUG - hello world"));
+// END eval({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void turboFilter() throws JoranException {
-        // Although this test uses turbo filters, it only checks
-        // that Joran can see the xml element and create
-        // and place the relevant object correctly.
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "turbo.xml");
+    // START turboFilter({FormalParametersInternal})//@Test
+  public void turboFilter() throws JoranException {
+    // Although this test uses turbo filters, it only checks
+    // that Joran can see the xml element and create
+    // and place the relevant object correctly.
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "turbo.xml");
 
-        TurboFilter filter = loggerContext.getTurboFilterList().get(0);
-        assertTrue(filter instanceof NOPTurboFilter);
-    }
+    TurboFilter filter = loggerContext.getTurboFilterList().get(0);
+    assertTrue(filter instanceof NOPTurboFilter);
+// END turboFilter({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void testTurboFilterWithStringList() throws JoranException {
-        // Although this test uses turbo filters, it only checks
-        // that Joran can see <user> elements, and behave correctly
-        // that is call the addUser method and pass the correct values
-        // to that method.
-        configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "turbo2.xml");
+    // START testTurboFilterWithStringList({FormalParametersInternal})//@Test
+  public void testTurboFilterWithStringList() throws JoranException {
+    // Although this test uses turbo filters, it only checks
+    // that Joran can see <user> elements, and behave correctly
+    // that is call the addUser method and pass the correct values
+    // to that method.
+    configure(ClassicTestConstants.JORAN_INPUT_PREFIX + "turbo2.xml");
 
-        // StatusPrinter.print(loggerContext.getStatusManager());
+    // StatusPrinter.print(loggerContext.getStatusManager());
 
-        TurboFilter filter = loggerContext.getTurboFilterList().get(0);
-        assertTrue(filter instanceof DebugUsersTurboFilter);
-        DebugUsersTurboFilter dutf = (DebugUsersTurboFilter) filter;
-        assertEquals(2, dutf.getUsers().size());
-    }
+    TurboFilter filter = loggerContext.getTurboFilterList().get(0);
+    assertTrue(filter instanceof DebugUsersTurboFilter);
+    DebugUsersTurboFilter dutf = (DebugUsersTurboFilter) filter;
+    assertEquals(2, dutf.getUsers().size());
+// END testTurboFilterWithStringList({FormalParametersInternal})//  }
+	
 
     @Test
     public void testLevelFilter() throws JoranException {
@@ -213,6 +267,7 @@ public class JoranConfiguratorTest {
         assertEquals(Level.WARN, back.getLevel());
         assertEquals("hello", back.getMessage());
     }
+	
 
     @Test
     public void testEvaluatorFilter() throws JoranException {
@@ -231,6 +286,7 @@ public class JoranConfiguratorTest {
         assertEquals(Level.WARN, back.getLevel());
         assertEquals("hello", back.getMessage());
     }
+	
 
     @Test
     public void testTurboDynamicThreshold() throws JoranException {
@@ -250,6 +306,7 @@ public class JoranConfiguratorTest {
         ILoggingEvent le = (ILoggingEvent) listAppender.list.get(0);
         assertEquals("hello user2", le.getMessage());
     }
+	
 
     @Test
     public void testTurboDynamicThreshold2() throws JoranException {
@@ -274,82 +331,123 @@ public class JoranConfiguratorTest {
         le = (ILoggingEvent) listAppender.list.get(1);
         assertEquals("hello user2", le.getMessage());
     }
+	
 
-    @Test
-    public void timestamp() throws JoranException, IOException, InterruptedException {
+    // Tests whether ConfigurationAction is installing ReconfigureOnChangeFilter
+    // START autoscanShouldReconfigureOnFileChange({FormalParametersInternal})//@Test
+  public void autoscanShouldReconfigureOnFileChange() throws Exception {
 
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "timestamp-context.xml";
-        configure(configFileAsStr);
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "scan1.xml";
+    configure(configFileAsStr);
 
-        String r = loggerContext.getProperty("testTimestamp");
-        assertNotNull(r);
-        CachingDateFormatter sdf = new CachingDateFormatter("yyyy-MM");
-        String expected = sdf.format(System.currentTimeMillis());
-        assertEquals("expected \"" + expected + "\" but got " + r, expected, r);
+    File file = new File(configFileAsStr);
+    file.setLastModified(System.currentTimeMillis());
+
+    Thread.sleep(10);
+    // scanning requires 16 logs
+    for (int i = 0; i < 16; i++) {
+      logger.debug("after " + i);
     }
 
-    @Test
-    public void timestampLocal() throws JoranException, IOException, InterruptedException {
+    loggerContext.getExecutorService().shutdown();
+    loggerContext.getExecutorService().awaitTermination(1000, TimeUnit.MILLISECONDS);
 
-        String sysProp = "ch.qos.logback.classic.joran.JoranConfiguratorTest.timestampLocal";
-        System.setProperty(sysProp, "");
+    StatusChecker checker = new StatusChecker(loggerContext);
+    checker.assertIsErrorFree();
+    checker.assertContainsMatch(CoreConstants.RESET_MSG_PREFIX);
+// END autoscanShouldReconfigureOnFileChange({FormalParametersInternal})//  }
+	
 
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "timestamp-local.xml";
-        configure(configFileAsStr);
+    // START timestamp({FormalParametersInternal})//@Test
+  public void timestamp() throws JoranException, IOException,
+          InterruptedException {
 
-        // It's hard to test the local variable has been set, as it's not
-        // visible from here. But instead we test that it's not set in the
-        // context. And check that a system property has been replaced with the
-        // contents of the local variable
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "timestamp-context.xml";
+    configure(configFileAsStr);
 
-        String r = loggerContext.getProperty("testTimestamp");
-        assertNull(r);
+    String r = loggerContext.getProperty("testTimestamp");
+    assertNotNull(r);
+    CachingDateFormatter sdf = new CachingDateFormatter("yyyy-MM");
+    String expected = sdf.format(System.currentTimeMillis());
+    assertEquals("expected \"" + expected + "\" but got " + r, expected, r);
+// END timestamp({FormalParametersInternal})//  }
+	
 
-        String expected = "today is " + new SimpleDateFormat("yyyy-MM").format(new Date());
-        String sysPropValue = System.getProperty(sysProp);
-        assertEquals(expected, sysPropValue);
+    // START timestampLocal({FormalParametersInternal})//@Test
+  public void timestampLocal() throws JoranException, IOException,
+          InterruptedException {
+
+    String sysProp = "ch.qos.logback.classic.joran.JoranConfiguratorTest.timestampLocal";
+    System.setProperty(sysProp, "");
+
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "timestamp-local.xml";
+    configure(configFileAsStr);
+
+    // It's hard to test the local variable has been set, as it's not
+    // visible from here. But instead we test that it's not set in the
+    // context. And check that a system property has been replaced with the
+    // contents of the local variable
+
+    String r = loggerContext.getProperty("testTimestamp");
+    assertNull(r);
+
+    String expected = "today is " + new SimpleDateFormat("yyyy-MM").format(new Date());
+    String sysPropValue = System.getProperty(sysProp);
+    assertEquals(expected, sysPropValue);
+// END timestampLocal({FormalParametersInternal})//  }
+	
+
+    // START encoderCharset({FormalParametersInternal})//@Test
+  public void encoderCharset() throws JoranException, IOException,
+          InterruptedException {
+
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "encoderCharset.xml";
+    configure(configFileAsStr);
+
+    ConsoleAppender<ILoggingEvent> consoleAppender = (ConsoleAppender<ILoggingEvent>) root.getAppender("CONSOLE");
+    assertNotNull(consoleAppender);
+    LayoutWrappingEncoder<ILoggingEvent> encoder = (LayoutWrappingEncoder<ILoggingEvent>) consoleAppender.getEncoder();
+
+    assertEquals("UTF-8", encoder.getCharset().displayName());
+
+    StatusChecker checker = new StatusChecker(loggerContext);
+    checker.assertIsErrorFree();
+// END encoderCharset({FormalParametersInternal})//  }
+	
+
+    // START verifyJULLevel(String-String-Level-Level)//void verifyJULLevel(String loggerName, Level expectedLevel) {
+    java.util.logging.Logger julLogger = JULHelper.asJULLogger(loggerName);
+    java.util.logging.Level julLevel = julLogger.getLevel();
+
+    if (expectedLevel == null) {
+      assertNull(julLevel);
+    } else {
+      assertEquals(JULHelper.asJULLevel(expectedLevel), julLevel);
     }
 
-    @Test
-    public void encoderCharset() throws JoranException, IOException, InterruptedException {
 
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "encoderCharset.xml";
-        configure(configFileAsStr);
+// END verifyJULLevel(String-String-Level-Level)//  }
+	
 
-        ConsoleAppender<ILoggingEvent> consoleAppender = (ConsoleAppender<ILoggingEvent>) root.getAppender("CONSOLE");
-        assertNotNull(consoleAppender);
-        LayoutWrappingEncoder<ILoggingEvent> encoder = (LayoutWrappingEncoder<ILoggingEvent>) consoleAppender.getEncoder();
-
-        assertEquals("UTF-8", encoder.getCharset().displayName());
-
-        StatusChecker checker = new StatusChecker(loggerContext);
-        checker.assertIsErrorFree();
-    }
-
-    void verifyJULLevel(String loggerName, Level expectedLevel) {
-        java.util.logging.Logger julLogger = JULHelper.asJULLogger(loggerName);
-        java.util.logging.Level julLevel = julLogger.getLevel();
-
-        if (expectedLevel == null) {
-            assertNull(julLevel);
-        } else {
-            assertEquals(JULHelper.asJULLevel(expectedLevel), julLevel);
-        }
-
-    }
-
-    @Test
-    public void levelChangePropagator0() throws JoranException, IOException, InterruptedException {
-        String loggerName = "changePropagator0" + diff;
-        java.util.logging.Logger.getLogger(loggerName).setLevel(java.util.logging.Level.INFO);
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "/jul/levelChangePropagator0.xml";
-        configure(configFileAsStr);
-        StatusChecker checker = new StatusChecker(loggerContext);
-        checker.assertIsErrorFree();
-        verifyJULLevel(loggerName, null);
-        verifyJULLevel("a.b.c." + diff, Level.WARN);
-        verifyJULLevel(Logger.ROOT_LOGGER_NAME, Level.TRACE);
-    }
+    // START levelChangePropagator0({FormalParametersInternal})//@Test
+  public void levelChangePropagator0() throws JoranException, IOException,
+          InterruptedException {
+    String loggerName = "changePropagator0" + diff;
+    java.util.logging.Logger.getLogger(loggerName).setLevel(java.util.logging.Level.INFO);
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "/jul/levelChangePropagator0.xml";
+    configure(configFileAsStr);
+    StatusChecker checker = new StatusChecker(loggerContext);
+    checker.assertIsErrorFree();
+    verifyJULLevel(loggerName, null);
+    verifyJULLevel("a.b.c." + diff, Level.WARN);
+    verifyJULLevel(Logger.ROOT_LOGGER_NAME, Level.TRACE);
+// END levelChangePropagator0({FormalParametersInternal})//  }
+	
 
     @Test
     public void levelChangePropagator1() throws JoranException, IOException, InterruptedException {
@@ -365,60 +463,61 @@ public class JoranConfiguratorTest {
         verifyJULLevel("a.b.c." + diff, Level.WARN);
         verifyJULLevel(Logger.ROOT_LOGGER_NAME, Level.TRACE);
     }
+	
 
-    @Test
-    @Ignore
-    public void onConsoleRetro() throws JoranException, IOException, InterruptedException {
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "/onConsoleRetro.xml";
-        configure(configFileAsStr);
-        System.out.println("xxxxxxxxxxxxx");
-        Thread.sleep(400);
+    // START onConsoleRetro({FormalParametersInternal})//@Test
+  @Ignore
+  public void onConsoleRetro() throws JoranException, IOException, InterruptedException {
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "/onConsoleRetro.xml";
+    configure(configFileAsStr);
+    System.out.println("xxxxxxxxxxxxx");
+    Thread.sleep(400);
 
-        loggerContext.reset();
-        configure(configFileAsStr);
-    }
+    loggerContext.reset();
+    configure(configFileAsStr);
+// END onConsoleRetro({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void lbcore193() throws JoranException {
-        String configFileAsStr = ClassicTestConstants.ISSUES_PREFIX + "lbcore193.xml";
-        configure(configFileAsStr);
-        checker.asssertContainsException(ScanException.class);
-        checker.assertContainsMatch(Status.ERROR, "Expecting RIGHT_PARENTHESIS token but got null");
-        checker.assertContainsMatch(Status.ERROR, "See also " + Parser.MISSING_RIGHT_PARENTHESIS);
-    }
+    // START lbcore193({FormalParametersInternal})//@Test
+  public void lbcore193() throws JoranException {
+    String configFileAsStr = ClassicTestConstants.ISSUES_PREFIX + "lbcore193.xml";
+    configure(configFileAsStr);
+    checker.asssertContainsException(ScanException.class);
+    checker.assertContainsMatch(Status.ERROR, "Expecting RIGHT_PARENTHESIS token but got null");
+    checker.assertContainsMatch(Status.ERROR, "See also " + Parser.MISSING_RIGHT_PARENTHESIS);
+// END lbcore193({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void properties() throws JoranException {
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "properties.xml";
-        assertNull(System.getProperty("sys"));
+    // START properties({FormalParametersInternal})//@Test
+  public void properties() throws JoranException {
+    String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX
+            + "properties.xml";
+    assertNull(loggerContext.getProperty(CoreConstants.HOSTNAME_KEY));
+    assertNull(System.getProperty("sys"));
 
-        configure(configFileAsStr);
-        assertNotNull(loggerContext.getProperty(CoreConstants.HOSTNAME_KEY));
-        assertNull(loggerContext.getProperty("transientKey1"));
-        assertNull(loggerContext.getProperty("transientKey2"));
-        assertEquals("node0", loggerContext.getProperty("nodeId"));
-        assertEquals("tem", System.getProperty("sys"));
-        assertNotNull(loggerContext.getProperty("path"));
-        checker.assertIsErrorFree();
-    }
-
-    @Test
-    public void hostnameProperty() throws JoranException {
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "hostnameProperty.xml";
-        configure(configFileAsStr);
-        assertEquals("A", loggerContext.getProperty(CoreConstants.HOSTNAME_KEY));
-    }
+    configure(configFileAsStr);
+    assertNotNull(loggerContext.getProperty(CoreConstants.HOSTNAME_KEY));
+    assertNull(loggerContext.getProperty("transientKey1"));
+    assertNull(loggerContext.getProperty("transientKey2"));
+    assertEquals("node0", loggerContext.getProperty("nodeId"));
+    assertEquals("tem", System.getProperty("sys"));
+    assertNotNull(loggerContext.getProperty("path"));
+    checker.assertIsErrorFree();
+// END properties({FormalParametersInternal})//  }
+	
 
     // see also http://jira.qos.ch/browse/LBCORE-254
-    @Test
-    public void sysProps() throws JoranException {
-        System.setProperty("k.lbcore254", ClassicTestConstants.ISSUES_PREFIX + "lbcore254");
-        JoranConfigurator configurator = new JoranConfigurator();
-        configurator.setContext(loggerContext);
-        configurator.doConfigure(ClassicTestConstants.ISSUES_PREFIX + "lbcore254.xml");
+    // START sysProps({FormalParametersInternal})//@Test
+  public void sysProps() throws JoranException {
+    System.setProperty("k.lbcore254", ClassicTestConstants.ISSUES_PREFIX + "lbcore254");
+    JoranConfigurator configurator = new JoranConfigurator();
+    configurator.setContext(loggerContext);
+    configurator.doConfigure(ClassicTestConstants.ISSUES_PREFIX + "lbcore254.xml");
 
-        checker.assertIsErrorFree();
-    }
+    checker.assertIsErrorFree();
+// END sysProps({FormalParametersInternal})//  }
+	
 
     @Test
     public void packageDataDisabledByConfigAttribute() throws JoranException {
@@ -426,6 +525,7 @@ public class JoranConfiguratorTest {
         configure(configFileAsStr);
         assertFalse(loggerContext.isPackagingDataEnabled());
     }
+	
 
     @Test
     public void packageDataEnabledByConfigAttribute() throws JoranException {
@@ -434,10 +534,4 @@ public class JoranConfiguratorTest {
         assertTrue(loggerContext.isPackagingDataEnabled());
     }
 
-    @Test
-    public void valueOfConvention() throws JoranException {
-        String configFileAsStr = ClassicTestConstants.JORAN_INPUT_PREFIX + "valueOfConvention.xml";
-        configure(configFileAsStr);
-        checker.assertIsWarningOrErrorFree();
-    }
 }

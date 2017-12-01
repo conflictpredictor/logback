@@ -14,6 +14,7 @@
 package ch.qos.logback.classic.net;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;

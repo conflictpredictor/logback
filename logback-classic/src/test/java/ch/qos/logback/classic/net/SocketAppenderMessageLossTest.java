@@ -13,28 +13,27 @@
  */
 package ch.qos.logback.classic.net;
 
-import static org.junit.Assert.assertTrue;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import ch.qos.logback.core.read.ListAppender;
+import ch.qos.logback.core.testUtil.RandomUtil;
+import ch.qos.logback.core.util.Duration;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Test;
-
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.testUtil.RandomUtil;
-import ch.qos.logback.core.util.Duration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SocketAppenderMessageLossTest {
     int runLen = 100;
     Duration reconnectionDelay = new Duration(1000);
 
-    static final int TIMEOUT = 3000;
-
-    @Test  // (timeout = TIMEOUT)
+    @Test(timeout = 1000)
     public void synchronousSocketAppender() throws Exception {
 
         SocketAppender socketAppender = new SocketAppender();
@@ -44,7 +43,7 @@ public class SocketAppenderMessageLossTest {
         runTest(socketAppender);
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test(timeout = 1000)
     public void smallQueueSocketAppender() throws Exception {
 
         SocketAppender socketAppender = new SocketAppender();
@@ -54,7 +53,7 @@ public class SocketAppenderMessageLossTest {
         runTest(socketAppender);
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test(timeout = 1000)
     public void largeQueueSocketAppender() throws Exception {
         SocketAppender socketAppender = new SocketAppender();
         socketAppender.setReconnectionDelay(reconnectionDelay);
@@ -90,9 +89,9 @@ public class SocketAppenderMessageLossTest {
         listAppender.setContext(serverLoggerContext);
         listAppender.start();
 
-        Logger serverRootLogger = serverLoggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-        serverRootLogger.setAdditive(false);
-        serverRootLogger.addAppender(listAppender);
+        Logger serverLogger = serverLoggerContext.getLogger(getClass());
+        serverLogger.setAdditive(false);
+        serverLogger.addAppender(listAppender);
 
         LoggerContext loggerContext = new LoggerContext();
         loggerContext.setName("clientLoggerContext");
@@ -120,9 +119,9 @@ public class SocketAppenderMessageLossTest {
         }
 
         allMessagesReceivedLatch.await();
+
+        assertEquals(runLen, listAppender.list.size());
         loggerContext.stop();
         simpleSocketServer.close();
-
- 
     }
 }

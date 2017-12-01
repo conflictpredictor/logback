@@ -11,80 +11,110 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.net.mock;
+package ch.qos.logback.core.net.mock; 
 
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+ 
+import java.util.concurrent.ExecutorService;
+ 
 
 import ch.qos.logback.core.Context;
+ 
 import ch.qos.logback.core.ContextBase;
+ 
 import ch.qos.logback.core.status.Status;
+ 
 import ch.qos.logback.core.status.StatusListener;
+ 
 import ch.qos.logback.core.status.StatusManager;
+ 
 
 /**
  * A mock {@link Context} with instrumentation for unit testing.
  *
  * @author Carl Harris
  */
-public class MockContext extends ContextBase {
+public
+  class
+  MockContext  extends ContextBase
+ {
+	
 
-    private final ScheduledExecutorService scheduledExecutorService;
+    private final ExecutorService executorService;
+
+	
 
     private Status lastStatus;
 
-    public MockContext() {
-        this(new MockScheduledExecutorService());
-    }
+	
 
-    public MockContext(ScheduledExecutorService executorService) {
-        this.setStatusManager(new MockStatusManager());
-        this.scheduledExecutorService = executorService;
-    }
+    // START MockContext({FormalParametersInternal})//public MockContext() {
+    this(new MockExecutorService());
+// END MockContext({FormalParametersInternal})//  }
+	
 
-    @Override
-    public ScheduledExecutorService getScheduledExecutorService() {
-        return scheduledExecutorService;
-    }
+    // START MockContext(ExecutorService-ExecutorService)//public MockContext(ExecutorService executorService) {
+    this.setStatusManager(new MockStatusManager());
+    this.executorService = executorService;
+// END MockContext(ExecutorService-ExecutorService)//  }
+	
 
-    public Status getLastStatus() {
-        return lastStatus;
-    }
+    // START getExecutorService({FormalParametersInternal})//@Override
+  public ExecutorService getExecutorService() {
+    return executorService;
+// END getExecutorService({FormalParametersInternal})//  }
+	
 
-    public void setLastStatus(Status lastStatus) {
-        this.lastStatus = lastStatus;
-    }
+    // START getLastStatus({FormalParametersInternal})//public Status getLastStatus() {
+    return lastStatus;
+// END getLastStatus({FormalParametersInternal})//  }
+	
 
-    private class MockStatusManager implements StatusManager {
+    // START setLastStatus(Status-Status)//public void setLastStatus(Status lastStatus) {
+    this.lastStatus = lastStatus;
+// END setLastStatus(Status-Status)//  }
+	
 
-        public void add(Status status) {
-            lastStatus = status;
-        }
+    private
+  class
+  MockStatusManager  implements StatusManager
+ {
+		
 
-        public List<Status> getCopyOfStatusList() {
-            throw new UnsupportedOperationException();
-        }
+        // START add(Status-Status)//public void add(Status status) {
+      lastStatus = status;
+// END add(Status-Status)//    }
+		
 
-        public int getCount() {
-            throw new UnsupportedOperationException();
-        }
+        // START getCopyOfStatusList({FormalParametersInternal})//public List<Status> getCopyOfStatusList() {
+      throw new UnsupportedOperationException();
+// END getCopyOfStatusList({FormalParametersInternal})//    }
+		
+
+        // START getCount({FormalParametersInternal})//public int getCount() {
+      throw new UnsupportedOperationException();
+// END getCount({FormalParametersInternal})//    }
+		
 
         public boolean add(StatusListener listener) {
             throw new UnsupportedOperationException();
         }
+		
 
-        public void remove(StatusListener listener) {
-            throw new UnsupportedOperationException();
-        }
+        // START remove(StatusListener-StatusListener)//public void remove(StatusListener listener) {
+      throw new UnsupportedOperationException();
+// END remove(StatusListener-StatusListener)//    }
+		
 
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
+        // START clear({FormalParametersInternal})//public void clear() {
+      throw new UnsupportedOperationException();
+// END clear({FormalParametersInternal})//    }
+		
 
-        public List<StatusListener> getCopyOfStatusListenerList() {
-            throw new UnsupportedOperationException();
-        }
+        // START getCopyOfStatusListenerList({FormalParametersInternal})//public List<StatusListener> getCopyOfStatusListenerList() {
+      throw new UnsupportedOperationException();
+// END getCopyOfStatusListenerList({FormalParametersInternal})//    }
 
-    }
+	}
 
 }

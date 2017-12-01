@@ -11,30 +11,48 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.joran;
+package ch.qos.logback.classic.joran; 
 
 import ch.qos.logback.classic.joran.action.*;
+ 
 import ch.qos.logback.classic.sift.SiftAction;
-import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.classic.spi.PlatformInfo;
+ 
 import ch.qos.logback.classic.util.DefaultNestedComponentRules;
+ 
 import ch.qos.logback.core.joran.JoranConfiguratorBase;
+ 
 import ch.qos.logback.core.joran.action.AppenderRefAction;
+ 
 import ch.qos.logback.core.joran.action.IncludeAction;
+ 
 import ch.qos.logback.core.joran.action.NOPAction;
+ 
 import ch.qos.logback.core.joran.conditional.ElseAction;
+ 
 import ch.qos.logback.core.joran.conditional.IfAction;
+ 
 import ch.qos.logback.core.joran.conditional.ThenAction;
+ 
 import ch.qos.logback.core.joran.spi.DefaultNestedComponentRegistry;
+ 
 import ch.qos.logback.core.joran.spi.ElementSelector;
+ 
 import ch.qos.logback.core.joran.spi.RuleStore;
+ 
+import ch.qos.logback.classic.spi.ILoggingEvent; 
 
 /**
  * JoranConfigurator class adds rules specific to logback-classic.
  *
  * @author Ceki G&uuml;lc&uuml;
  */
-public class JoranConfigurator extends JoranConfiguratorBase<ILoggingEvent> {
+public
+  class
+  JoranConfigurator  extends JoranConfiguratorBase
+ {
+	
 
     @Override
     public void addInstanceRules(RuleStore rs) {
@@ -79,10 +97,12 @@ public class JoranConfigurator extends JoranConfiguratorBase<ILoggingEvent> {
         rs.addRule(new ElementSelector("configuration/receiver"), new ReceiverAction());
 
     }
+	
 
-    @Override
-    protected void addDefaultNestedComponentRegistryRules(DefaultNestedComponentRegistry registry) {
-        DefaultNestedComponentRules.addDefaultNestedComponentRegistryRules(registry);
-    }
+    // START addDefaultNestedComponentRegistryRules(DefaultNestedComponentRegistry-DefaultNestedComponentRegistry)//@Override
+  protected void addDefaultNestedComponentRegistryRules(
+      DefaultNestedComponentRegistry registry) {
+    DefaultNestedComponentRules.addDefaultNestedComponentRegistryRules(registry);
+// END addDefaultNestedComponentRegistryRules(DefaultNestedComponentRegistry-DefaultNestedComponentRegistry)//  }
 
 }

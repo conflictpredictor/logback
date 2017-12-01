@@ -11,21 +11,37 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.status;
+package ch.qos.logback.core.status; 
+
+ 
 
 import java.io.PrintStream;
+ 
 
 /**
  * Print all new incoming status messages on the console (System.out).
  *
  * @author Ceki G&uuml;lc&uuml;
  */
-public class OnConsoleStatusListener extends OnPrintStreamStatusListenerBase {
-    
-    
-    @Override
-    protected PrintStream getPrintStream() {
-        return System.out;
-    }
+public
+  class
+  OnConsoleStatusListener  extends OnPrintStreamStatusListenerBase
+ {
+	
+
+    // START getPrintStream({FormalParametersInternal})//@Override
+  protected PrintStream getPrintStream() {
+    return System.out;
+// END getPrintStream({FormalParametersInternal})//  }
+	
+
+  /**
+   * This utility method adds a new OnConsoleStatusListener to the context
+   * passed as parameter.
+   *
+   * @param context
+   * @since 1.0.1
+   */
+  
 
 }

@@ -18,7 +18,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
-import javax.servlet.WriteListener;
 
 public class TeeServletOutputStream extends ServletOutputStream {
 
@@ -34,7 +33,7 @@ public class TeeServletOutputStream extends ServletOutputStream {
     byte[] getOutputStreamAsByteArray() {
         return baosCopy.toByteArray();
     }
- 
+
     @Override
     public void write(int val) throws IOException {
         if (underlyingStream != null) {
@@ -82,15 +81,5 @@ public class TeeServletOutputStream extends ServletOutputStream {
         // System.out.println("FLUSH TeeServletOutputStream.flush() called");
         underlyingStream.flush();
         baosCopy.flush();
-    }
-
-    @Override
-    public boolean isReady() {
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void setWriteListener(WriteListener listener) {
-        throw new RuntimeException("Not yet implemented");
     }
 }

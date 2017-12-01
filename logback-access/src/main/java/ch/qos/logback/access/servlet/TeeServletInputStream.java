@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,6 +30,11 @@ class TeeServletInputStream extends ServletInputStream {
         duplicateInputStream(request);
     }
 
+    @Override
+    public int read() throws IOException {
+        return in.read();
+    }
+
     private void duplicateInputStream(HttpServletRequest request) {
         ServletInputStream originalSIS = null;
         try {
@@ -40,13 +44,8 @@ class TeeServletInputStream extends ServletInputStream {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            closeStream(originalSIS);
+            closeStrean(originalSIS);
         }
-    }
-
-    @Override
-    public int read() throws IOException {
-        return in.read();
     }
 
     byte[] consumeBufferAndReturnAsByteArray(InputStream is) throws IOException {
@@ -60,7 +59,7 @@ class TeeServletInputStream extends ServletInputStream {
         return baos.toByteArray();
     }
 
-    void closeStream(ServletInputStream is) {
+    void closeStrean(ServletInputStream is) {
         if (is != null) {
             try {
                 is.close();
@@ -71,20 +70,5 @@ class TeeServletInputStream extends ServletInputStream {
 
     byte[] getInputBuffer() {
         return inputBuffer;
-    }
-
-    @Override
-    public boolean isFinished() {
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public boolean isReady() {
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void setReadListener(ReadListener listener) {
-        throw new RuntimeException("Not yet implemented");
     }
 }

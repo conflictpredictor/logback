@@ -11,41 +11,63 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.access.joran;
+package ch.qos.logback.access.joran; 
 
 import static org.junit.Assert.assertEquals;
+ 
 import static org.junit.Assert.assertNotNull;
+ 
 import static org.junit.Assert.assertTrue;
+ 
 
 import ch.qos.logback.access.spi.IAccessEvent;
+ 
 import org.junit.After;
+ 
 import org.junit.Before;
+ 
 import org.junit.Test;
+ 
 
-import ch.qos.logback.access.AccessTestConstants;
+ 
 import ch.qos.logback.access.dummy.DummyAccessEventBuilder;
+ 
 import ch.qos.logback.access.spi.AccessContext;
+ 
 import ch.qos.logback.core.joran.spi.JoranException;
+ 
 import ch.qos.logback.core.read.ListAppender;
+ 
 import ch.qos.logback.core.testUtil.StringListAppender;
+ 
 
-public class JoranConfiguratorTest {
+import ch.qos.logback.access.AccessTestConstants; 
+
+public
+  class
+  JoranConfiguratorTest {
+	
 
     AccessContext context = new AccessContext();
 
-    @Before
-    public void setUp() throws Exception {
-    }
+	
 
-    @After
-    public void tearDown() throws Exception {
-    }
+    // START setUp({FormalParametersInternal})//@Before
+  public void setUp() throws Exception {
+// END setUp({FormalParametersInternal})//  }
+	
 
-    void configure(String file) throws JoranException {
-        JoranConfigurator jc = new JoranConfigurator();
-        jc.setContext(context);
-        jc.doConfigure(file);
-    }
+    // START tearDown({FormalParametersInternal})//@After
+  public void tearDown() throws Exception {
+// END tearDown({FormalParametersInternal})//  }
+	
+
+    // START configure(String-String)//void configure(String file) throws JoranException {
+    JoranConfigurator jc = new JoranConfigurator();
+    jc.setContext(context);
+    jc.doConfigure(file);
+// END configure(String-String)//  }
+	
 
     @Test
     public void smoke() throws Exception {
@@ -61,6 +83,7 @@ public class JoranConfiguratorTest {
         IAccessEvent ae = listAppender.list.get(0);
         assertNotNull(ae);
     }
+	
 
     @Test
     public void defaultLayout() throws Exception {
@@ -72,4 +95,5 @@ public class JoranConfiguratorTest {
         // the result contains a line separator at the end
         assertTrue(listAppender.strList.get(0).startsWith("testMethod"));
     }
+
 }

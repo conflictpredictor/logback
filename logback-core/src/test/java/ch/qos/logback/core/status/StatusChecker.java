@@ -16,7 +16,6 @@ package ch.qos.logback.core.status;
 import ch.qos.logback.core.Context;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Extend  StatusUtil with assertions.
@@ -35,10 +34,6 @@ public class StatusChecker extends StatusUtil {
         assertTrue(containsMatch(level, regex));
     }
 
-    public void assertNoMatch(String regex) {
-        assertFalse(containsMatch(regex));
-    }
-    
     public void assertContainsMatch(String regex) {
         assertTrue(containsMatch(regex));
     }
@@ -51,7 +46,4 @@ public class StatusChecker extends StatusUtil {
         assertTrue(isErrorFree(0));
     }
 
-    public void assertIsWarningOrErrorFree() {
-        assertTrue(isWarningOrErrorFree(0));
-    }
 }

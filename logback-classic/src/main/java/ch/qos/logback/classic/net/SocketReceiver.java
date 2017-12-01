@@ -28,7 +28,6 @@ import javax.net.SocketFactory;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.net.server.HardenedLoggingEventInputStream;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.net.DefaultSocketConnector;
 import ch.qos.logback.core.net.AbstractSocketAppender;
@@ -114,9 +113,8 @@ public class SocketReceiver extends ReceiverBase implements Runnable, SocketConn
             while (!Thread.currentThread().isInterrupted()) {
                 SocketConnector connector = createConnector(address, port, 0, reconnectionDelay);
                 connectorTask = activateConnector(connector);
-                if (connectorTask == null) {
+                if (connectorTask == null)
                     break;
-                }
                 socket = waitForConnectorToReturnASocket();
                 if (socket == null)
                     break;
@@ -137,7 +135,7 @@ public class SocketReceiver extends ReceiverBase implements Runnable, SocketConn
 
     private Future<Socket> activateConnector(SocketConnector connector) {
         try {
-            return getContext().getScheduledExecutorService().submit(connector);
+            return getContext().getExecutorService().submit(connector);
         } catch (RejectedExecutionException ex) {
             return null;
         }
@@ -154,10 +152,9 @@ public class SocketReceiver extends ReceiverBase implements Runnable, SocketConn
     }
 
     private void dispatchEvents(LoggerContext lc) {
-        ObjectInputStream ois = null;
         try {
             socket.setSoTimeout(acceptConnectionTimeout);
-            ois = new HardenedLoggingEventInputStream(socket.getInputStream());
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
             socket.setSoTimeout(0);
             addInfo(receiverId + "connection established");
             while (true) {
@@ -174,7 +171,6 @@ public class SocketReceiver extends ReceiverBase implements Runnable, SocketConn
         } catch (ClassNotFoundException ex) {
             addInfo(receiverId + "unknown event class: " + ex);
         } finally {
-            CloseUtil.closeQuietly(ois);
             CloseUtil.closeQuietly(socket);
             socket = null;
             addInfo(receiverId + "connection closed");

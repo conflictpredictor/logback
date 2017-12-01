@@ -42,7 +42,6 @@ public interface StatusManager {
      * @return
      */
     // int getLevel();
-
     /**
      * Return the number of status entries.
      * 
@@ -54,7 +53,6 @@ public interface StatusManager {
      * Add a status listener.
      * @param listener
      */
-
     /**
      * Add a status listener. The StatusManager may decide to skip installation if an 
      * earlier instance was already installed.
@@ -63,7 +61,7 @@ public interface StatusManager {
      * @return true if actually added, false if skipped
      */
     boolean add(StatusListener listener);
-
+    boolean add(StatusListener listener);
     /**);
      * Remove a status listener.
      * 
@@ -82,5 +80,4 @@ public interface StatusManager {
      * @return
      */
     List<StatusListener> getCopyOfStatusListenerList();
-
 }

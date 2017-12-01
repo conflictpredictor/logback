@@ -11,57 +11,96 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic.util;
+package ch.qos.logback.classic.util; 
 
 import static org.junit.Assert.assertEquals;
+ 
 import static org.junit.Assert.assertNotNull;
+ 
 import static org.junit.Assert.assertNull;
+ 
 import static org.junit.Assert.assertSame;
+ 
 import static org.junit.Assert.assertTrue;
+ 
 import static org.junit.Assert.fail;
+ 
 import static org.junit.Assume.assumeTrue;
+ 
 
 import java.io.IOException;
+ 
 import java.io.InputStream;
+ 
 import java.net.MalformedURLException;
+ 
 import java.net.URL;
+ 
 import java.util.Enumeration;
+ 
 import java.util.List;
+ 
 import java.util.Vector;
+ 
 
 import org.junit.After;
+ 
 import org.junit.Before;
+ 
 import org.junit.Ignore;
+ 
 import org.junit.Test;
+ 
 
 import ch.qos.logback.classic.ClassicTestConstants;
+ 
 import ch.qos.logback.classic.Logger;
+ 
 import ch.qos.logback.classic.LoggerContext;
+ 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+ 
 import ch.qos.logback.core.Appender;
+ 
 import ch.qos.logback.core.ConsoleAppender;
+ 
 import ch.qos.logback.core.CoreConstants;
+ 
 import ch.qos.logback.core.LogbackException;
+ 
 import ch.qos.logback.core.joran.spi.JoranException;
+ 
 import ch.qos.logback.core.status.StatusListener;
+ 
 import ch.qos.logback.core.status.TrivialStatusListener;
+ 
 import ch.qos.logback.core.util.Loader;
+ 
 
-public class ContextInitializerTest {
+public
+  class
+  ContextInitializerTest {
+	
 
     LoggerContext loggerContext = new LoggerContext();
+
+	
     Logger root = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
 
-    @Before
-    public void setUp() throws Exception {
-    }
+	
+
+    // START setUp({FormalParametersInternal})//@Before
+  public void setUp() throws Exception {
+// END setUp({FormalParametersInternal})//  }
+	
 
     @After
     public void tearDown() throws Exception {
         System.clearProperty(ContextInitializer.CONFIG_FILE_PROPERTY);
-        System.clearProperty(CoreConstants.STATUS_LISTENER_CLASS_KEY);
+        System.clearProperty(CoreConstants.STATUS_LISTENER_CLASS);
         MockConfigurator.context = null;
     }
+	
 
     @Test
     @Ignore
@@ -81,45 +120,50 @@ public class ContextInitializerTest {
             assertNull(appender);
         }
     }
+	
 
-    @Test
-    public void autoConfigFromSystemProperties() throws JoranException {
-        doAutoConfigFromSystemProperties(ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml");
-        doAutoConfigFromSystemProperties("autoConfigAsResource.xml");
-        // test passing a URL. note the relative path syntax with file:src/test/...
-        doAutoConfigFromSystemProperties("file:" + ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml");
-    }
+    // START autoConfigFromSystemProperties({FormalParametersInternal})//@Test
+  public void autoConfigFromSystemProperties() throws JoranException  {
+    doAutoConfigFromSystemProperties(ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml");
+    doAutoConfigFromSystemProperties("autoConfigAsResource.xml");
+    // test passing a URL. note the relative path syntax with file:src/test/...
+    doAutoConfigFromSystemProperties("file:"+ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml"); 
+// END autoConfigFromSystemProperties({FormalParametersInternal})//  }
+	
 
-    public void doAutoConfigFromSystemProperties(String val) throws JoranException {
-        // lc.reset();
-        System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, val);
-        new ContextInitializer(loggerContext).autoConfig();
-        Appender<ILoggingEvent> appender = root.getAppender("AUTO_BY_SYSTEM_PROPERTY");
-        assertNotNull(appender);
-    }
+    // START doAutoConfigFromSystemProperties(String-String)//public void doAutoConfigFromSystemProperties(String val) throws JoranException {
+    //lc.reset();
+    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, val);
+    new ContextInitializer(loggerContext).autoConfig();
+    Appender<ILoggingEvent> appender = root.getAppender("AUTO_BY_SYSTEM_PROPERTY");
+    assertNotNull(appender);
+// END doAutoConfigFromSystemProperties(String-String)//  }
+	
 
-    @Test
-    public void autoConfigFromServiceLoaderJDK6andAbove() throws Exception {
-        assumeTrue(!isJDK5());
-        setupMockServiceLoader();
-        assertNull(MockConfigurator.context);
-        new ContextInitializer(loggerContext).autoConfig();
-        assertNotNull(MockConfigurator.context);
-        assertSame(loggerContext, MockConfigurator.context);
-    }
+    // START autoConfigFromServiceLoaderJDK6andAbove({FormalParametersInternal})//@Test
+  public void autoConfigFromServiceLoaderJDK6andAbove() throws Exception {
+    assumeTrue(!isJDK5());
+    setupMockServiceLoader();
+    assertNull(MockConfigurator.context);
+    new ContextInitializer(loggerContext).autoConfig();
+    assertNotNull(MockConfigurator.context);
+    assertSame(loggerContext, MockConfigurator.context);
+// END autoConfigFromServiceLoaderJDK6andAbove({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void autoConfigFromServiceLoaderJDK5() throws Exception {
-        assumeTrue(isJDK5());
-        setupMockServiceLoader();
-        assertNull(MockConfigurator.context);
-        new ContextInitializer(loggerContext).autoConfig();
-        assertNull(MockConfigurator.context);
-    }
+    // START autoConfigFromServiceLoaderJDK5({FormalParametersInternal})//@Test
+  public void autoConfigFromServiceLoaderJDK5() throws Exception {
+    assumeTrue(isJDK5());
+    setupMockServiceLoader();
+    assertNull(MockConfigurator.context);
+    new ContextInitializer(loggerContext).autoConfig();
+    assertNull(MockConfigurator.context);
+// END autoConfigFromServiceLoaderJDK5({FormalParametersInternal})//  }
+	
 
     @Test
     public void autoStatusListener() throws JoranException {
-        System.setProperty(CoreConstants.STATUS_LISTENER_CLASS_KEY, TrivialStatusListener.class.getName());
+        System.setProperty(CoreConstants.STATUS_LISTENER_CLASS, TrivialStatusListener.class.getName());
         List<StatusListener> statusListenerList = loggerContext.getStatusManager().getCopyOfStatusListenerList();
         assertEquals(0, statusListenerList.size());
         doAutoConfigFromSystemProperties(ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml");
@@ -129,120 +173,142 @@ public class ContextInitializerTest {
         TrivialStatusListener tsl = (TrivialStatusListener) statusListenerList.get(0);
         assertTrue("expecting at least one event in list", tsl.list.size() > 0);
     }
+	
 
     @Test
     public void autoOnConsoleStatusListener() throws JoranException {
-        System.setProperty(CoreConstants.STATUS_LISTENER_CLASS_KEY, CoreConstants.SYSOUT);
+        System.setProperty(CoreConstants.STATUS_LISTENER_CLASS, CoreConstants.SYSOUT);
         List<StatusListener> sll = loggerContext.getStatusManager().getCopyOfStatusListenerList();
         assertEquals(0, sll.size());
         doAutoConfigFromSystemProperties(ClassicTestConstants.INPUT_PREFIX + "autoConfig.xml");
         sll = loggerContext.getStatusManager().getCopyOfStatusListenerList();
         assertTrue(sll.size() + " should be 1", sll.size() == 1);
     }
+	
 
-    @Test
-    public void shouldConfigureFromXmlFile() throws MalformedURLException, JoranException {
-        LoggerContext loggerContext = new LoggerContext();
-        ContextInitializer initializer = new ContextInitializer(loggerContext);
-        assertNull(loggerContext.getObject(CoreConstants.SAFE_JORAN_CONFIGURATION));
+    // START shouldConfigureFromXmlFile({FormalParametersInternal})//@Test
+  public void shouldConfigureFromXmlFile() throws MalformedURLException, JoranException {
+    LoggerContext loggerContext = new LoggerContext();
+    ContextInitializer initializer = new ContextInitializer(loggerContext);
+    assertNull(loggerContext.getObject(CoreConstants.SAFE_JORAN_CONFIGURATION));
 
-        URL configurationFileUrl = Loader.getResource("BOO_logback-test.xml", Thread.currentThread().getContextClassLoader());
-        initializer.configureByResource(configurationFileUrl);
+    URL configurationFileUrl = Loader.getResource("BOO_logback-test.xml", Thread.currentThread().getContextClassLoader());
+    initializer.configureByResource(configurationFileUrl);
 
-        assertNotNull(loggerContext.getObject(CoreConstants.SAFE_JORAN_CONFIGURATION));
+    assertNotNull(loggerContext.getObject(CoreConstants.SAFE_JORAN_CONFIGURATION));
+// END shouldConfigureFromXmlFile({FormalParametersInternal})//  }
+	
+
+    // START shouldConfigureFromGroovyScript({FormalParametersInternal})//@Test
+  public void shouldConfigureFromGroovyScript() throws MalformedURLException, JoranException {
+    LoggerContext loggerContext = new LoggerContext();
+    ContextInitializer initializer = new ContextInitializer(loggerContext);
+    assertNull(loggerContext.getObject(CoreConstants.CONFIGURATION_WATCH_LIST));
+
+    URL configurationFileUrl = Loader.getResource("test.groovy", Thread.currentThread().getContextClassLoader());
+    initializer.configureByResource(configurationFileUrl);
+
+    assertNotNull(loggerContext.getObject(CoreConstants.CONFIGURATION_WATCH_LIST));
+// END shouldConfigureFromGroovyScript({FormalParametersInternal})//  }
+	
+
+    // START shouldThrowExceptionIfUnexpectedConfigurationFileExtension({FormalParametersInternal})//@Test
+  public void shouldThrowExceptionIfUnexpectedConfigurationFileExtension() throws JoranException {
+    LoggerContext loggerContext = new LoggerContext();
+    ContextInitializer initializer = new ContextInitializer(loggerContext);
+
+    URL configurationFileUrl = Loader.getResource("README.txt", Thread.currentThread().getContextClassLoader());
+    try {
+      initializer.configureByResource(configurationFileUrl);
+      fail("Should throw LogbackException");
+    } catch (LogbackException expectedException) {
+      // pass
     }
+// END shouldThrowExceptionIfUnexpectedConfigurationFileExtension({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void shouldConfigureFromGroovyScript() throws MalformedURLException, JoranException {
-        LoggerContext loggerContext = new LoggerContext();
-        ContextInitializer initializer = new ContextInitializer(loggerContext);
-        assertNull(loggerContext.getObject(CoreConstants.CONFIGURATION_WATCH_LIST));
+    // START isJDK5({FormalParametersInternal})//private static boolean isJDK5() {
+    String ver = System.getProperty("java.version");
+    boolean jdk5 = ver.startsWith("1.5.") || ver.equals("1.5");
+    return jdk5;
+// END isJDK5({FormalParametersInternal})//  }
+	
 
-        URL configurationFileUrl = Loader.getResource("test.groovy", Thread.currentThread().getContextClassLoader());
-        initializer.configureByResource(configurationFileUrl);
+    // START setupMockServiceLoader({FormalParametersInternal})//private void setupMockServiceLoader() {
+    final ClassLoader realLoader = EnvUtil.class.getClassLoader();
+    EnvUtil.testServiceLoaderClassLoader = new WrappedClassLoader(realLoader) {
 
-        assertNotNull(loggerContext.getObject(CoreConstants.CONFIGURATION_WATCH_LIST));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfUnexpectedConfigurationFileExtension() throws JoranException {
-        LoggerContext loggerContext = new LoggerContext();
-        ContextInitializer initializer = new ContextInitializer(loggerContext);
-
-        URL configurationFileUrl = Loader.getResource("README.txt", Thread.currentThread().getContextClassLoader());
-        try {
-            initializer.configureByResource(configurationFileUrl);
-            fail("Should throw LogbackException");
-        } catch (LogbackException expectedException) {
-            // pass
+      @Override
+      public Enumeration<URL> getResources(String name) throws IOException {
+        final Enumeration<URL> r;
+        if (name.endsWith("META-INF/services/ch.qos.logback.classic.spi.Configurator")) {
+          Vector<URL> vs = new Vector<URL>();
+          URL u = super.getResource("FAKE_META_INF_SERVICES_ch_qos_logback_classic_spi_Configurator");
+          vs.add(u);
+          return vs.elements();
+        } else {
+          r = super.getResources(name);
         }
-    }
+        return r;
+      }
+    };
+// END setupMockServiceLoader({FormalParametersInternal})//  }
+	
 
-    private static boolean isJDK5() {
-        String ver = System.getProperty("java.version");
-        boolean jdk5 = ver.startsWith("1.5.") || ver.equals("1.5");
-        return jdk5;
-    }
-
-    private void setupMockServiceLoader() {
-        final ClassLoader realLoader = EnvUtil.class.getClassLoader();
-        EnvUtil.testServiceLoaderClassLoader = new WrappedClassLoader(realLoader) {
-
-            @Override
-            public Enumeration<URL> getResources(String name) throws IOException {
-                final Enumeration<URL> r;
-                if (name.endsWith("META-INF/services/ch.qos.logback.classic.spi.Configurator")) {
-                    Vector<URL> vs = new Vector<URL>();
-                    URL u = super.getResource("FAKE_META_INF_SERVICES_ch_qos_logback_classic_spi_Configurator");
-                    vs.add(u);
-                    return vs.elements();
-                } else {
-                    r = super.getResources(name);
-                }
-                return r;
-            }
-        };
-    }
-
-    static class WrappedClassLoader extends ClassLoader {
+    static
+  class
+  WrappedClassLoader  extends ClassLoader
+ {
+		
         final ClassLoader delegate;
 
-        public WrappedClassLoader(ClassLoader delegate) {
-            super();
-            this.delegate = delegate;
-        }
+		
 
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-            return delegate.loadClass(name);
-        }
+        // START WrappedClassLoader(ClassLoader-ClassLoader)//public WrappedClassLoader(ClassLoader delegate) {
+      super();
+      this.delegate = delegate;
+// END WrappedClassLoader(ClassLoader-ClassLoader)//    }
+		
 
-        public URL getResource(String name) {
-            return delegate.getResource(name);
-        }
+        // START loadClass(String-String)//public Class<?> loadClass(String name) throws ClassNotFoundException {
+      return delegate.loadClass(name);
+// END loadClass(String-String)//    }
+		
 
-        public Enumeration<URL> getResources(String name) throws IOException {
-            return delegate.getResources(name);
-        }
+        // START getResource(String-String)//public URL getResource(String name) {
+      return delegate.getResource(name);
+// END getResource(String-String)//    }
+		
 
-        public InputStream getResourceAsStream(String name) {
-            return delegate.getResourceAsStream(name);
-        }
+        // START getResources(String-String)//public Enumeration<URL> getResources(String name) throws IOException {
+      return delegate.getResources(name);
+// END getResources(String-String)//    }
+		
 
-        public void setDefaultAssertionStatus(boolean enabled) {
-            delegate.setDefaultAssertionStatus(enabled);
-        }
+        // START getResourceAsStream(String-String)//public InputStream getResourceAsStream(String name) {
+      return delegate.getResourceAsStream(name);
+// END getResourceAsStream(String-String)//    }
+		
 
-        public void setPackageAssertionStatus(String packageName, boolean enabled) {
-            delegate.setPackageAssertionStatus(packageName, enabled);
-        }
+        // START setDefaultAssertionStatus(boolean-boolean)//public void setDefaultAssertionStatus(boolean enabled) {
+      delegate.setDefaultAssertionStatus(enabled);
+// END setDefaultAssertionStatus(boolean-boolean)//    }
+		
 
-        public void setClassAssertionStatus(String className, boolean enabled) {
-            delegate.setClassAssertionStatus(className, enabled);
-        }
+        // START setPackageAssertionStatus(String-String-boolean-boolean)//public void setPackageAssertionStatus(String packageName, boolean enabled) {
+      delegate.setPackageAssertionStatus(packageName, enabled);
+// END setPackageAssertionStatus(String-String-boolean-boolean)//    }
+		
 
-        public void clearAssertionStatus() {
-            delegate.clearAssertionStatus();
-        }
-    }
+        // START setClassAssertionStatus(String-String-boolean-boolean)//public void setClassAssertionStatus(String className, boolean enabled) {
+      delegate.setClassAssertionStatus(className, enabled);
+// END setClassAssertionStatus(String-String-boolean-boolean)//    }
+		
+
+        // START clearAssertionStatus({FormalParametersInternal})//public void clearAssertionStatus() {
+      delegate.clearAssertionStatus();
+// END clearAssertionStatus({FormalParametersInternal})//    }
+
+	}
 
 }

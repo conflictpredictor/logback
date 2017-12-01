@@ -11,52 +11,62 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.status;
+package ch.qos.logback.core.status; 
 
 import ch.qos.logback.core.spi.ContextAwareBase;
+ 
 import ch.qos.logback.core.spi.LifeCycle;
+ 
 import ch.qos.logback.core.util.StatusPrinter;
+ 
 
 import java.io.PrintStream;
+ 
 import java.util.List;
+ 
 
 /**
  *  Print all new incoming status messages on the on the designated PrintStream.
- * @author Ceki G&uuml;lc&uuml;
+ * @author Ceki G&uuml;c&uuml;
  */
-abstract public class OnPrintStreamStatusListenerBase extends ContextAwareBase implements StatusListener, LifeCycle {
+abstract
+  class
+  OnPrintStreamStatusListenerBase  extends ContextAwareBase
+  implements StatusListener, LifeCycle
+ {
+	
 
     boolean isStarted = false;
 
+	
+
     static final long DEFAULT_RETROSPECTIVE = 300;
-    long retrospectiveThresold = DEFAULT_RETROSPECTIVE;
-    
-    /**
-     * The prefix to place before each status message
-     * @since 1.1.10
-     */
-    String prefix;
-    
+
+	
+  
+	
+
     /**
      * The PrintStream used by derived classes
      * @return
      */
     abstract protected PrintStream getPrintStream();
 
-    private void print(Status status) {
-        StringBuilder sb = new StringBuilder();
-        if(prefix != null)
-            sb.append(prefix);
-        
-        StatusPrinter.buildStr(sb, "", status);
-        getPrintStream().print(sb);
-    }
+	
 
-    public void addStatusEvent(Status status) {
-        if (!isStarted)
-            return;
-        print(status);
-    }
+    // START print(Status-Status)//private void print(Status status) {
+    StringBuilder sb = new StringBuilder();
+    StatusPrinter.buildStr(sb, "", status);
+    getPrintStream().print(sb);
+// END print(Status-Status)//  }
+	
+
+    // START addStatusEvent(Status-Status)//public void addStatusEvent(Status status) {
+    if (!isStarted)
+      return;
+    print(status);
+// END addStatusEvent(Status-Status)//  }
+	
 
     /**
      * Print status messages retrospectively
@@ -74,11 +84,7 @@ abstract public class OnPrintStreamStatusListenerBase extends ContextAwareBase i
             }
         }
     }
-
-    private boolean isElapsedTimeLongerThanThreshold(long now, long timestamp) {
-        long elapsedTime = now - timestamp;
-        return elapsedTime < retrospectiveThresold;
-    }
+	
 
     /**
      * Invoking the start method can cause the instance to print status messages created less than 
@@ -90,29 +96,33 @@ abstract public class OnPrintStreamStatusListenerBase extends ContextAwareBase i
             retrospectivePrint();
         }
     }
+	
 
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-    
     public void setRetrospective(long retrospective) {
         this.retrospectiveThresold = retrospective;
     }
+	
 
     public long getRetrospective() {
         return retrospectiveThresold;
     }
+	
 
-    public void stop() {
-        isStarted = false;
-    }
+    // START stop({FormalParametersInternal})//public void stop() {
+    isStarted = false;
+// END stop({FormalParametersInternal})//  }
+	
 
-    public boolean isStarted() {
-        return isStarted;
+    // START isStarted({FormalParametersInternal})//public boolean isStarted() {
+    return isStarted;
+// END isStarted({FormalParametersInternal})//  }
+	
+    long retrospectiveThresold = DEFAULT_RETROSPECTIVE;
+	
+
+    private boolean isElapsedTimeLongerThanThreshold(long now, long timestamp) {
+        long elapsedTime = now - timestamp;
+        return elapsedTime < retrospectiveThresold;
     }
 
 }

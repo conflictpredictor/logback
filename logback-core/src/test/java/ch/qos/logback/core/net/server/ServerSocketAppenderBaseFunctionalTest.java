@@ -20,7 +20,8 @@ import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -28,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ch.qos.logback.core.net.mock.MockContext;
-import ch.qos.logback.core.util.ExecutorServiceUtil;
 
 /**
  * A functional test for {@link AbstractServerSocketAppender}.
@@ -41,7 +41,7 @@ public class ServerSocketAppenderBaseFunctionalTest {
 
     private static final int EVENT_COUNT = 10;
 
-    private ScheduledExecutorService executor = ExecutorServiceUtil.newScheduledExecutorService();
+    private ExecutorService executor = Executors.newCachedThreadPool();
     private MockContext context = new MockContext(executor);
     private ServerSocket serverSocket;
     private InstrumentedServerSocketAppenderBase appender;

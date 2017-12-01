@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * A registry which maps a property in a host class to a default class.
  * 
- * @author Ceki G&uuml;lc&uuml;
+ * @author Cek G&uuml;lc&uuml;
  * 
  */
 public class DefaultNestedComponentRegistry {

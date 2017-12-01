@@ -11,35 +11,52 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.classic;
+package ch.qos.logback.classic; 
 
-import static ch.qos.logback.core.CoreConstants.EVALUATOR_MAP;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+ 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
+ 
+import ch.qos.logback.classic.util.LoggerNameUtil;
+ 
 
 import org.slf4j.ILoggerFactory;
+ 
 import org.slf4j.Marker;
+ 
 
 import ch.qos.logback.classic.spi.LoggerComparator;
+ 
 import ch.qos.logback.classic.spi.LoggerContextListener;
+ 
 import ch.qos.logback.classic.spi.LoggerContextVO;
+ 
 import ch.qos.logback.classic.spi.TurboFilterList;
+ 
 import ch.qos.logback.classic.turbo.TurboFilter;
-import ch.qos.logback.classic.util.LoggerNameUtil;
+ 
 import ch.qos.logback.core.ContextBase;
-import ch.qos.logback.core.boolex.EventEvaluator;
+ 
+ 
 import ch.qos.logback.core.spi.FilterReply;
+ 
 import ch.qos.logback.core.spi.LifeCycle;
+ 
 import ch.qos.logback.core.status.StatusListener;
+ 
 import ch.qos.logback.core.status.StatusManager;
+ 
 import ch.qos.logback.core.status.WarnStatus;
+ 
+
+import static ch.qos.logback.core.CoreConstants.EVALUATOR_MAP; 
+
+import java.util.ArrayList; 
+import java.util.Collection; 
+import java.util.Collections; 
+import java.util.HashMap; 
+import java.util.List; 
+import java.util.Map; 
+import ch.qos.logback.core.boolex.EventEvaluator; 
 
 /**
  * LoggerContext glues many of the logback-classic components together. In
@@ -50,67 +67,99 @@ import ch.qos.logback.core.status.WarnStatus;
  *
  * @author Ceki Gulcu
  */
-public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCycle {
+public
+  class
+  LoggerContext  extends ContextBase
+  implements ILoggerFactory, LifeCycle
+ {
+	
 
-    /** Default setting of packaging data in stack traces */
-    public static final boolean DEFAULT_PACKAGING_DATA = false;
+  /** Default setting of stacktrace packaging detail */
+  
+	
 
     final Logger root;
+
+	
     private int size;
+
+	
     private int noAppenderWarning = 0;
+
+	
     final private List<LoggerContextListener> loggerContextListenerList = new ArrayList<LoggerContextListener>();
+
+	
 
     private Map<String, Logger> loggerCache;
 
+	
+
     private LoggerContextVO loggerContextRemoteView;
+
+	
     private final TurboFilterList turboFilterList = new TurboFilterList();
+
+	
     private boolean packagingDataEnabled = DEFAULT_PACKAGING_DATA;
+
+	
 
     private int maxCallerDataDepth = ClassicConstants.DEFAULT_MAX_CALLEDER_DATA_DEPTH;
 
+	
+
     int resetCount = 0;
+
+	
     private List<String> frameworkPackages;
 
-    public LoggerContext() {
-        super();
-        this.loggerCache = new ConcurrentHashMap<String, Logger>();
+	
 
-        this.loggerContextRemoteView = new LoggerContextVO(this);
-        this.root = new Logger(Logger.ROOT_LOGGER_NAME, null, this);
-        this.root.setLevel(Level.DEBUG);
-        loggerCache.put(Logger.ROOT_LOGGER_NAME, root);
-        initEvaluatorMap();
-        size = 1;
-        this.frameworkPackages = new ArrayList<String>();
-    }
+    // START LoggerContext({FormalParametersInternal})//public LoggerContext() {
+    super();
+    this.loggerCache = new ConcurrentHashMap<String, Logger>();
+
+    this.loggerContextRemoteView = new LoggerContextVO(this);
+    this.root = new Logger(Logger.ROOT_LOGGER_NAME, null, this);
+    this.root.setLevel(Level.DEBUG);
+    loggerCache.put(Logger.ROOT_LOGGER_NAME, root);
+    initEvaluatorMap();
+    size = 1;
+    this.frameworkPackages = new ArrayList<String>();
+// END LoggerContext({FormalParametersInternal})//  }
+	
 
     void initEvaluatorMap() {
         putObject(EVALUATOR_MAP, new HashMap<String, EventEvaluator<?>>());
     }
+	
 
     /**
      * A new instance of LoggerContextRemoteView needs to be created each time the
      * name or propertyMap (including keys or values) changes.
      */
-    private void updateLoggerContextVO() {
-        loggerContextRemoteView = new LoggerContextVO(this);
-    }
+    // START updateLoggerContextVO({FormalParametersInternal})//private void updateLoggerContextVO() {
+    loggerContextRemoteView = new LoggerContextVO(this);
+// END updateLoggerContextVO({FormalParametersInternal})//  }
+	
 
-    @Override
-    public void putProperty(String key, String val) {
-        super.putProperty(key, val);
-        updateLoggerContextVO();
-    }
+    // START putProperty(String-String-String-String)//@Override
+  public void putProperty(String key, String val) {
+    super.putProperty(key, val);
+    updateLoggerContextVO();
+// END putProperty(String-String-String-String)//  }
+	
 
-    @Override
-    public void setName(String name) {
-        super.setName(name);
-        updateLoggerContextVO();
-    }
+    // START setName(String-String)//@Override
+  public void setName(String name) {
+    super.setName(name);
+    updateLoggerContextVO();
+// END setName(String-String)//  }
+	
 
-    public final Logger getLogger(final Class<?> clazz) {
-        return getLogger(clazz.getName());
-    }
+  
+	
 
     @Override
     public final Logger getLogger(final String name) {
@@ -162,14 +211,17 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
             }
         }
     }
+	
 
-    private void incSize() {
-        size++;
-    }
+    // START incSize({FormalParametersInternal})//private void incSize() {
+    size++;
+// END incSize({FormalParametersInternal})//  }
+	
 
-    int size() {
-        return size;
-    }
+    // START size({FormalParametersInternal})//int size() {
+    return size;
+// END size({FormalParametersInternal})//  }
+	
 
     /**
      * Check if the named logger exists in the hierarchy. If so return its
@@ -177,34 +229,42 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
      *
      * @param name the name of the logger to search for.
      */
-    public Logger exists(String name) {
-        return (Logger) loggerCache.get(name);
-    }
+    // START exists(String-String)//public Logger exists(String name) {
+    return (Logger) loggerCache.get(name);
+// END exists(String-String)//  }
+	
 
-    final void noAppenderDefinedWarning(final Logger logger) {
-        if (noAppenderWarning++ == 0) {
-            getStatusManager().add(new WarnStatus("No appenders present in context [" + getName() + "] for logger [" + logger.getName() + "].", logger));
-        }
+    // START noAppenderDefinedWarning(Logger-Logger)//final void noAppenderDefinedWarning(final Logger logger) {
+    if (noAppenderWarning++ == 0) {
+      getStatusManager().add(
+              new WarnStatus("No appenders present in context [" + getName()
+                      + "] for logger [" + logger.getName() + "].", logger));
     }
+// END noAppenderDefinedWarning(Logger-Logger)//  }
+	
 
-    public List<Logger> getLoggerList() {
-        Collection<Logger> collection = loggerCache.values();
-        List<Logger> loggerList = new ArrayList<Logger>(collection);
-        Collections.sort(loggerList, new LoggerComparator());
-        return loggerList;
-    }
+    // START getLoggerList({FormalParametersInternal})//public List<Logger> getLoggerList() {
+    Collection<Logger> collection = loggerCache.values();
+    List<Logger> loggerList = new ArrayList<Logger>(collection);
+    Collections.sort(loggerList, new LoggerComparator());
+    return loggerList;
+// END getLoggerList({FormalParametersInternal})//  }
+	
 
-    public LoggerContextVO getLoggerContextRemoteView() {
-        return loggerContextRemoteView;
-    }
+    // START getLoggerContextRemoteView({FormalParametersInternal})//public LoggerContextVO getLoggerContextRemoteView() {
+    return loggerContextRemoteView;
+// END getLoggerContextRemoteView({FormalParametersInternal})//  }
+	
 
-    public void setPackagingDataEnabled(boolean packagingDataEnabled) {
-        this.packagingDataEnabled = packagingDataEnabled;
-    }
+    // START setPackagingDataEnabled(boolean-boolean)//public void setPackagingDataEnabled(boolean packagingDataEnabled) {
+    this.packagingDataEnabled = packagingDataEnabled;
+// END setPackagingDataEnabled(boolean-boolean)//  }
+	
 
-    public boolean isPackagingDataEnabled() {
-        return packagingDataEnabled;
-    }
+    // START isPackagingDataEnabled({FormalParametersInternal})//public boolean isPackagingDataEnabled() {
+    return packagingDataEnabled;
+// END isPackagingDataEnabled({FormalParametersInternal})//  }
+	
 
     /**
      * This method clears all internal properties, except internal status messages,
@@ -222,147 +282,167 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
         initCollisionMaps();
         root.recursiveReset();
         resetTurboFilterList();
-        cancelScheduledTasks();
         fireOnReset();
         resetListenersExceptResetResistant();
         resetStatusListeners();
     }
+	
 
-    private void cancelScheduledTasks() {
-        for(ScheduledFuture<?> sf: scheduledFutures) {
-            sf.cancel(false);
-        }
-        scheduledFutures.clear();
+    // START resetStatusListeners({FormalParametersInternal})//private void resetStatusListeners() {
+    StatusManager sm = getStatusManager();
+    for (StatusListener sl : sm.getCopyOfStatusListenerList()) {
+      sm.remove(sl);
     }
+// END resetStatusListeners({FormalParametersInternal})//  }
+	
 
-    private void resetStatusListeners() {
-        StatusManager sm = getStatusManager();
-        for (StatusListener sl : sm.getCopyOfStatusListenerList()) {
-            sm.remove(sl);
-        }
-    }
+    // START getTurboFilterList({FormalParametersInternal})//public TurboFilterList getTurboFilterList() {
+    return turboFilterList;
+// END getTurboFilterList({FormalParametersInternal})//  }
+	
 
-    public TurboFilterList getTurboFilterList() {
-        return turboFilterList;
-    }
-
-    public void addTurboFilter(TurboFilter newFilter) {
-        turboFilterList.add(newFilter);
-    }
+    // START addTurboFilter(TurboFilter-TurboFilter)//public void addTurboFilter(TurboFilter newFilter) {
+    turboFilterList.add(newFilter);
+// END addTurboFilter(TurboFilter-TurboFilter)//  }
+	
 
     /**
      * First processPriorToRemoval all registered turbo filters and then clear the registration
      * list.
      */
-    public void resetTurboFilterList() {
-        for (TurboFilter tf : turboFilterList) {
-            tf.stop();
-        }
-        turboFilterList.clear();
+    // START resetTurboFilterList({FormalParametersInternal})//public void resetTurboFilterList() {
+    for (TurboFilter tf : turboFilterList) {
+      tf.stop();
     }
+    turboFilterList.clear();
+// END resetTurboFilterList({FormalParametersInternal})//  }
+	
 
-    final FilterReply getTurboFilterChainDecision_0_3OrMore(final Marker marker, final Logger logger, final Level level, final String format,
-                    final Object[] params, final Throwable t) {
-        if (turboFilterList.size() == 0) {
-            return FilterReply.NEUTRAL;
-        }
-        return turboFilterList.getTurboFilterChainDecision(marker, logger, level, format, params, t);
+    // START getTurboFilterChainDecision_0_3OrMore(Marker-Marker-Logger-Logger-Level-Level-String-String-Object[]-Object[]-Throwable-Throwable)//final FilterReply getTurboFilterChainDecision_0_3OrMore(final Marker marker,
+                                                          final Logger logger, final Level level, final String format,
+                                                          final Object[] params, final Throwable t) {
+    if (turboFilterList.size() == 0) {
+      return FilterReply.NEUTRAL;
     }
+    return turboFilterList.getTurboFilterChainDecision(marker, logger, level,
+            format, params, t);
+// END getTurboFilterChainDecision_0_3OrMore(Marker-Marker-Logger-Logger-Level-Level-String-String-Object[]-Object[]-Throwable-Throwable)//  }
+	
 
-    final FilterReply getTurboFilterChainDecision_1(final Marker marker, final Logger logger, final Level level, final String format, final Object param,
-                    final Throwable t) {
-        if (turboFilterList.size() == 0) {
-            return FilterReply.NEUTRAL;
-        }
-        return turboFilterList.getTurboFilterChainDecision(marker, logger, level, format, new Object[] { param }, t);
+    // START getTurboFilterChainDecision_1(Marker-Marker-Logger-Logger-Level-Level-String-String-Object-Object-Throwable-Throwable)//final FilterReply getTurboFilterChainDecision_1(final Marker marker,
+                                                  final Logger logger, final Level level, final String format,
+                                                  final Object param, final Throwable t) {
+    if (turboFilterList.size() == 0) {
+      return FilterReply.NEUTRAL;
     }
+    return turboFilterList.getTurboFilterChainDecision(marker, logger, level,
+            format, new Object[]{param}, t);
+// END getTurboFilterChainDecision_1(Marker-Marker-Logger-Logger-Level-Level-String-String-Object-Object-Throwable-Throwable)//  }
+	
 
-    final FilterReply getTurboFilterChainDecision_2(final Marker marker, final Logger logger, final Level level, final String format, final Object param1,
-                    final Object param2, final Throwable t) {
-        if (turboFilterList.size() == 0) {
-            return FilterReply.NEUTRAL;
-        }
-        return turboFilterList.getTurboFilterChainDecision(marker, logger, level, format, new Object[] { param1, param2 }, t);
+    // START getTurboFilterChainDecision_2(Marker-Marker-Logger-Logger-Level-Level-String-String-Object-Object-Object-Object-Throwable-Throwable)//final FilterReply getTurboFilterChainDecision_2(final Marker marker,
+                                                  final Logger logger, final Level level, final String format,
+                                                  final Object param1, final Object param2, final Throwable t) {
+    if (turboFilterList.size() == 0) {
+      return FilterReply.NEUTRAL;
     }
+    return turboFilterList.getTurboFilterChainDecision(marker, logger, level,
+            format, new Object[]{param1, param2}, t);
+// END getTurboFilterChainDecision_2(Marker-Marker-Logger-Logger-Level-Level-String-String-Object-Object-Object-Object-Throwable-Throwable)//  }
+	
 
     // === start listeners ==============================================
-    public void addListener(LoggerContextListener listener) {
-        loggerContextListenerList.add(listener);
-    }
+    // START addListener(LoggerContextListener-LoggerContextListener)//public void addListener(LoggerContextListener listener) {
+    loggerContextListenerList.add(listener);
+// END addListener(LoggerContextListener-LoggerContextListener)//  }
+	
 
-    public void removeListener(LoggerContextListener listener) {
-        loggerContextListenerList.remove(listener);
-    }
+    // START removeListener(LoggerContextListener-LoggerContextListener)//public void removeListener(LoggerContextListener listener) {
+    loggerContextListenerList.remove(listener);
+// END removeListener(LoggerContextListener-LoggerContextListener)//  }
+	
 
-    private void resetListenersExceptResetResistant() {
-        List<LoggerContextListener> toRetain = new ArrayList<LoggerContextListener>();
+    // START resetListenersExceptResetResistant({FormalParametersInternal})//private void resetListenersExceptResetResistant() {
+    List<LoggerContextListener> toRetain = new ArrayList<LoggerContextListener>();
 
-        for (LoggerContextListener lcl : loggerContextListenerList) {
-            if (lcl.isResetResistant()) {
-                toRetain.add(lcl);
-            }
-        }
-        loggerContextListenerList.retainAll(toRetain);
+    for (LoggerContextListener lcl : loggerContextListenerList) {
+      if (lcl.isResetResistant()) {
+        toRetain.add(lcl);
+      }
     }
+    loggerContextListenerList.retainAll(toRetain);
+// END resetListenersExceptResetResistant({FormalParametersInternal})//  }
+	
 
-    private void resetAllListeners() {
-        loggerContextListenerList.clear();
-    }
+    // START resetAllListeners({FormalParametersInternal})//private void resetAllListeners() {
+    loggerContextListenerList.clear();
+// END resetAllListeners({FormalParametersInternal})//  }
+	
 
-    public List<LoggerContextListener> getCopyOfListenerList() {
-        return new ArrayList<LoggerContextListener>(loggerContextListenerList);
-    }
+    // START getCopyOfListenerList({FormalParametersInternal})//public List<LoggerContextListener> getCopyOfListenerList() {
+    return new ArrayList<LoggerContextListener>(loggerContextListenerList);
+// END getCopyOfListenerList({FormalParametersInternal})//  }
+	
 
-    void fireOnLevelChange(Logger logger, Level level) {
-        for (LoggerContextListener listener : loggerContextListenerList) {
-            listener.onLevelChange(logger, level);
-        }
+    // START fireOnLevelChange(Logger-Logger-Level-Level)//void fireOnLevelChange(Logger logger, Level level) {
+    for (LoggerContextListener listener : loggerContextListenerList) {
+      listener.onLevelChange(logger, level);
     }
+// END fireOnLevelChange(Logger-Logger-Level-Level)//  }
+	
 
-    private void fireOnReset() {
-        for (LoggerContextListener listener : loggerContextListenerList) {
-            listener.onReset(this);
-        }
+    // START fireOnReset({FormalParametersInternal})//private void fireOnReset() {
+    for (LoggerContextListener listener : loggerContextListenerList) {
+      listener.onReset(this);
     }
+// END fireOnReset({FormalParametersInternal})//  }
+	
 
-    private void fireOnStart() {
-        for (LoggerContextListener listener : loggerContextListenerList) {
-            listener.onStart(this);
-        }
+    // START fireOnStart({FormalParametersInternal})//private void fireOnStart() {
+    for (LoggerContextListener listener : loggerContextListenerList) {
+      listener.onStart(this);
     }
+// END fireOnStart({FormalParametersInternal})//  }
+	
 
-    private void fireOnStop() {
-        for (LoggerContextListener listener : loggerContextListenerList) {
-            listener.onStop(this);
-        }
+    // START fireOnStop({FormalParametersInternal})//private void fireOnStop() {
+    for (LoggerContextListener listener : loggerContextListenerList) {
+      listener.onStop(this);
     }
+// END fireOnStop({FormalParametersInternal})//  }
+	
 
     // === end listeners ==============================================
 
-    public void start() {
-        super.start();
-        fireOnStart();
-    }
+    // START start({FormalParametersInternal})//public void start() {
+    super.start();
+    fireOnStart();
+// END start({FormalParametersInternal})//  }
+	
 
-    public void stop() {
-        reset();
-        fireOnStop();
-        resetAllListeners();
-        super.stop();
-    }
+    // START stop({FormalParametersInternal})//public void stop() {
+    reset();
+    fireOnStop();
+    resetAllListeners();
+    super.stop();
+// END stop({FormalParametersInternal})//  }
+	
 
-    @Override
-    public String toString() {
-        return this.getClass().getName() + "[" + getName() + "]";
-    }
+    // START toString({FormalParametersInternal})//@Override
+  public String toString() {
+    return this.getClass().getName() + "[" + getName() + "]";
+// END toString({FormalParametersInternal})//  }
+	
 
-    public int getMaxCallerDataDepth() {
-        return maxCallerDataDepth;
-    }
+    // START getMaxCallerDataDepth({FormalParametersInternal})//public int getMaxCallerDataDepth() {
+    return maxCallerDataDepth;
+// END getMaxCallerDataDepth({FormalParametersInternal})//  }
+	
 
-    public void setMaxCallerDataDepth(int maxCallerDataDepth) {
-        this.maxCallerDataDepth = maxCallerDataDepth;
-    }
+    // START setMaxCallerDataDepth(int-int)//public void setMaxCallerDataDepth(int maxCallerDataDepth) {
+    this.maxCallerDataDepth = maxCallerDataDepth;
+// END setMaxCallerDataDepth(int-int)//  }
+	
 
     /**
      * List of packages considered part of the logging framework such that they are never considered
@@ -373,7 +453,17 @@ public class LoggerContext extends ContextBase implements ILoggerFactory, LifeCy
      *
      * @return list of framework packages
      */
-    public List<String> getFrameworkPackages() {
-        return frameworkPackages;
+    // START getFrameworkPackages({FormalParametersInternal})//public List<String> getFrameworkPackages() {
+    return frameworkPackages;
+// END getFrameworkPackages({FormalParametersInternal})//  }
+	
+
+    /** Default setting of packaging data in stack traces */
+    public static final boolean DEFAULT_PACKAGING_DATA = false;
+	
+
+    public final Logger getLogger(final Class<?> clazz) {
+        return getLogger(clazz.getName());
     }
+
 }

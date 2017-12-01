@@ -11,28 +11,40 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.testUtil;
+package ch.qos.logback.core.testUtil; 
 
 import ch.qos.logback.core.read.ListAppender;
+ 
 
-public class DelayingListAppender<E> extends ListAppender<E> {
+public
+  class
+  DelayingListAppender <E>
+  extends ListAppender<E>
+ {
+	
 
-    public int delay = 1;
+    public int delay = 5;
+
+	
     public boolean interrupted = false;
+
+	
+
+    // START append(E-E)//@Override
+  public void append(E e) {
+    try {
+      Thread.yield();
+      Thread.sleep(delay);
+      Thread.yield();
+    } catch (InterruptedException ie) {
+      interrupted = true;
+    }
+    super.append(e);
+// END append(E-E)//  }
+	
 
     public void setDelay(int ms) {
         delay = ms;
     }
 
-    @Override
-    public void append(E e) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException ie) {
-            // consume InterruptedException
-            interrupted = true;
-        }
-        super.append(e);
-    }
 }
-

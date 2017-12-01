@@ -47,7 +47,7 @@ public class DateConverter extends ClassicConverter {
             cachingDateFormatter = new CachingDateFormatter(CoreConstants.ISO8601_PATTERN);
         }
 
-        List<String> optionList = getOptionList();
+        List optionList = getOptionList();
 
         // if the option list contains a TZ option, then set it.
         if (optionList != null && optionList.size() > 1) {

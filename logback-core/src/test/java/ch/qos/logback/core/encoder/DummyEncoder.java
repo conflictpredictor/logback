@@ -13,7 +13,8 @@
  */
 package ch.qos.logback.core.encoder;
 
-import java.nio.charset.Charset;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import ch.qos.logback.core.CoreConstants;
 
@@ -23,14 +24,14 @@ public class DummyEncoder<E> extends EncoderBase<E> {
     String val = DUMMY;
     String fileHeader;
     String fileFooter;
-    Charset charset;
+    String encodingName;
 
-    public Charset getCharset() {
-        return charset;
+    public String getEncodingName() {
+        return encodingName;
     }
 
-    public void setCharset(Charset charset) {
-        this.charset = charset;
+    public void setEncodingName(String encodingName) {
+        this.encodingName = encodingName;
     }
 
     public DummyEncoder() {
@@ -40,16 +41,8 @@ public class DummyEncoder<E> extends EncoderBase<E> {
         this.val = val;
     }
 
-    public byte[] encode(E event)  {
-        return encodeString(val);
-    }
-
-    byte[] encodeString(String s) {
-        if (charset == null) {
-            return s.getBytes();
-        } else {
-            return s.getBytes(charset);
-        }
+    public void doEncode(E event) throws IOException {
+        writeOut(val);
     }
 
     private void appendIfNotNull(StringBuilder sb, String s) {
@@ -58,27 +51,40 @@ public class DummyEncoder<E> extends EncoderBase<E> {
         }
     }
 
-    byte[] header() {
+    void writeOut(String s) throws IOException {
+        if (encodingName == null) {
+            outputStream.write(s.getBytes());
+        } else {
+            outputStream.write(s.getBytes(encodingName));
+        }
+    }
+
+    void writeHeader() throws IOException {
         StringBuilder sb = new StringBuilder();
         appendIfNotNull(sb, fileHeader);
         if (sb.length() > 0) {
+            sb.append(CoreConstants.LINE_SEPARATOR);
             // If at least one of file header or presentation header were not
             // null, then append a line separator.
             // This should be useful in most cases and should not hurt.
-            sb.append(CoreConstants.LINE_SEPARATOR);
+            writeOut(sb.toString());
         }
-        return encodeString(sb.toString());
     }
 
-    public byte[] headerBytes() {
-        return header();
+    public void init(OutputStream os) throws IOException {
+        super.init(os);
+        writeHeader();
     }
 
-    public byte[] footerBytes()  {
+    public void close() throws IOException {
         if (fileFooter == null) {
-            return null;
+            return;
         }
-        return encodeString(fileFooter);
+        if (encodingName == null) {
+            outputStream.write(fileFooter.getBytes());
+        } else {
+            outputStream.write(fileFooter.getBytes(encodingName));
+        }
     }
 
     public String getFileHeader() {

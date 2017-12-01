@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
+import org.slf4j.helpers.BogoPerf;
 
 import ch.qos.logback.classic.net.NOPOutputStream;
 import ch.qos.logback.classic.net.testObjectBuilders.Builder;
@@ -105,7 +106,7 @@ public class LoggingEventSerializationPerfTest {
 
         // the reference was computed on Orion (Ceki's computer)
         long referencePerf = 5000;
-        //BogoPerf.assertDuration(rt, referencePerf, CoreConstants.REFERENCE_BIPS);
+        BogoPerf.assertDuration(rt, referencePerf, CoreConstants.REFERENCE_BIPS);
     }
 
     @Test
@@ -130,6 +131,6 @@ public class LoggingEventSerializationPerfTest {
 
         // the reference was computed on Orion (Ceki's computer)
         long referencePerf = 7000;
-        //BogoPerf.assertDuration(rt, referencePerf, CoreConstants.REFERENCE_BIPS);
+        BogoPerf.assertDuration(rt, referencePerf, CoreConstants.REFERENCE_BIPS);
     }
 }

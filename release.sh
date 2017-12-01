@@ -1,3 +1,5 @@
+# memory aid 
+
 mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${VERSION_NUMBER} 
 
 mvn clean
@@ -6,8 +8,8 @@ mvn animal-sniffer:check
 mvn site:site
 
 #mvn javadoc:jar
-mvn assembly:single
-mvn deploy -P javadocjar,sign-artifacts -Dgpg.passphrase=passwd
+mvn assembly:assembly
+mvn deploy -P javadocjar,sign-artifacts
 
 #uncomment diffie-hellman support in /etc/ssh/sshd_config
 mvn site:deploy -N

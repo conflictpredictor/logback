@@ -11,30 +11,54 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.pattern;
-
-import java.util.HashMap;
-import java.util.Map;
+package ch.qos.logback.core.pattern; 
 
 import ch.qos.logback.core.Context;
+ 
 import ch.qos.logback.core.CoreConstants;
+ 
 import ch.qos.logback.core.LayoutBase;
+ 
 import ch.qos.logback.core.pattern.parser.Node;
+ 
 import ch.qos.logback.core.pattern.parser.Parser;
+ 
 import ch.qos.logback.core.spi.ScanException;
+ 
 import ch.qos.logback.core.status.ErrorStatus;
+ 
 import ch.qos.logback.core.status.StatusManager;
+ 
 
-abstract public class PatternLayoutBase<E> extends LayoutBase<E> {
+import java.util.HashMap;
+ 
+import java.util.Map;
+ 
 
-    static final int INTIAL_STRING_BUILDER_SIZE = 256;
+abstract public
+  class
+  PatternLayoutBase <E>
+  extends LayoutBase<E>
+ {
+	
+
     Converter<E> head;
+
+	
     String pattern;
+
+	
     protected PostCompileProcessor<E> postCompileProcessor;
-    
+
+	
+
     Map<String, String> instanceConverterMap = new HashMap<String, String>();
+
+	
     protected boolean outputPatternAsHeader = false;
-    
+
+	
+
     /**
      * Concrete implementations of this class are responsible for elaborating the
      * mapping between pattern words and converters.
@@ -43,32 +67,36 @@ abstract public class PatternLayoutBase<E> extends LayoutBase<E> {
      */
     abstract public Map<String, String> getDefaultConverterMap();
 
+	
+
     /**
      * Returns a map where the default converter map is merged with the map
      * contained in the context.
      */
-    public Map<String, String> getEffectiveConverterMap() {
-        Map<String, String> effectiveMap = new HashMap<String, String>();
+    // START getEffectiveConverterMap({FormalParametersInternal})//public Map<String, String> getEffectiveConverterMap() {
+    Map<String, String> effectiveMap = new HashMap<String, String>();
 
-        // add the least specific map fist
-        Map<String, String> defaultMap = getDefaultConverterMap();
-        if (defaultMap != null) {
-            effectiveMap.putAll(defaultMap);
-        }
-
-        // contextMap is more specific than the default map
-        Context context = getContext();
-        if (context != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, String> contextMap = (Map<String, String>) context.getObject(CoreConstants.PATTERN_RULE_REGISTRY);
-            if (contextMap != null) {
-                effectiveMap.putAll(contextMap);
-            }
-        }
-        // set the most specific map last
-        effectiveMap.putAll(instanceConverterMap);
-        return effectiveMap;
+    // add the least specific map fist
+    Map<String, String> defaultMap = getDefaultConverterMap();
+    if (defaultMap != null) {
+      effectiveMap.putAll(defaultMap);
     }
+
+    // contextMap is more specific than the default map
+    Context context = getContext();
+    if (context != null) {
+      @SuppressWarnings("unchecked")
+      Map<String, String> contextMap = (Map<String, String>) context
+          .getObject(CoreConstants.PATTERN_RULE_REGISTRY);
+      if (contextMap != null) {
+        effectiveMap.putAll(contextMap);
+      }
+    }
+    // set the most specific map last
+    effectiveMap.putAll(instanceConverterMap);
+    return effectiveMap;
+// END getEffectiveConverterMap({FormalParametersInternal})//  }
+	
 
     public void start() {
         if (pattern == null || pattern.length() == 0) {
@@ -93,10 +121,13 @@ abstract public class PatternLayoutBase<E> extends LayoutBase<E> {
             sm.add(new ErrorStatus("Failed to parse pattern \"" + getPattern() + "\".", this, sce));
         }
     }
+	
 
-    public void setPostCompileProcessor(PostCompileProcessor<E> postCompileProcessor) {
-        this.postCompileProcessor = postCompileProcessor;
-    }
+    // START setPostCompileProcessor(PostCompileProcessor<E>-PostCompileProcessor<E>)//public void setPostCompileProcessor(
+      PostCompileProcessor<E> postCompileProcessor) {
+    this.postCompileProcessor = postCompileProcessor;
+// END setPostCompileProcessor(PostCompileProcessor<E>-PostCompileProcessor<E>)//  }
+	
 
     /**
      *
@@ -104,53 +135,63 @@ abstract public class PatternLayoutBase<E> extends LayoutBase<E> {
      * @deprecated  Use {@link ConverterUtil#setContextForConverters} instead. This method will
      *  be removed in future releases.
      */
-    protected void setContextForConverters(Converter<E> head) {
-        ConverterUtil.setContextForConverters(getContext(), head);
-    }
+    // START setContextForConverters(Converter<E>-Converter<E>)//protected void setContextForConverters(Converter<E> head) {
+    ConverterUtil.setContextForConverters(getContext(), head);
+// END setContextForConverters(Converter<E>-Converter<E>)//  }
+	
 
-    protected String writeLoopOnConverters(E event) {
-        StringBuilder strBuilder = new StringBuilder(INTIAL_STRING_BUILDER_SIZE);
-        Converter<E> c = head;
-        while (c != null) {
-            c.write(strBuilder, event);
-            c = c.getNext();
-        }
-        return strBuilder.toString();
+    // START writeLoopOnConverters(E-E)//protected String writeLoopOnConverters(E event) {
+    StringBuilder buf = new StringBuilder(128);
+    Converter<E> c = head;
+    while (c != null) {
+      c.write(buf, event);
+      c = c.getNext();
     }
+    return buf.toString();
+// END writeLoopOnConverters(E-E)//  }
+	
 
-    public String getPattern() {
-        return pattern;
-    }
+    // START getPattern({FormalParametersInternal})//public String getPattern() {
+    return pattern;
+// END getPattern({FormalParametersInternal})//  }
+	
 
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
+    // START setPattern(String-String)//public void setPattern(String pattern) {
+    this.pattern = pattern;
+// END setPattern(String-String)//  }
+	
 
-    public String toString() {
-        return this.getClass().getName() + "(\"" + getPattern() + "\")";
-    }
+    // START toString({FormalParametersInternal})//public String toString() {
+    return this.getClass().getName() + "(\"" + getPattern() + "\")";
+// END toString({FormalParametersInternal})//  }
+	
 
-    public Map<String, String> getInstanceConverterMap() {
-        return instanceConverterMap;
-    }
+    // START getInstanceConverterMap({FormalParametersInternal})//public Map<String, String> getInstanceConverterMap() {
+    return instanceConverterMap;
+// END getInstanceConverterMap({FormalParametersInternal})//  }
+	
 
-    protected String getPresentationHeaderPrefix() {
-        return CoreConstants.EMPTY_STRING;
-    }
+    // START getPresentationHeaderPrefix({FormalParametersInternal})//protected String getPresentationHeaderPrefix() {
+    return CoreConstants.EMPTY_STRING;
+// END getPresentationHeaderPrefix({FormalParametersInternal})//  }
+	
 
-    public boolean isOutputPatternAsHeader() {
-        return outputPatternAsHeader;
-    }
+    // START isOutputPatternAsHeader({FormalParametersInternal})//public boolean isOutputPatternAsHeader() {
+    return outputPatternAsHeader;
+// END isOutputPatternAsHeader({FormalParametersInternal})//  }
+	
 
-    public void setOutputPatternAsHeader(boolean outputPatternAsHeader) {
-        this.outputPatternAsHeader = outputPatternAsHeader;
-    }
+    // START setOutputPatternAsHeader(boolean-boolean)//public void setOutputPatternAsHeader(boolean outputPatternAsHeader) {
+    this.outputPatternAsHeader = outputPatternAsHeader;
+// END setOutputPatternAsHeader(boolean-boolean)//  }
+	
 
-    @Override
-    public String getPresentationHeader() {
-        if (outputPatternAsHeader)
-            return getPresentationHeaderPrefix() + pattern;
-        else
-            return super.getPresentationHeader();
-    }
+    // START getPresentationHeader({FormalParametersInternal})//@Override
+  public String getPresentationHeader() {
+    if(outputPatternAsHeader)
+      return getPresentationHeaderPrefix()+pattern;
+    else
+      return super.getPresentationHeader();
+// END getPresentationHeader({FormalParametersInternal})//  }
+
 }

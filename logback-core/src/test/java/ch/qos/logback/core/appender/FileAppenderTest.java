@@ -11,122 +11,151 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package ch.qos.logback.core.appender;
+package ch.qos.logback.core.appender; 
 
 import static org.junit.Assert.assertEquals;
+ 
 import static org.junit.Assert.assertFalse;
+ 
 import static org.junit.Assert.assertTrue;
+ 
 
 import java.io.File;
+ 
 import java.util.List;
+ 
 
 import ch.qos.logback.core.status.StatusChecker;
+ 
 
 import org.junit.Test;
+ 
 
 import ch.qos.logback.core.Appender;
+ 
 import ch.qos.logback.core.FileAppender;
+ 
 import ch.qos.logback.core.encoder.DummyEncoder;
+ 
 import ch.qos.logback.core.encoder.NopEncoder;
+ 
 import ch.qos.logback.core.status.Status;
+ 
 import ch.qos.logback.core.status.StatusManager;
+ 
 import ch.qos.logback.core.testUtil.RandomUtil;
+ 
 import ch.qos.logback.core.util.CoreTestConstants;
-import ch.qos.logback.core.util.StatusPrinter;
+ 
+import ch.qos.logback.core.util.StatusPrinter; 
 
-public class FileAppenderTest extends AbstractAppenderTest<Object> {
+public
+  class
+  FileAppenderTest  extends AbstractAppenderTest<Object>
+ {
+	
 
     int diff = RandomUtil.getPositiveInt();
 
-    protected Appender<Object> getAppender() {
-        return new FileAppender<Object>();
-    }
+	
 
-    protected Appender<Object> getConfiguredAppender() {
-        FileAppender<Object> appender = new FileAppender<Object>();
-        appender.setEncoder(new NopEncoder<Object>());
-        appender.setFile(CoreTestConstants.OUTPUT_DIR_PREFIX + "temp.log");
-        appender.setName("test");
-        appender.setContext(context);
-        appender.start();
-        return appender;
-    }
+    // START getAppender({FormalParametersInternal})//protected Appender<Object> getAppender() {
+    return new FileAppender<Object>();
+// END getAppender({FormalParametersInternal})//  }
+	
 
-    @Test
-    public void smoke() {
-        String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + "/fat-smoke.log";
+    // START getConfiguredAppender({FormalParametersInternal})//protected Appender<Object> getConfiguredAppender() {
+    FileAppender<Object> appender = new FileAppender<Object>();
+    appender.setEncoder(new NopEncoder<Object>());
+    appender.setFile(CoreTestConstants.OUTPUT_DIR_PREFIX+"temp.log");
+    appender.setName("test");
+    appender.setContext(context);
+    appender.start();
+    return appender;
+// END getConfiguredAppender({FormalParametersInternal})//  }
+	
 
-        FileAppender<Object> appender = new FileAppender<Object>();
-        appender.setEncoder(new DummyEncoder<Object>());
-        appender.setAppend(false);
-        appender.setFile(filename);
-        appender.setName("smoke");
-        appender.setContext(context);
-        appender.start();
-        appender.doAppend(new Object());
-        appender.stop();
+    // START smoke({FormalParametersInternal})//@Test
+  public void smoke() {
+    String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + "/fat-smoke.log";
 
-        File file = new File(filename);
-        assertTrue(file.exists());
-        assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
-    }
+    FileAppender<Object> appender = new FileAppender<Object>();
+    appender.setEncoder(new DummyEncoder<Object>());
+    appender.setAppend(false);
+    appender.setFile(filename);
+    appender.setName("smoke");
+    appender.setContext(context);
+    appender.start();
+    appender.doAppend(new Object());
+    appender.stop();
 
-    @Test
-    public void testCreateParentFolders() {
-        String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + "/fat-testCreateParentFolders-" + diff + "/testCreateParentFolders.txt";
-        File file = new File(filename);
-        assertFalse(file.getParentFile().exists());
-        assertFalse(file.exists());
+    File file = new File(filename);
+    assertTrue(file.exists());
+    assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
+// END smoke({FormalParametersInternal})//  }
+	
 
-        FileAppender<Object> appender = new FileAppender<Object>();
-        appender.setEncoder(new DummyEncoder<Object>());
-        appender.setAppend(false);
-        appender.setFile(filename);
-        appender.setName("testCreateParentFolders");
-        appender.setContext(context);
-        appender.start();
-        appender.doAppend(new Object());
-        appender.stop();
-        assertTrue(file.getParentFile().exists());
-        assertTrue(file.exists());
+    // START testCreateParentFolders({FormalParametersInternal})//@Test
+  public void testCreateParentFolders() {
+    String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + "/fat-testCreateParentFolders-" + diff
+        + "/testCreateParentFolders.txt";
+    File file = new File(filename);
+    assertFalse(file.getParentFile().exists());
+    assertFalse(file.exists());
 
-        // cleanup
-        assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
-        File parent = file.getParentFile();
-        assertTrue("failed to delete " + parent.getAbsolutePath(), parent.delete());
-    }
+    FileAppender<Object> appender = new FileAppender<Object>();
+    appender.setEncoder(new DummyEncoder<Object>());
+    appender.setAppend(false);
+    appender.setFile(filename);
+    appender.setName("testCreateParentFolders");
+    appender.setContext(context);
+    appender.start();
+    appender.doAppend(new Object());
+    appender.stop();
+    assertTrue(file.getParentFile().exists());
+    assertTrue(file.exists());
 
-    @Test
-    public void testPrudentModeLogicalImplications() {
-        String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + diff + "fat-testPrudentModeLogicalImplications.txt";
-        File file = new File(filename);
-        FileAppender<Object> appender = new FileAppender<Object>();
-        appender.setEncoder(new DummyEncoder<Object>());
-        appender.setFile(filename);
-        appender.setName("testPrudentModeLogicalImplications");
-        appender.setContext(context);
+    // cleanup
+    assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
+    File parent = file.getParentFile();
+    assertTrue("failed to delete " + parent.getAbsolutePath(), parent.delete());
+// END testCreateParentFolders({FormalParametersInternal})//  }
+	
 
-        appender.setAppend(false);
-        appender.setPrudent(true);
-        appender.start();
+    // START testPrudentModeLogicalImplications({FormalParametersInternal})//@Test
+  public void testPrudentModeLogicalImplications() {
+    String filename = CoreTestConstants.OUTPUT_DIR_PREFIX + diff + "fat-testPrudentModeLogicalImplications.txt";
+    File file = new File(filename);
+    FileAppender<Object> appender = new FileAppender<Object>();
+    appender.setEncoder(new DummyEncoder<Object>());
+    appender.setFile(filename);
+    appender.setName("testPrudentModeLogicalImplications");
+    appender.setContext(context);
 
-        assertTrue(appender.isAppend());
+    appender.setAppend(false);
+    appender.setPrudent(true);
+    appender.start();
 
-        StatusManager sm = context.getStatusManager();
-        // StatusPrinter.print(context);
-        StatusChecker statusChecker = new StatusChecker(context);
-        assertEquals(Status.WARN, statusChecker.getHighestLevel(0));
-        List<Status> statusList = sm.getCopyOfStatusList();
-        assertTrue("Expecting status list size to be 2 or larger, but was " + statusList.size(), statusList.size() >= 2);
-        String msg1 = statusList.get(1).getMessage();
+    assertTrue(appender.isAppend());
 
-        assertTrue("Got message [" + msg1 + "]", msg1.startsWith("Setting \"Append\" property"));
+    StatusManager sm = context.getStatusManager();
+    //StatusPrinter.print(context);
+    StatusChecker statusChecker = new StatusChecker(context);
+    assertEquals(Status.WARN, statusChecker.getHighestLevel(0));
+    List<Status> statusList = sm.getCopyOfStatusList();
+    assertTrue("Expecting status list size to be 2 or larger, but was "
+        + statusList.size(), statusList.size() >= 2);
+    String msg1 = statusList.get(1).getMessage();
 
-        appender.doAppend(new Object());
-        appender.stop();
-        assertTrue(file.exists());
-        assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
-    }
+    assertTrue("Got message [" + msg1 + "]", msg1
+        .startsWith("Setting \"Append\" property"));
+    
+    appender.doAppend(new Object());
+    appender.stop();
+    assertTrue(file.exists());
+    assertTrue("failed to delete " + file.getAbsolutePath(), file.delete());
+// END testPrudentModeLogicalImplications({FormalParametersInternal})//  }
+	
 
     @Test
     public void fileNameCollision() {
@@ -154,4 +183,5 @@ public class FileAppenderTest extends AbstractAppenderTest<Object> {
         checker.assertContainsMatch(Status.ERROR, "'File' option has the same value");
 
     }
+
 }
