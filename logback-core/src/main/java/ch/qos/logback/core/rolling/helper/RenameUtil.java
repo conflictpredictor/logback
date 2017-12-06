@@ -14,7 +14,6 @@
 package ch.qos.logback.core.rolling.helper;
 
 import java.io.File;
-
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.RolloverFailure;
@@ -46,15 +45,11 @@ public class RenameUtil extends ContextAwareBase {
             return;
         }
         File srcFile = new File(src);
-
         if (srcFile.exists()) {
             File targetFile = new File(target);
             createMissingTargetDirsIfNecessary(targetFile);
-
             addInfo("Renaming file [" + srcFile + "] to [" + targetFile + "]");
-
             boolean result = srcFile.renameTo(targetFile);
-
             if (!result) {
                 addWarn("Failed to rename file [" + srcFile + "] as [" + targetFile + "].");
                 if (areOnDifferentVolumes(srcFile, targetFile)) {
@@ -82,9 +77,7 @@ public class RenameUtil extends ContextAwareBase {
     boolean areOnDifferentVolumes(File srcFile, File targetFile) throws RolloverFailure {
         if (!EnvUtil.isJDK7OrHigher())
             return false;
-
-        File parentOfTarget = targetFile.getParentFile();
-
+        File parentOfTarget = targetFile.getAbsoluteFile().getParentFile();
         try {
             boolean onSameFileStore = FileStoreUtil.areOnSameFileStore(srcFile, parentOfTarget);
             return !onSameFileStore;
@@ -95,15 +88,12 @@ public class RenameUtil extends ContextAwareBase {
     }
 
     public void renameByCopying(String src, String target) throws RolloverFailure {
-
         FileUtil fileUtil = new FileUtil(getContext());
         fileUtil.copy(src, target);
-
         File srcFile = new File(src);
         if (!srcFile.delete()) {
             addWarn("Could not delete " + src);
         }
-
     }
 
     void createMissingTargetDirsIfNecessary(File toFile) throws RolloverFailure {
