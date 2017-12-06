@@ -35,84 +35,97 @@ import java.util.Map;
  */
 public interface IAccessEvent extends DeferredProcessingAware {
 
-    String NA = "-";
-    int SENTINEL = -1;
+  String NA = "-";
+  int SENTINEL = -1;
 
-    /**
-     * Returns the underlying HttpServletRequest. After serialization the returned
-     * value will be null.
-     *
-     * @return
-     */
-    HttpServletRequest getRequest();
+  /**
+   * Returns the underlying HttpServletRequest. After serialization the returned
+   * value will be null.
+   *
+   * @return
+   */
+  HttpServletRequest getRequest();
 
-    /**
-     * Returns the underlying HttpServletResponse. After serialization the returned
-     * value will be null.
-     *
-     * @return
-     */
-    HttpServletResponse getResponse();
+  /**
+   * Returns the underlying HttpServletResponse. After serialization the returned
+   * value will be null.
+   *
+   * @return
+   */
+  HttpServletResponse getResponse();
 
-    /**
-     * The number of milliseconds elapsed from 1/1/1970 until logging event was
-     * created.
-     */
-    long getTimeStamp();
+  /**
+   * The number of milliseconds elapsed from 1/1/1970 until logging event was
+   * created.
+   */
+  long getTimeStamp();
 
-    /**
-     * The time elapsed between receiving the request and logging it.
-     */
-    long getElapsedTime();
+  /**
+   * The number of seconds elapsed between receiving the request and logging it.
+   */
+  long getElapsedSeconds();
 
-    String getRequestURI();
+  /**
+   * The time elapsed in ms between receiving the request and logging it.
+   */
+  long getElapsedTime();
 
-    /**
-     * The first line of the request.
-     */
-    String getRequestURL();
+  void setThreadName(String threadName);
 
-    String getRemoteHost();
+  String getThreadName();
 
-    String getRemoteUser();
+  String getQueryString();
 
-    String getProtocol();
+  String getRequestURI();
 
-    String getMethod();
+  /**
+   * The first line of the request.
+   */
+  String getRequestURL();
 
-    String getServerName();
+  String getRemoteHost();
 
-    String getRemoteAddr();
+  String getRemoteUser();
 
-    String getRequestHeader(String key);
+  String getProtocol();
 
-    Enumeration getRequestHeaderNames();
+  String getMethod();
 
-    Map<String, String> getRequestHeaderMap();
+  String getSessionID();
 
-    Map<String, String[]> getRequestParameterMap();
+  String getServerName();
 
-    String getAttribute(String key);
+  String getRemoteAddr();
 
-    String[] getRequestParameter(String key);
+  String getRequestHeader(String key);
 
-    String getCookie(String key);
+  Enumeration getRequestHeaderNames();
 
-    long getContentLength();
+  Map<String, String> getRequestHeaderMap();
 
-    int getStatusCode();
+  Map<String, String[]> getRequestParameterMap();
 
-    String getRequestContent();
+  String getAttribute(String key);
 
-    String getResponseContent();
+  String[] getRequestParameter(String key);
 
-    int getLocalPort();
+  String getCookie(String key);
 
-    ServerAdapter getServerAdapter();
+  long getContentLength();
 
-    String getResponseHeader(String key);
+  int getStatusCode();
 
-    Map<String, String> getResponseHeaderMap();
+  String getRequestContent();
 
-    List<String> getResponseHeaderNameList();
+  String getResponseContent();
+
+  int getLocalPort();
+
+  ServerAdapter getServerAdapter();
+
+  String getResponseHeader(String key);
+
+  Map<String, String> getResponseHeaderMap();
+
+  List<String> getResponseHeaderNameList();
 }

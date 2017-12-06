@@ -15,17 +15,13 @@ package ch.qos.logback.access.tomcat;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
@@ -33,7 +29,6 @@ import org.apache.catalina.LifecycleState;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
-
 import ch.qos.logback.access.AccessConstants;
 import ch.qos.logback.access.joran.JoranConfigurator;
 import ch.qos.logback.access.spi.AccessEvent;
@@ -43,7 +38,6 @@ import ch.qos.logback.core.BasicStatusManager;
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.LifeCycleManager;
-import ch.qos.logback.core.boolex.EventEvaluator;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.AppenderAttachable;
@@ -53,57 +47,62 @@ import ch.qos.logback.core.spi.FilterAttachableImpl;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.spi.LifeCycle;
 import ch.qos.logback.core.spi.LogbackLock;
-import ch.qos.logback.core.status.ErrorStatus;
 import ch.qos.logback.core.status.InfoStatus;
-import ch.qos.logback.core.status.OnConsoleStatusListener;
-import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.status.WarnStatus;
 import ch.qos.logback.core.util.ExecutorServiceUtil;
-import ch.qos.logback.core.util.Loader;
 import ch.qos.logback.core.util.OptionHelper;
+import java.net.MalformedURLException;
+import java.net.URL;
+import ch.qos.logback.core.boolex.EventEvaluator;
+import ch.qos.logback.core.status.ErrorStatus;
+import ch.qos.logback.core.status.OnConsoleStatusListener;
+import ch.qos.logback.core.status.Status;
+import ch.qos.logback.core.util.Loader;
 import ch.qos.logback.core.util.StatusListenerConfigHelper;
-
-//import org.apache.catalina.Lifecycle;
 
 /**
  * This class is an implementation of tomcat's Valve interface, by extending
  * ValveBase.
- * 
+ *
  * <p>
  * For more information on using LogbackValve please refer to the online
  * documentation on <a
  * href="http://logback.qos.ch/access.html#tomcat">logback-acces and tomcat</a>.
- * 
+ *
  * @author Ceki G&uuml;lc&uuml;
  * @author S&eacute;bastien Pennec
  */
 public class LogbackValve extends ValveBase implements Lifecycle, Context, AppenderAttachable<IAccessEvent>, FilterAttachable<IAccessEvent> {
 
-    public final static String DEFAULT_FILENAME = "logback-access.xml";
-    public final static String DEFAULT_CONFIG_FILE = "conf" + File.separatorChar + DEFAULT_FILENAME;
-    final static String CATALINA_BASE_KEY = "catalina.base";
-    final static String CATALINA_HOME_KEY = "catalina.home";
+    public static final String DEFAULT_CONFIG_FILE = "conf" + File.separatorChar + DEFAULT_FILENAME;
 
     private final LifeCycleManager lifeCycleManager = new LifeCycleManager();
 
     private long birthTime = System.currentTimeMillis();
+
     LogbackLock configurationLock = new LogbackLock();
 
     // Attributes from ContextBase:
     private String name;
+
     StatusManager sm = new BasicStatusManager();
+
     // TODO propertyMap should be observable so that we can be notified
     // when it changes so that a new instance of propertyMap can be
     // serialized. For the time being, we ignore this shortcoming.
     Map<String, String> propertyMap = new HashMap<String, String>();
+
     Map<String, Object> objectMap = new HashMap<String, Object>();
+
     private FilterAttachableImpl<IAccessEvent> fai = new FilterAttachableImpl<IAccessEvent>();
 
     AppenderAttachableImpl<IAccessEvent> aai = new AppenderAttachableImpl<IAccessEvent>();
-    String filenameOption;
+
     boolean quiet;
+
     boolean started;
+
     boolean alreadySetLogbackStatusManager = false;
 
     private ExecutorService executorService;
@@ -119,106 +118,34 @@ public class LogbackValve extends ValveBase implements Lifecycle, Context, Appen
     @Override
     public void startInternal() throws LifecycleException {
         executorService = ExecutorServiceUtil.newExecutorService();
-
         String filename;
-
         if (filenameOption != null) {
             filename = filenameOption;
         } else {
             addInfo("filename property not set. Assuming [" + DEFAULT_CONFIG_FILE + "]");
             filename = DEFAULT_CONFIG_FILE;
         }
-
         // String catalinaBase = OptionHelper.getSystemProperty(CATALINA_BASE_KEY);
         // String catalinaHome = OptionHelper.getSystemProperty(CATALINA_BASE_KEY);
-
         File configFile = searchForConfigFileTomcatProperty(filename, CATALINA_BASE_KEY);
         if (configFile == null) {
             configFile = searchForConfigFileTomcatProperty(filename, CATALINA_HOME_KEY);
         }
-
         URL resourceURL;
         if (configFile != null)
             resourceURL = fileToUrl(configFile);
         else
             resourceURL = searchAsResource(filename);
-
         if (resourceURL != null) {
             configureAsResource(resourceURL);
         } else {
             addWarn("Failed to find valid logback-access configuration file.");
         }
-
         if (!quiet) {
             StatusListenerConfigHelper.addOnConsoleListenerInstance(this, new OnConsoleStatusListener());
         }
-
         started = true;
         setState(LifecycleState.STARTING);
-    }
-
-    private URL fileToUrl(File configFile) {
-        try {
-            return configFile.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException("File to URL conversion failed", e);
-        }
-    }
-
-    private URL searchAsResource(String filename) {
-        URL result = Loader.getResource(filename, getClass().getClassLoader());
-        if (result != null)
-            addInfo("Found [" + filename + "] as a resource.");
-        else
-            addInfo("Could NOT find [" + filename + "] as a resource.");
-        return result;
-    }
-
-    private File searchForConfigFileTomcatProperty(String filename, String propertyKey) {
-        String propertyValue = OptionHelper.getSystemProperty(propertyKey);
-        String candidatePath = propertyValue + File.separatorChar + filename;
-        if (propertyValue == null) {
-            addInfo("System property \"" + propertyKey + "\" is not set. Skipping configuration file search with ${" + propertyKey + "} path prefix.");
-            return null;
-        }
-        File candidateFile = new File(candidatePath);
-        if (candidateFile.exists()) {
-            addInfo("Found configuration file [" + candidatePath + "] using property \"" + propertyKey + "\"");
-            return candidateFile;
-        } else {
-            addInfo("Could NOT configuration file [" + candidatePath + "] using property \"" + propertyKey + "\"");
-            return null;
-        }
-    }
-
-    public void addStatus(Status status) {
-        StatusManager sm = getStatusManager();
-        if (sm != null) {
-            sm.add(status);
-        }
-    }
-
-    public void addInfo(String msg) {
-        addStatus(new InfoStatus(msg, this));
-    }
-
-    public void addWarn(String msg) {
-        addStatus(new WarnStatus(msg, this));
-    }
-
-    public void addError(String msg, Throwable t) {
-        addStatus(new ErrorStatus(msg, this, t));
-    }
-
-    private void configureAsResource(URL resourceURL) {
-        try {
-            JoranConfigurator jc = new JoranConfigurator();
-            jc.setContext(this);
-            jc.doConfigure(resourceURL);
-            addInfo("Done configuring");
-        } catch (JoranException e) {
-            addError("Failed to configure LogbackValve", e);
-        }
     }
 
     public String getFilename() {
@@ -250,16 +177,19 @@ public class LogbackValve extends ValveBase implements Lifecycle, Context, Appen
                     }
                 }
             }
-
             getNext().invoke(request, response);
-
             TomcatServerAdapter adapter = new TomcatServerAdapter(request, response);
             IAccessEvent accessEvent = new AccessEvent(request, response, adapter);
-
+            try {
+                final String threadName = Thread.currentThread().getName();
+                if (threadName != null) {
+                    accessEvent.setThreadName(threadName);
+                }
+            } catch (Exception ignored) {
+            }
             if (getFilterChainDecision(accessEvent) == FilterReply.DENY) {
                 return;
             }
-
             // TODO better exception handling
             aai.appendLoopOnAppenders(accessEvent);
         } finally {
@@ -301,7 +231,6 @@ public class LogbackValve extends ValveBase implements Lifecycle, Context, Appen
     @Override
     public void detachAndStopAllAppenders() {
         aai.detachAndStopAllAppenders();
-
     }
 
     @Override
@@ -408,10 +337,9 @@ public class LogbackValve extends ValveBase implements Lifecycle, Context, Appen
     }
 
     // ====== Methods from catalina Lifecycle =====
-
     @Override
     public void addLifecycleListener(LifecycleListener arg0) {
-        // dummy NOP implementation
+    // dummy NOP implementation
     }
 
     @Override
@@ -421,7 +349,79 @@ public class LogbackValve extends ValveBase implements Lifecycle, Context, Appen
 
     @Override
     public void removeLifecycleListener(LifecycleListener arg0) {
-        // dummy NOP implementation
+    // dummy NOP implementation
+    }
+
+    public static final String DEFAULT_FILENAME = "logback-access.xml";
+
+    static final String CATALINA_BASE_KEY = "catalina.base";
+
+    static final String CATALINA_HOME_KEY = "catalina.home";
+
+    String filenameOption;
+
+    private URL fileToUrl(File configFile) {
+        try {
+            return configFile.toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("File to URL conversion failed", e);
+        }
+    }
+
+    private URL searchAsResource(String filename) {
+        URL result = Loader.getResource(filename, getClass().getClassLoader());
+        if (result != null)
+            addInfo("Found [" + filename + "] as a resource.");
+        else
+            addInfo("Could NOT find [" + filename + "] as a resource.");
+        return result;
+    }
+
+    private File searchForConfigFileTomcatProperty(String filename, String propertyKey) {
+        String propertyValue = OptionHelper.getSystemProperty(propertyKey);
+        String candidatePath = propertyValue + File.separatorChar + filename;
+        if (propertyValue == null) {
+            addInfo("System property \"" + propertyKey + "\" is not set. Skipping configuration file search with ${" + propertyKey + "} path prefix.");
+            return null;
+        }
+        File candidateFile = new File(candidatePath);
+        if (candidateFile.exists()) {
+            addInfo("Found configuration file [" + candidatePath + "] using property \"" + propertyKey + "\"");
+            return candidateFile;
+        } else {
+            addInfo("Could NOT configuration file [" + candidatePath + "] using property \"" + propertyKey + "\"");
+            return null;
+        }
+    }
+
+    public void addStatus(Status status) {
+        StatusManager sm = getStatusManager();
+        if (sm != null) {
+            sm.add(status);
+        }
+    }
+
+    public void addInfo(String msg) {
+        addStatus(new InfoStatus(msg, this));
+    }
+
+    public void addWarn(String msg) {
+        addStatus(new WarnStatus(msg, this));
+    }
+
+    public void addError(String msg, Throwable t) {
+        addStatus(new ErrorStatus(msg, this, t));
+    }
+
+    private void configureAsResource(URL resourceURL) {
+        try {
+            JoranConfigurator jc = new JoranConfigurator();
+            jc.setContext(this);
+            jc.doConfigure(resourceURL);
+            addInfo("Done configuring");
+        } catch (JoranException e) {
+            addError("Failed to configure LogbackValve", e);
+        }
     }
 
     @Override
